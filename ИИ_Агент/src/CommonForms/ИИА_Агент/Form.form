@@ -842,7 +842,7 @@
     </use>
     <action xsi:type="form:FormCommandHandlerContainer">
       <handler>
-        <name>Отправить</name>
+        <name>КомандаОтправить</name>
       </handler>
     </action>
     <currentRowUse>Auto</currentRowUse>
