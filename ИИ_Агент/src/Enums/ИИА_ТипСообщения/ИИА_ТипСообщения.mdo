@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Enum xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="bffb785f-8de8-45e6-89ca-e9f4f3699f4b">
+  <producedTypes>
+    <refType typeId="e9babc76-0cdf-4515-9828-3dc913f3dc75" valueTypeId="98ad3c57-11f6-4f19-8293-f354351513eb"/>
+    <listType typeId="ac14cabe-1b4a-437e-94e9-1d40fed5711e" valueTypeId="661cfadf-5169-4ebf-aa97-7990c71f9ab9"/>
+    <managerType typeId="10c1ead4-2e0f-47a1-ad40-1a807d3dd227" valueTypeId="92f86f4b-c2ae-4ab6-aee9-94bd18d17a39"/>
+  </producedTypes>
+  <name>ИИА_ТипСообщения</name>
+  <synonym>
+    <key>ru</key>
+    <value>Тип сообщения</value>
+  </synonym>
+  <quickChoice>true</quickChoice>
+  <choiceMode>BothWays</choiceMode>
+  <enumValues uuid="196ddef8-0cd2-4968-ae61-4ba777ec2d51">
+    <name>Текст</name>
+    <synonym>
+      <key>ru</key>
+      <value>Текст</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="99120734-99af-44fa-8787-1bba69dd5244">
+    <name>Запрос</name>
+    <synonym>
+      <key>ru</key>
+      <value>Запрос</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="4a6bb93d-8e3a-47d4-ad4f-84eff3993fb8">
+    <name>Код</name>
+    <synonym>
+      <key>ru</key>
+      <value>Код</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="fb8be96e-ea9c-400c-b3d2-0c8a3a5ff0ca">
+    <name>Ошибка</name>
+    <synonym>
+      <key>ru</key>
+      <value>Ошибка</value>
+    </synonym>
+  </enumValues>
+</mdclass:Enum>

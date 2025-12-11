@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:core="http://g5.1c.ru/v8/dt/mcore" xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="d9f505c8-06e8-4aa7-b342-265e8c4a6cdf">
+  <producedTypes>
+    <objectType typeId="7802b0d9-9f87-4e4c-a8c8-0f230ae794b5" valueTypeId="d998dfcc-ef3e-48d1-99c8-4f72b916b1e1"/>
+    <refType typeId="5d966a12-409d-43bd-9af6-c71ecfe1804a" valueTypeId="a602ce70-9726-45ea-852a-74b14c21d990"/>
+    <selectionType typeId="2d5d2434-f0f4-4638-a1f5-021921b681c2" valueTypeId="b0c31d42-62c0-4ac5-82ed-7a1be24b58ea"/>
+    <listType typeId="247d3a31-7841-4643-bd0b-128fa0cc46a2" valueTypeId="a23f7740-1c30-4ef0-a44c-0289091c6e91"/>
+    <managerType typeId="b4e74c0e-68bb-4ef9-846c-4fca7293c476" valueTypeId="73815d94-aba0-4fc3-9a2c-ac7a0dc2dcbd"/>
+  </producedTypes>
+  <name>ИИА_Диалоги</name>
+  <synonym>
+    <key>ru</key>
+    <value>Диалоги</value>
+  </synonym>
+  <useStandardCommands>true</useStandardCommands>
+  <inputByString>Catalog.ИИА_Диалоги.StandardAttribute.Code</inputByString>
+  <inputByString>Catalog.ИИА_Диалоги.StandardAttribute.Description</inputByString>
+  <fullTextSearchOnInputByString>DontUse</fullTextSearchOnInputByString>
+  <createOnInput>Use</createOnInput>
+  <fullTextSearch>Use</fullTextSearch>
+  <levelCount>2</levelCount>
+  <foldersOnTop>true</foldersOnTop>
+  <codeLength>9</codeLength>
+  <descriptionLength>25</descriptionLength>
+  <codeType>String</codeType>
+  <codeAllowedLength>Variable</codeAllowedLength>
+  <checkUnique>true</checkUnique>
+  <autonumbering>true</autonumbering>
+  <defaultPresentation>AsDescription</defaultPresentation>
+  <editType>InDialog</editType>
+  <choiceMode>BothWays</choiceMode>
+  <attributes uuid="b0f3d933-b186-4508-a747-e044119fe0f4">
+    <name>Пользователь</name>
+    <synonym>
+      <key>ru</key>
+      <value>Пользователь</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers>
+        <length>10</length>
+      </stringQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="0e3bd93f-22d5-4870-9758-e557bf79a8ae">
+    <name>Имя</name>
+    <synonym>
+      <key>ru</key>
+      <value>Имя</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers>
+        <length>50</length>
+      </stringQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="2b63728c-4126-4236-ad2b-2630a56152a8">
+    <name>ТипДиалога</name>
+    <synonym>
+      <key>ru</key>
+      <value>Тип диалога</value>
+    </synonym>
+    <type>
+      <types>EnumRef.ИИА_ТипДиалога</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="1409178b-921d-4834-a284-c64f488241ab">
+    <name>ДатаСоздания</name>
+    <synonym>
+      <key>ru</key>
+      <value>Дата создания</value>
+    </synonym>
+    <type>
+      <types>Date</types>
+      <dateQualifiers/>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <attributes uuid="db5cf1bd-544b-49f9-a9e2-095c1c6df7d7">
+    <name>Активный</name>
+    <synonym>
+      <key>ru</key>
+      <value>Активный</value>
+    </synonym>
+    <type>
+      <types>Boolean</types>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
+  <tabularSections uuid="5022fa95-1311-4a88-bf95-cbb0c71cca76">
+    <producedTypes>
+      <objectType typeId="d23be879-fedc-4472-89e8-2266c18d974d" valueTypeId="be4ac4a2-2806-41dd-b652-fc04fdccc442"/>
+      <rowType typeId="a5b53a1f-ba81-498b-ac7b-1d9009f55333" valueTypeId="036d6afb-143f-410f-9bf9-41ec85d62ec4"/>
+    </producedTypes>
+    <name>Сообщения</name>
+    <synonym>
+      <key>ru</key>
+      <value>Сообщения</value>
+    </synonym>
+    <attributes uuid="627773d6-545d-4c86-bb1b-8e7ca6dfed2e">
+      <name>Время</name>
+      <synonym>
+        <key>ru</key>
+        <value>Время</value>
+      </synonym>
+      <type>
+        <types>Date</types>
+        <dateQualifiers/>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <attributes uuid="b10e16b7-0078-43ce-ba74-ee83d13072d1">
+      <name>Автор</name>
+      <synonym>
+        <key>ru</key>
+        <value>Автор</value>
+      </synonym>
+      <type>
+        <types>EnumRef.ИИА_АвторСообщения</types>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <attributes uuid="cba79378-d0eb-4969-9688-4613de394601">
+      <name>ТипСообщения</name>
+      <synonym>
+        <key>ru</key>
+        <value>Тип сообщения</value>
+      </synonym>
+      <type>
+        <types>EnumRef.ИИА_ТипСообщения</types>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <attributes uuid="9f79d693-2bc2-4e6d-9f5d-960b32c8293b">
+      <name>Текст</name>
+      <synonym>
+        <key>ru</key>
+        <value>Текст</value>
+      </synonym>
+      <type>
+        <types>String</types>
+        <stringQualifiers/>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <attributes uuid="5aecf2e9-531e-4600-9260-eab872f8b5dc">
+      <name>ТекстКода</name>
+      <synonym>
+        <key>ru</key>
+        <value>Текст кода</value>
+      </synonym>
+      <type>
+        <types>String</types>
+        <stringQualifiers/>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <attributes uuid="ed07208c-53e8-40ea-9bba-3260396d7f20">
+      <name>Статус</name>
+      <synonym>
+        <key>ru</key>
+        <value>Статус</value>
+      </synonym>
+      <type>
+        <types>String</types>
+        <stringQualifiers>
+          <length>10</length>
+        </stringQualifiers>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <attributes uuid="603f9c4b-9f76-4b91-b77b-2e8afa4dc55d">
+      <name>UsageTokens</name>
+      <synonym>
+        <key>ru</key>
+        <value>Usage tokens</value>
+      </synonym>
+      <type>
+        <types>Number</types>
+        <numberQualifiers>
+          <precision>10</precision>
+        </numberQualifiers>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <lineNumberLength>9</lineNumberLength>
+  </tabularSections>
+</mdclass:Catalog>
