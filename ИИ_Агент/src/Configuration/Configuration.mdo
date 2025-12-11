@@ -34,9 +34,12 @@
   <compatibilityMode>8.3.27</compatibilityMode>
   <roles>Role.ИИА_ОсновнаяРоль</roles>
   <commonModules>CommonModule.ИИА_DSL</commonModules>
+  <commonModules>CommonModule.ИИА_ВызовСервера</commonModules>
   <commonModules>CommonModule.ИИА_Клиент</commonModules>
+  <commonModules>CommonModule.ИИА_Метаданные</commonModules>
   <commonModules>CommonModule.ИИА_Сервер</commonModules>
-  <commonForms>CommonForm.ИИА_Панель</commonForms>
+  <commonCommands>CommonCommand.ИИА_Чат</commonCommands>
+  <commonForms>CommonForm.ИИА_Агент</commonForms>
   <catalogs>Catalog.ИИА_Диалоги</catalogs>
   <enums>Enum.ИИА_АвторСообщения</enums>
   <enums>Enum.ИИА_РежимыПодключения</enums>

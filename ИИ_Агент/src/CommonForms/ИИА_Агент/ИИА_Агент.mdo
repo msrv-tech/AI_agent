@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdclass:CommonForm xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="cb23e6d1-2f1e-490f-90dd-81118c1ff016">
-  <name>ИИА_Панель</name>
+<mdclass:CommonForm xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="62ecb59f-45f9-4eeb-9bcf-2fc6a892bb66">
+  <name>ИИА_Агент</name>
   <synonym>
     <key>ru</key>
-    <value>Панель</value>
+    <value>Агент</value>
   </synonym>
   <usePurposes>PersonalComputer</usePurposes>
   <usePurposes>MobileDevice</usePurposes>

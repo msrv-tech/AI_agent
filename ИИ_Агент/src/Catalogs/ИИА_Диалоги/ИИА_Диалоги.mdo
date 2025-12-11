@@ -29,6 +29,7 @@
   <defaultPresentation>AsDescription</defaultPresentation>
   <editType>InDialog</editType>
   <choiceMode>BothWays</choiceMode>
+  <defaultObjectForm>Catalog.ИИА_Диалоги.Form.ФормаЭлемента</defaultObjectForm>
   <attributes uuid="b0f3d933-b186-4508-a747-e044119fe0f4">
     <name>Пользователь</name>
     <synonym>
@@ -230,4 +231,13 @@
     </attributes>
     <lineNumberLength>9</lineNumberLength>
   </tabularSections>
+  <forms uuid="02615798-85e0-47ff-bc20-a597ee43ae4b">
+    <name>ФормаЭлемента</name>
+    <synonym>
+      <key>ru</key>
+      <value>Форма элемента</value>
+    </synonym>
+    <usePurposes>PersonalComputer</usePurposes>
+    <usePurposes>MobileDevice</usePurposes>
+  </forms>
 </mdclass:Catalog>
