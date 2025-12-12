@@ -229,6 +229,20 @@
       <dataHistory>Use</dataHistory>
       <fullTextSearch>Use</fullTextSearch>
     </attributes>
+    <attributes uuid="b1bbd242-d201-42e1-aef5-2f66e45f1105">
+      <name>СтатусDSL</name>
+      <synonym>
+        <key>ru</key>
+        <value>Статус DSL</value>
+      </synonym>
+      <type>
+        <types>EnumRef.ИИА_СтатусDSL</types>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
     <lineNumberLength>9</lineNumberLength>
   </tabularSections>
   <forms uuid="02615798-85e0-47ff-bc20-a597ee43ae4b">

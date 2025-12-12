@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:Enum xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="cf4cdfcf-f981-4ba0-bdd1-9f6d2be1c58f">
+  <producedTypes>
+    <refType typeId="b7bb6bd9-400d-4c87-8791-6690c1938d85" valueTypeId="5f8d317d-7357-4a24-83db-1b180591f828"/>
+    <listType typeId="f82f9c4c-aa67-4bc9-b323-868ffff7d837" valueTypeId="25519447-baa4-433e-9c87-9409ffb42838"/>
+    <managerType typeId="b81b76c5-10c3-409e-bbf1-0a5590ecbfa7" valueTypeId="2617249b-793b-4afa-acea-f93862d0bc94"/>
+  </producedTypes>
+  <name>ИИА_СтатусDSL</name>
+  <synonym>
+    <key>ru</key>
+    <value>Статус DSL</value>
+  </synonym>
+  <quickChoice>true</quickChoice>
+  <choiceMode>BothWays</choiceMode>
+  <enumValues uuid="7fe27c4b-c4ec-430c-91d5-57fae1a9cc44">
+    <name>НеПрименяется</name>
+    <synonym>
+      <key>ru</key>
+      <value>Не применяется</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="9b73dc56-4cbe-47e8-9df9-de6af4eeb6ed">
+    <name>ВОчереди</name>
+    <synonym>
+      <key>ru</key>
+      <value>В очереди</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="1f894dab-4eef-4980-8104-e970722934c3">
+    <name>ОбработанУспешно</name>
+    <synonym>
+      <key>ru</key>
+      <value>Обработан успешно</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="d79eccfa-a128-420b-bfad-ae7a67bd78b0">
+    <name>ОбработанСОшибкой</name>
+    <synonym>
+      <key>ru</key>
+      <value>Обработан с ошибкой</value>
+    </synonym>
+  </enumValues>
+  <enumValues uuid="f7184682-071b-466a-a0e3-81145dec6811">
+    <name>Исправляется</name>
+    <synonym>
+      <key>ru</key>
+      <value>Исправляется</value>
+    </synonym>
+  </enumValues>
+</mdclass:Enum>
+
