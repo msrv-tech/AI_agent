@@ -1,0 +1,20 @@
+{
+  "Lang": "ru",
+  "featurepath": "D:\\EDTApps\\AI_agent\\automation\\vanessa\\OpenChatForm.feature",
+  "ВыполнитьСценарии": true,
+  "useaddin": true,
+  "TestClient": {
+    "runtestclientwithmaximizedwindow": true,
+    "testclienttimeout": 120,
+    "datatestclients": [
+      {
+        "Name": "LocalFileBase",
+        "PathToInfobase": "File=\"D:\\EDT_base\\КонфигурацияТест\";",
+        "PortTestClient": 48010,
+        "AddItionalParameters": "",
+        "ClientType": "Thin",
+        "ComputerName": "localhost"
+      }
+    ]
+  }
+}
