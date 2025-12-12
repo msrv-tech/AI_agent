@@ -38,6 +38,7 @@
   <commonModules>CommonModule.ИИА_Гигачат</commonModules>
   <commonModules>CommonModule.ИИА_Клиент</commonModules>
   <commonModules>CommonModule.ИИА_Метаданные</commonModules>
+  <commonModules>CommonModule.ИИА_Провайдеры</commonModules>
   <commonModules>CommonModule.ИИА_Сервер</commonModules>
   <commonCommands>CommonCommand.ИИА_Чат</commonCommands>
   <commonForms>CommonForm.ИИА_Агент</commonForms>
