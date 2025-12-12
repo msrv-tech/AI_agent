@@ -35,6 +35,7 @@
   <roles>Role.ИИА_ОсновнаяРоль</roles>
   <commonModules>CommonModule.ИИА_DSL</commonModules>
   <commonModules>CommonModule.ИИА_ВызовСервера</commonModules>
+  <commonModules>CommonModule.ИИА_Гигачат</commonModules>
   <commonModules>CommonModule.ИИА_Клиент</commonModules>
   <commonModules>CommonModule.ИИА_Метаданные</commonModules>
   <commonModules>CommonModule.ИИА_Сервер</commonModules>
