@@ -112,6 +112,22 @@
     <fullTextSearch>Use</fullTextSearch>
     <dataHistory>Use</dataHistory>
   </attributes>
+  <attributes uuid="aba48272-dcf2-4bd9-8d84-b4a5481d2166">
+    <name>Лог</name>
+    <synonym>
+      <key>ru</key>
+      <value>Лог</value>
+    </synonym>
+    <type>
+      <types>String</types>
+      <stringQualifiers/>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fillValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+  </attributes>
   <tabularSections uuid="5022fa95-1311-4a88-bf95-cbb0c71cca76">
     <producedTypes>
       <objectType typeId="d23be879-fedc-4472-89e8-2266c18d974d" valueTypeId="be4ac4a2-2806-41dd-b652-fc04fdccc442"/>
@@ -251,6 +267,32 @@
       </synonym>
       <type>
         <types>Boolean</types>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <lineNumberLength>9</lineNumberLength>
+  </tabularSections>
+  <tabularSections uuid="afd4ecd7-3eb6-4788-afba-eb9bbd58ad61">
+    <producedTypes>
+      <objectType typeId="a3bf92f1-2f20-4c08-92b6-688bbafb8680" valueTypeId="5677e2d6-e5be-439e-ad19-f4ce179d0fc5"/>
+      <rowType typeId="28e642b8-bfb8-45e4-a32f-d7e576068226" valueTypeId="87627557-1a09-4294-8c89-f1490e512d3a"/>
+    </producedTypes>
+    <name>ИзмененныеОбъекты</name>
+    <synonym>
+      <key>ru</key>
+      <value>Измененные объекты</value>
+    </synonym>
+    <attributes uuid="773624f1-72ac-4bcc-8339-c43187048425">
+      <name>СсылкаНаОбъект</name>
+      <synonym>
+        <key>ru</key>
+        <value>Ссылка на объект</value>
+      </synonym>
+      <type>
+        <types>AnyRef</types>
       </type>
       <minValue xsi:type="core:UndefinedValue"/>
       <maxValue xsi:type="core:UndefinedValue"/>
