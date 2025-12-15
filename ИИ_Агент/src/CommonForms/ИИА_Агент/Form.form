@@ -3,46 +3,46 @@
   <items xsi:type="form:FormGroup">
     <name>ГруппаСтатус</name>
     <id>53</id>
-    <items xsi:type="form:FormField">
+  <items xsi:type="form:FormField">
       <name>ТекущийДиалог</name>
-      <id>1</id>
-      <visible>true</visible>
-      <enabled>true</enabled>
-      <userVisible>
-        <common>true</common>
-      </userVisible>
-      <dataPath xsi:type="form:DataPath">
+    <id>1</id>
+    <visible>true</visible>
+    <enabled>true</enabled>
+    <userVisible>
+      <common>true</common>
+    </userVisible>
+    <dataPath xsi:type="form:DataPath">
         <segments>ТекущийДиалог</segments>
-      </dataPath>
-      <extendedTooltip>
+    </dataPath>
+    <extendedTooltip>
         <name>ТекущийДиалогРасширеннаяПодсказка</name>
-        <id>3</id>
-        <type>Label</type>
-        <autoMaxWidth>true</autoMaxWidth>
-        <autoMaxHeight>true</autoMaxHeight>
-        <extInfo xsi:type="form:LabelDecorationExtInfo">
-          <horizontalAlign>Left</horizontalAlign>
-        </extInfo>
-      </extendedTooltip>
-      <contextMenu>
-        <name>ТекущийДиалогКонтекстноеМеню</name>
-        <id>2</id>
-        <autoFill>true</autoFill>
-      </contextMenu>
-      <type>InputField</type>
-      <editMode>Enter</editMode>
-      <showInHeader>true</showInHeader>
-      <headerHorizontalAlign>Left</headerHorizontalAlign>
-      <showInFooter>true</showInFooter>
-      <extInfo xsi:type="form:InputFieldExtInfo">
-        <autoMaxWidth>true</autoMaxWidth>
-        <autoMaxHeight>true</autoMaxHeight>
-        <wrap>true</wrap>
-        <chooseType>true</chooseType>
-        <typeDomainEnabled>true</typeDomainEnabled>
-        <textEdit>true</textEdit>
+      <id>3</id>
+      <type>Label</type>
+      <autoMaxWidth>true</autoMaxWidth>
+      <autoMaxHeight>true</autoMaxHeight>
+      <extInfo xsi:type="form:LabelDecorationExtInfo">
+        <horizontalAlign>Left</horizontalAlign>
       </extInfo>
-    </items>
+    </extendedTooltip>
+    <contextMenu>
+        <name>ТекущийДиалогКонтекстноеМеню</name>
+      <id>2</id>
+      <autoFill>true</autoFill>
+    </contextMenu>
+    <type>InputField</type>
+    <editMode>Enter</editMode>
+    <showInHeader>true</showInHeader>
+    <headerHorizontalAlign>Left</headerHorizontalAlign>
+    <showInFooter>true</showInFooter>
+    <extInfo xsi:type="form:InputFieldExtInfo">
+      <autoMaxWidth>true</autoMaxWidth>
+      <autoMaxHeight>true</autoMaxHeight>
+      <wrap>true</wrap>
+      <chooseType>true</chooseType>
+      <typeDomainEnabled>true</typeDomainEnabled>
+      <textEdit>true</textEdit>
+    </extInfo>
+  </items>
     <items xsi:type="form:Button">
       <name>НовыйДиалог</name>
       <id>76</id>
@@ -741,35 +741,35 @@
       </items>
       <items xsi:type="form:FormField">
         <name>СтрокаСтатуса</name>
-        <id>4</id>
-        <title>
-          <key>ru</key>
+    <id>4</id>
+    <title>
+      <key>ru</key>
           <value>Статус</value>
-        </title>
-        <visible>true</visible>
-        <enabled>true</enabled>
-        <userVisible>
-          <common>true</common>
-        </userVisible>
+    </title>
+    <visible>true</visible>
+    <enabled>true</enabled>
+    <userVisible>
+      <common>true</common>
+    </userVisible>
         <dataPath xsi:type="form:DataPath">
           <segments>СтрокаСтатуса</segments>
         </dataPath>
         <titleLocation>None</titleLocation>
-        <extendedTooltip>
+    <extendedTooltip>
           <name>СтрокаСтатусаРасширеннаяПодсказка</name>
-          <id>6</id>
-          <type>Label</type>
-          <autoMaxWidth>true</autoMaxWidth>
-          <autoMaxHeight>true</autoMaxHeight>
-          <extInfo xsi:type="form:LabelDecorationExtInfo">
-            <horizontalAlign>Left</horizontalAlign>
-          </extInfo>
-        </extendedTooltip>
-        <contextMenu>
+      <id>6</id>
+      <type>Label</type>
+      <autoMaxWidth>true</autoMaxWidth>
+      <autoMaxHeight>true</autoMaxHeight>
+      <extInfo xsi:type="form:LabelDecorationExtInfo">
+        <horizontalAlign>Left</horizontalAlign>
+      </extInfo>
+    </extendedTooltip>
+    <contextMenu>
           <name>СтрокаСтатусаКонтекстноеМеню</name>
-          <id>5</id>
-          <autoFill>true</autoFill>
-        </contextMenu>
+      <id>5</id>
+      <autoFill>true</autoFill>
+    </contextMenu>
         <type>LabelField</type>
         <editMode>Enter</editMode>
         <showInHeader>true</showInHeader>
@@ -997,11 +997,11 @@
     <extendedTooltip>
       <name>ИзмененныеОбъектыРасширеннаяПодсказка</name>
       <id>75</id>
-      <type>Label</type>
-      <autoMaxWidth>true</autoMaxWidth>
-      <autoMaxHeight>true</autoMaxHeight>
-      <extInfo xsi:type="form:LabelDecorationExtInfo">
-        <horizontalAlign>Left</horizontalAlign>
+    <type>Label</type>
+    <autoMaxWidth>true</autoMaxWidth>
+    <autoMaxHeight>true</autoMaxHeight>
+    <extInfo xsi:type="form:LabelDecorationExtInfo">
+      <horizontalAlign>Left</horizontalAlign>
       </extInfo>
     </extendedTooltip>
     <contextMenu>
