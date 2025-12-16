@@ -40,7 +40,7 @@
   <commonModules>CommonModule.ИИА_Метаданные</commonModules>
   <commonModules>CommonModule.ИИА_Провайдеры</commonModules>
   <commonModules>CommonModule.ИИА_Сервер</commonModules>
-  <commonCommands>CommonCommand.ИИА_Чат</commonCommands>
+  <commonCommands>CommonCommand.ИИА_Агент</commonCommands>
   <commonForms>CommonForm.ИИА_Агент</commonForms>
   <catalogs>Catalog.ИИА_Диалоги</catalogs>
   <enums>Enum.ИИА_АвторСообщения</enums>
