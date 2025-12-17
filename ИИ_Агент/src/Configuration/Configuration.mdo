@@ -45,6 +45,7 @@
   <commonForms>CommonForm.ИИА_Агент</commonForms>
   <catalogs>Catalog.ИИА_Диалоги</catalogs>
   <enums>Enum.ИИА_АвторСообщения</enums>
+  <enums>Enum.ИИА_Модели</enums>
   <enums>Enum.ИИА_РежимыПодключения</enums>
   <enums>Enum.ИИА_СтатусDSL</enums>
   <enums>Enum.ИИА_ТипДиалога</enums>

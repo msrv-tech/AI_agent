@@ -714,9 +714,51 @@
         <width>15</width>
         <autoMaxWidth>true</autoMaxWidth>
         <autoMaxHeight>true</autoMaxHeight>
+        <horizontalStretch>true</horizontalStretch>
         <verticalStretch>true</verticalStretch>
         <placementArea>UserCmds</placementArea>
         <representationInContextMenu>Auto</representationInContextMenu>
+      </items>
+      <items xsi:type="form:FormField">
+        <name>ТекущаяМодель</name>
+        <id>81</id>
+        <visible>true</visible>
+        <enabled>true</enabled>
+        <userVisible>
+          <common>true</common>
+        </userVisible>
+        <dataPath xsi:type="form:DataPath">
+          <segments>ТекущаяМодель</segments>
+        </dataPath>
+        <titleLocation>None</titleLocation>
+        <extendedTooltip>
+          <name>ТекущаяМодельРасширеннаяПодсказка</name>
+          <id>83</id>
+          <type>Label</type>
+          <autoMaxWidth>true</autoMaxWidth>
+          <autoMaxHeight>true</autoMaxHeight>
+          <extInfo xsi:type="form:LabelDecorationExtInfo">
+            <horizontalAlign>Left</horizontalAlign>
+          </extInfo>
+        </extendedTooltip>
+        <contextMenu>
+          <name>ТекущаяМодельКонтекстноеМеню</name>
+          <id>82</id>
+          <autoFill>true</autoFill>
+        </contextMenu>
+        <type>InputField</type>
+        <editMode>Enter</editMode>
+        <showInHeader>true</showInHeader>
+        <headerHorizontalAlign>Left</headerHorizontalAlign>
+        <showInFooter>true</showInFooter>
+        <extInfo xsi:type="form:InputFieldExtInfo">
+          <autoMaxWidth>true</autoMaxWidth>
+          <autoMaxHeight>true</autoMaxHeight>
+          <wrap>true</wrap>
+          <chooseType>true</chooseType>
+          <typeDomainEnabled>true</typeDomainEnabled>
+          <textEdit>true</textEdit>
+        </extInfo>
       </items>
       <items xsi:type="form:FormField">
         <name>ТекущийТипСообщения</name>
@@ -752,6 +794,7 @@
         <showInFooter>true</showInFooter>
         <extInfo xsi:type="form:InputFieldExtInfo">
           <width>12</width>
+          <autoMaxWidth>true</autoMaxWidth>
           <maxWidth>8</maxWidth>
           <autoMaxHeight>true</autoMaxHeight>
           <horizontalStretch>true</horizontalStretch>
@@ -759,24 +802,6 @@
           <chooseType>true</chooseType>
           <typeDomainEnabled>true</typeDomainEnabled>
           <textEdit>true</textEdit>
-          <choiceList>
-            <presentation>
-              <key>ru</key>
-              <value>Чат</value>
-            </presentation>
-            <value xsi:type="core:StringValue">
-              <value>Чат</value>
-            </value>
-          </choiceList>
-          <choiceList>
-            <presentation>
-              <key>ru</key>
-              <value>Запрос</value>
-            </presentation>
-            <value xsi:type="core:StringValue">
-              <value>Запрос</value>
-            </value>
-          </choiceList>
         </extInfo>
       </items>
       <items xsi:type="form:FormField">
@@ -816,8 +841,9 @@
         <headerHorizontalAlign>Left</headerHorizontalAlign>
         <showInFooter>true</showInFooter>
         <extInfo xsi:type="form:LabelFieldExtInfo">
+          <autoMaxWidth>true</autoMaxWidth>
           <autoMaxHeight>true</autoMaxHeight>
-          <horizontalStretch>false</horizontalStretch>
+          <horizontalStretch>true</horizontalStretch>
           <border xsi:type="core:BorderDef">
             <width>1</width>
           </border>
@@ -832,6 +858,8 @@
         <key>ru</key>
         <value>Группа отправить</value>
       </title>
+      <width>20</width>
+      <horizontalStretch>false</horizontalStretch>
       <extendedTooltip>
         <name>ГруппаОтправитьРасширеннаяПодсказка</name>
         <id>72</id>
@@ -1273,6 +1301,23 @@
     <id>22</id>
     <valueType>
       <types>Boolean</types>
+    </valueType>
+    <view>
+      <common>true</common>
+    </view>
+    <edit>
+      <common>true</common>
+    </edit>
+  </attributes>
+  <attributes>
+    <name>ТекущаяМодель</name>
+    <title>
+      <key>ru</key>
+      <value>Текущая модель</value>
+    </title>
+    <id>23</id>
+    <valueType>
+      <types>EnumRef.ИИА_Модели</types>
     </valueType>
     <view>
       <common>true</common>
