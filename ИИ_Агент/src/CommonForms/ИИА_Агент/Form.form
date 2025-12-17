@@ -711,6 +711,7 @@
         <type>UsualButton</type>
         <commandName>Form.Command.Отправить</commandName>
         <representation>Auto</representation>
+        <width>15</width>
         <autoMaxWidth>true</autoMaxWidth>
         <autoMaxHeight>true</autoMaxHeight>
         <verticalStretch>true</verticalStretch>
@@ -750,11 +751,11 @@
         <headerHorizontalAlign>Left</headerHorizontalAlign>
         <showInFooter>true</showInFooter>
         <extInfo xsi:type="form:InputFieldExtInfo">
+          <width>12</width>
           <maxWidth>8</maxWidth>
           <autoMaxHeight>true</autoMaxHeight>
-          <horizontalStretch>false</horizontalStretch>
+          <horizontalStretch>true</horizontalStretch>
           <wrap>true</wrap>
-          <listChoiceMode>true</listChoiceMode>
           <chooseType>true</chooseType>
           <typeDomainEnabled>true</typeDomainEnabled>
           <textEdit>true</textEdit>
