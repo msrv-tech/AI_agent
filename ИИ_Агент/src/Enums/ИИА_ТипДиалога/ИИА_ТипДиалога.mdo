@@ -13,17 +13,17 @@
   <quickChoice>true</quickChoice>
   <choiceMode>BothWays</choiceMode>
   <enumValues uuid="15e1bba4-19e8-4070-a690-10dea60c4e69">
-    <name>ОбщийЧат</name>
+    <name>Агент</name>
     <synonym>
       <key>ru</key>
-      <value>Общий чат</value>
+      <value>Агент (полный доступ)</value>
     </synonym>
   </enumValues>
   <enumValues uuid="e09b2de8-9cfb-4560-8875-4b09833b0af3">
     <name>Запрос1С</name>
     <synonym>
       <key>ru</key>
-      <value>Запрос1 С</value>
+      <value>Запрос 1С</value>
     </synonym>
   </enumValues>
 </mdclass:Enum>

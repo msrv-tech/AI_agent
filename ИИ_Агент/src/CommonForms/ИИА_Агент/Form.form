@@ -726,7 +726,7 @@
           <common>true</common>
         </userVisible>
         <dataPath xsi:type="form:DataPath">
-          <segments>ТекущийТипСообщения</segments>
+          <segments>ТекущийТипДиалога</segments>
         </dataPath>
         <titleLocation>None</titleLocation>
         <extendedTooltip>
@@ -1141,17 +1141,14 @@
     </columns>
   </attributes>
   <attributes>
-    <name>ТекущийТипСообщения</name>
+    <name>ТекущийТипДиалога</name>
     <title>
       <key>ru</key>
-      <value>Текущий тип сообщения</value>
+      <value>Текущий тип диалога</value>
     </title>
     <id>11</id>
     <valueType>
-      <types>String</types>
-      <stringQualifiers>
-        <length>20</length>
-      </stringQualifiers>
+      <types>EnumRef.ИИА_ТипДиалога</types>
     </valueType>
     <view>
       <common>true</common>
