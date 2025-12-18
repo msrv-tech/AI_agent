@@ -316,6 +316,47 @@
     </attributes>
     <lineNumberLength>9</lineNumberLength>
   </tabularSections>
+  <tabularSections uuid="083548f0-60ca-44f4-aa9e-d8dece41a48e">
+    <producedTypes>
+      <objectType typeId="ef33b71b-d8d8-4207-958f-d1d1bbf467d3" valueTypeId="324d9dad-79d9-4e2c-8688-b8661dba8b58"/>
+      <rowType typeId="488c708b-6bc9-42f0-b624-0a015fdc8e47" valueTypeId="e773074f-7141-4b63-99d2-653c7bc9e5a6"/>
+    </producedTypes>
+    <name>План</name>
+    <synonym>
+      <key>ru</key>
+      <value>План</value>
+    </synonym>
+    <attributes uuid="2714da14-cdf4-4648-a6ea-ea509b16ae8c">
+      <name>Задача</name>
+      <synonym>
+        <key>ru</key>
+        <value>Задача</value>
+      </synonym>
+      <type>
+        <types>String</types>
+        <stringQualifiers/>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <attributes uuid="b1c9ff92-717d-4d76-a9ac-957e6d04ae62">
+      <name>Выполнена</name>
+      <synonym>
+        <key>ru</key>
+        <value>Выполнена</value>
+      </synonym>
+      <type>
+        <types>Boolean</types>
+      </type>
+      <minValue xsi:type="core:UndefinedValue"/>
+      <maxValue xsi:type="core:UndefinedValue"/>
+      <dataHistory>Use</dataHistory>
+      <fullTextSearch>Use</fullTextSearch>
+    </attributes>
+    <lineNumberLength>9</lineNumberLength>
+  </tabularSections>
   <forms uuid="02615798-85e0-47ff-bc20-a597ee43ae4b">
     <name>ФормаЭлемента</name>
     <synonym>
