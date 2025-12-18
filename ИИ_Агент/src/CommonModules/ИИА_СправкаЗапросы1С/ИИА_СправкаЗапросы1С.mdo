@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdclass:CommonModule xmlns:mdclass="http://g5.1c.ru/v8/dt/metadata/mdclass" uuid="ac1c9697-b5a3-401f-898a-f07b7f2b5157">
+  <name>ИИА_СправкаЗапросы1С</name>
+  <synonym>
+    <key>ru</key>
+    <value>Справка запросы1 С</value>
+  </synonym>
+  <server>true</server>
+  <externalConnection>true</externalConnection>
+  <clientOrdinaryApplication>true</clientOrdinaryApplication>
+</mdclass:CommonModule>
