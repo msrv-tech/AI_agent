@@ -190,6 +190,24 @@
     <dataHistory>Use</dataHistory>
     <fillValue xsi:type="core:UndefinedValue"/>
   </resources>
+  <resources uuid="a06107b9-ff0c-45c1-84b0-2885ea2e8838">
+    <name>ЛимитТокеновНаДиалог</name>
+    <synonym>
+      <key>ru</key>
+      <value>Лимит токенов на диалог</value>
+    </synonym>
+    <type>
+      <types>Number</types>
+      <numberQualifiers>
+        <precision>10</precision>
+      </numberQualifiers>
+    </type>
+    <minValue xsi:type="core:UndefinedValue"/>
+    <maxValue xsi:type="core:UndefinedValue"/>
+    <fullTextSearch>Use</fullTextSearch>
+    <dataHistory>Use</dataHistory>
+    <fillValue xsi:type="core:UndefinedValue"/>
+  </resources>
   <dimensions uuid="a60929a7-cb96-43e8-ac57-4d2ceed32b3c">
     <name>Пользователь</name>
     <synonym>
