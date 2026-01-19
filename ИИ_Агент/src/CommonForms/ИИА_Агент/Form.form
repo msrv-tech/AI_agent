@@ -94,6 +94,7 @@
             <horizontalAlign>Left</horizontalAlign>
           </extInfo>
         </extendedTooltip>
+        <type>UsualButton</type>
         <commandName>Form.Command.КомандаВверх</commandName>
         <representation>Picture</representation>
         <autoMaxWidth>true</autoMaxWidth>
@@ -119,8 +120,35 @@
             <horizontalAlign>Left</horizontalAlign>
           </extInfo>
         </extendedTooltip>
+        <type>UsualButton</type>
         <commandName>Form.Command.КомандаВниз</commandName>
         <representation>Picture</representation>
+        <autoMaxWidth>true</autoMaxWidth>
+        <autoMaxHeight>true</autoMaxHeight>
+        <placementArea>UserCmds</placementArea>
+        <representationInContextMenu>Auto</representationInContextMenu>
+      </items>
+      <items xsi:type="form:Button">
+        <name>Регистрация</name>
+        <id>118</id>
+        <visible>true</visible>
+        <enabled>true</enabled>
+        <userVisible>
+          <common>true</common>
+        </userVisible>
+        <extendedTooltip>
+          <name>РегистрацияРасширеннаяПодсказка</name>
+          <id>119</id>
+          <type>Label</type>
+          <autoMaxWidth>true</autoMaxWidth>
+          <autoMaxHeight>true</autoMaxHeight>
+          <extInfo xsi:type="form:LabelDecorationExtInfo">
+            <horizontalAlign>Left</horizontalAlign>
+          </extInfo>
+        </extendedTooltip>
+        <type>UsualButton</type>
+        <commandName>Form.Command.Регистрация</commandName>
+        <representation>Auto</representation>
         <autoMaxWidth>true</autoMaxWidth>
         <autoMaxHeight>true</autoMaxHeight>
         <placementArea>UserCmds</placementArea>
@@ -167,7 +195,7 @@
       </items>
       <items xsi:type="form:FormField">
         <name>ЛогСсылка</name>
-        <id>91</id>
+        <id>130</id>
         <title>
           <key>ru</key>
           <value>Лог</value>
@@ -183,7 +211,7 @@
         <titleLocation>None</titleLocation>
         <extendedTooltip>
           <name>ЛогСсылкаРасширеннаяПодсказка</name>
-          <id>93</id>
+          <id>131</id>
           <type>Label</type>
           <autoMaxWidth>true</autoMaxWidth>
           <autoMaxHeight>true</autoMaxHeight>
@@ -193,7 +221,7 @@
         </extendedTooltip>
         <contextMenu>
           <name>ЛогСсылкаКонтекстноеМеню</name>
-          <id>92</id>
+          <id>132</id>
           <autoFill>true</autoFill>
         </contextMenu>
         <type>LabelField</type>
@@ -583,7 +611,7 @@
     </items>
     <items xsi:type="form:Table">
       <name>ПланЗадач</name>
-      <id>94</id>
+      <id>133</id>
       <visible>true</visible>
       <enabled>true</enabled>
       <userVisible>
@@ -1226,6 +1254,23 @@
     <action xsi:type="form:FormCommandHandlerContainer">
       <handler>
         <name>КомандаВниз</name>
+      </handler>
+    </action>
+    <currentRowUse>Auto</currentRowUse>
+  </formCommands>
+  <formCommands>
+    <name>Регистрация</name>
+    <title>
+      <key>ru</key>
+      <value>Регистрация</value>
+    </title>
+    <id>6</id>
+    <use>
+      <common>true</common>
+    </use>
+    <action xsi:type="form:FormCommandHandlerContainer">
+      <handler>
+        <name>Регистрация</name>
       </handler>
     </action>
     <currentRowUse>Auto</currentRowUse>

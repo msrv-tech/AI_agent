@@ -44,6 +44,7 @@
   <commonModules>CommonModule.ИИА_СправкаЗапросы1С</commonModules>
   <commonCommands>CommonCommand.ИИА_Агент</commonCommands>
   <commonForms>CommonForm.ИИА_Агент</commonForms>
+  <commonForms>CommonForm.ИИА_Регистрация</commonForms>
   <catalogs>Catalog.ИИА_Диалоги</catalogs>
   <enums>Enum.ИИА_АвторСообщения</enums>
   <enums>Enum.ИИА_Модели</enums>
