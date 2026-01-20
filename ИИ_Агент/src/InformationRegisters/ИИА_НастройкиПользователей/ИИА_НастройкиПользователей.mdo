@@ -32,42 +32,6 @@
     <dataHistory>Use</dataHistory>
     <fillValue xsi:type="core:UndefinedValue"/>
   </resources>
-  <resources uuid="1e3cf8e7-140e-4ca3-8d27-24d8528795d3">
-    <name>Gitsell_Endpoint</name>
-    <synonym>
-      <key>ru</key>
-      <value>Gitsell endpoint</value>
-    </synonym>
-    <type>
-      <types>String</types>
-      <stringQualifiers>
-        <length>200</length>
-      </stringQualifiers>
-    </type>
-    <minValue xsi:type="core:UndefinedValue"/>
-    <maxValue xsi:type="core:UndefinedValue"/>
-    <fullTextSearch>Use</fullTextSearch>
-    <dataHistory>Use</dataHistory>
-    <fillValue xsi:type="core:UndefinedValue"/>
-  </resources>
-  <resources uuid="d3e0b79a-40f9-4ddd-8cd5-c294702fb0dd">
-    <name>Gitsell_AccessToken</name>
-    <synonym>
-      <key>ru</key>
-      <value>Gitsell access token</value>
-    </synonym>
-    <type>
-      <types>String</types>
-      <stringQualifiers>
-        <length>200</length>
-      </stringQualifiers>
-    </type>
-    <minValue xsi:type="core:UndefinedValue"/>
-    <maxValue xsi:type="core:UndefinedValue"/>
-    <fullTextSearch>Use</fullTextSearch>
-    <dataHistory>Use</dataHistory>
-    <fillValue xsi:type="core:UndefinedValue"/>
-  </resources>
   <resources uuid="5f9cc5ce-1ac7-4c59-9d9e-b58614ce3403">
     <name>Provider_BaseUrl</name>
     <synonym>
