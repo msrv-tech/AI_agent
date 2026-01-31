@@ -83,6 +83,7 @@
 			<CommonModule>ИИА_Промты</CommonModule>
 			<CommonModule>ИИА_Сервер</CommonModule>
 			<CommonModule>ИИА_СправкаЗапросы1С</CommonModule>
+			<CommonModule>ИИА_GitsellСервер</CommonModule>
 			<CommonCommand>ИИА_Агент</CommonCommand>
 			<CommonForm>ИИА_Агент</CommonForm>
 			<CommonForm>ИИА_РегистрацияGitsell</CommonForm>

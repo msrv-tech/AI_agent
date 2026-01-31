@@ -5,6 +5,7 @@
 		<Button name="ФормаРегистрация" id="1">
 			<Type>UsualButton</Type>
 			<DefaultButton>true</DefaultButton>
+			<HorizontalStretch>true</HorizontalStretch>
 			<CommandName>Form.Command.Регистрация</CommandName>
 			<ExtendedTooltip name="ФормаРегистрацияРасширеннаяПодсказка" id="2"/>
 		</Button>
@@ -16,11 +17,38 @@
 				</v8:item>
 			</Title>
 			<Group>Vertical</Group>
-			<Behavior>Usual</Behavior>
 			<Representation>None</Representation>
 			<ShowTitle>false</ShowTitle>
 			<ExtendedTooltip name="ГруппаОсновнаяРасширеннаяПодсказка" id="11"/>
 			<ChildItems>
+				<LabelDecoration name="ДекорацияОписание" id="30">
+					<Title formatted="false">
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Мы используем ИИ прокси сервис Gitsell для доступа к нейросетям. Для работы необходимо авторизоваться.</v8:content>
+						</v8:item>
+						<v8:item>
+							<v8:lang/>
+							<v8:content>Декорация описание</v8:content>
+						</v8:item>
+					</Title>
+					<ContextMenu name="ДекорацияОписаниеКонтекстноеМеню" id="32"/>
+					<ExtendedTooltip name="ДекорацияОписаниеРасширеннаяПодсказка" id="31"/>
+				</LabelDecoration>
+				<LabelDecoration name="ДекорацияСсылкаGitsell" id="33">
+					<Title formatted="false">
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Перейти в личный кабинет Gitsell</v8:content>
+						</v8:item>
+					</Title>
+					<Hyperlink>true</Hyperlink>
+					<ContextMenu name="ДекорацияСсылкаGitsellКонтекстноеМеню" id="35"/>
+					<ExtendedTooltip name="ДекорацияСсылкаGitsellРасширеннаяПодсказка" id="34"/>
+					<Events>
+						<Event name="Click">ДекорацияСсылкаGitsellНажатие</Event>
+					</Events>
+				</LabelDecoration>
 				<LabelField name="СтрокаСтатуса" id="12">
 					<DataPath>СтрокаСтатуса</DataPath>
 					<TitleLocation>None</TitleLocation>
@@ -51,6 +79,9 @@
 					<Hiperlink>true</Hiperlink>
 					<ContextMenu name="VerificationUriКонтекстноеМеню" id="19"/>
 					<ExtendedTooltip name="VerificationUriРасширеннаяПодсказка" id="20"/>
+					<Events>
+						<Event name="Click">VerificationUriНажатие</Event>
+					</Events>
 				</LabelField>
 				<LabelField name="EmailПользователя" id="21">
 					<DataPath>EmailПользователя</DataPath>
