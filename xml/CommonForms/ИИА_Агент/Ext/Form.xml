@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Form xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcssch="http://v8.1c.ru/8.1/data-composition-system/schema" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.20">
 	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
 		<Autofill>false</Autofill>
@@ -59,10 +59,10 @@
 							<CommandName>Form.Command.КомандаВниз</CommandName>
 							<ExtendedTooltip name="КомандаВнизРасширеннаяПодсказка" id="94"/>
 						</Button>
-						<Button name="Регистрация" id="118">
+						<Button name="Настройка" id="118">
 							<Type>UsualButton</Type>
-							<CommandName>Form.Command.Регистрация</CommandName>
-							<ExtendedTooltip name="РегистрацияРасширеннаяПодсказка" id="119"/>
+							<CommandName>Form.Command.Настройка</CommandName>
+							<ExtendedTooltip name="НастройкаРасширеннаяПодсказка" id="119"/>
 						</Button>
 						<LabelField name="ОркестраторРаботает" id="78">
 							<DataPath>ОркестраторРаботает</DataPath>
@@ -513,14 +513,14 @@
 			</Picture>
 			<Action>КомандаВниз</Action>
 		</Command>
-		<Command name="Регистрация" id="6">
+		<Command name="Настройка" id="6">
 			<Title>
 				<v8:item>
 					<v8:lang>ru</v8:lang>
-					<v8:content>Регистрация</v8:content>
+					<v8:content>Настройка</v8:content>
 				</v8:item>
 			</Title>
-			<Action>Регистрация</Action>
+			<Action>Настройка</Action>
 		</Command>
 	</Commands>
 </Form>
