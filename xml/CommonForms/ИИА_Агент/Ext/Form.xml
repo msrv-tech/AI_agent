@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <Form xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcssch="http://v8.1c.ru/8.1/data-composition-system/schema" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.20">
 	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
 		<Autofill>false</Autofill>
@@ -149,12 +149,6 @@
 									<CommandName>Form.Command.Отправить</CommandName>
 									<ExtendedTooltip name="ОтправитьРасширеннаяПодсказка" id="50"/>
 								</Button>
-								<InputField name="ТекущаяМодель" id="81">
-									<DataPath>ТекущаяМодель</DataPath>
-									<TitleLocation>None</TitleLocation>
-									<ContextMenu name="ТекущаяМодельКонтекстноеМеню" id="82"/>
-									<ExtendedTooltip name="ТекущаяМодельРасширеннаяПодсказка" id="83"/>
-								</InputField>
 								<InputField name="ТекущийТипСообщения" id="44">
 									<DataPath>ТекущийТипДиалога</DataPath>
 									<TitleLocation>None</TitleLocation>
@@ -177,6 +171,7 @@
 					<v8:content>Группа тело</v8:content>
 				</v8:item>
 			</Title>
+			<HorizontalStretch>true</HorizontalStretch>
 			<Group>AlwaysHorizontal</Group>
 			<Representation>None</Representation>
 			<ShowTitle>false</ShowTitle>
@@ -189,88 +184,124 @@
 							<v8:content>Группа история чата</v8:content>
 						</v8:item>
 					</Title>
+					<HorizontalStretch>true</HorizontalStretch>
 					<Representation>None</Representation>
 					<ShowTitle>false</ShowTitle>
 					<ExtendedTooltip name="ГруппаИсторияЧатаРасширеннаяПодсказка" id="85"/>
-				</UsualGroup>
-				<Table name="ПланЗадач" id="133">
-					<Representation>List</Representation>
-					<CommandBarLocation>None</CommandBarLocation>
-					<AutoInsertNewRow>true</AutoInsertNewRow>
-					<EnableStartDrag>true</EnableStartDrag>
-					<EnableDrag>true</EnableDrag>
-					<DataPath>ПланЗадач</DataPath>
-					<CommandSet>
-						<ExcludedCommand>Add</ExcludedCommand>
-						<ExcludedCommand>CancelSearch</ExcludedCommand>
-						<ExcludedCommand>Change</ExcludedCommand>
-						<ExcludedCommand>Copy</ExcludedCommand>
-						<ExcludedCommand>CopyToClipboard</ExcludedCommand>
-						<ExcludedCommand>Delete</ExcludedCommand>
-						<ExcludedCommand>EndEdit</ExcludedCommand>
-						<ExcludedCommand>Find</ExcludedCommand>
-						<ExcludedCommand>FindByCurrentValue</ExcludedCommand>
-						<ExcludedCommand>MoveDown</ExcludedCommand>
-						<ExcludedCommand>MoveUp</ExcludedCommand>
-						<ExcludedCommand>OutputList</ExcludedCommand>
-						<ExcludedCommand>SearchEverywhere</ExcludedCommand>
-						<ExcludedCommand>SearchHistory</ExcludedCommand>
-						<ExcludedCommand>SelectAll</ExcludedCommand>
-						<ExcludedCommand>ShowMultipleSelection</ExcludedCommand>
-						<ExcludedCommand>ShowRowRearrangement</ExcludedCommand>
-						<ExcludedCommand>SortListAsc</ExcludedCommand>
-						<ExcludedCommand>SortListDesc</ExcludedCommand>
-					</CommandSet>
-					<RowFilter xsi:nil="true"/>
-					<ContextMenu name="ПланЗадачКонтекстноеМеню" id="96"/>
-					<AutoCommandBar name="ПланЗадачКоманднаяПанель" id="95"/>
-					<ExtendedTooltip name="ПланЗадачРасширеннаяПодсказка" id="97"/>
-					<SearchStringAddition name="ПланЗадачСтрокаПоиска" id="98">
-						<AdditionSource>
-							<Item>ПланЗадач</Item>
-							<Type>SearchStringRepresentation</Type>
-						</AdditionSource>
-						<ContextMenu name="ПланЗадачСтрокаПоискаКонтекстноеМеню" id="99"/>
-						<ExtendedTooltip name="ПланЗадачСтрокаПоискаРасширеннаяПодсказка" id="100"/>
-					</SearchStringAddition>
-					<ViewStatusAddition name="ПланЗадачСостояниеПросмотра" id="104">
-						<AdditionSource>
-							<Item>ПланЗадач</Item>
-							<Type>ViewStatusRepresentation</Type>
-						</AdditionSource>
-						<ContextMenu name="ПланЗадачСостояниеПросмотраКонтекстноеМеню" id="105"/>
-						<ExtendedTooltip name="ПланЗадачСостояниеПросмотраРасширеннаяПодсказка" id="106"/>
-					</ViewStatusAddition>
-					<SearchControlAddition name="ПланЗадачУправлениеПоиском" id="101">
-						<AdditionSource>
-							<Item>ПланЗадач</Item>
-							<Type>SearchControl</Type>
-						</AdditionSource>
-						<ContextMenu name="ПланЗадачУправлениеПоискомКонтекстноеМеню" id="102"/>
-						<ExtendedTooltip name="ПланЗадачУправлениеПоискомРасширеннаяПодсказка" id="103"/>
-					</SearchControlAddition>
 					<ChildItems>
-						<InputField name="ПланЗадачЗадача" id="107">
-							<DataPath>ПланЗадач.Задача</DataPath>
-							<EditMode>EnterOnInput</EditMode>
-							<ContextMenu name="ПланЗадачЗадачаКонтекстноеМеню" id="108"/>
-							<ExtendedTooltip name="ПланЗадачЗадачаРасширеннаяПодсказка" id="109"/>
-						</InputField>
-						<CheckBoxField name="ПланЗадачВыполнена" id="110">
-							<DataPath>ПланЗадач.Выполнена</DataPath>
-							<EditMode>EnterOnInput</EditMode>
-							<CheckBoxType>Auto</CheckBoxType>
-							<ContextMenu name="ПланЗадачВыполненаКонтекстноеМеню" id="111"/>
-							<ExtendedTooltip name="ПланЗадачВыполненаРасширеннаяПодсказка" id="112"/>
-						</CheckBoxField>
-						<InputField name="ПланЗадачРезультат" id="113">
-							<DataPath>ПланЗадач.Результат</DataPath>
-							<EditMode>EnterOnInput</EditMode>
-							<ContextMenu name="ПланЗадачРезультатКонтекстноеМеню" id="114"/>
-							<ExtendedTooltip name="ПланЗадачРезультатРасширеннаяПодсказка" id="115"/>
-						</InputField>
+						<LabelDecoration name="Декорация1" id="136">
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content>История</v8:content>
+								</v8:item>
+							</Title>
+							<ContextMenu name="Декорация1КонтекстноеМеню" id="137"/>
+							<ExtendedTooltip name="Декорация1РасширеннаяПодсказка" id="138"/>
+						</LabelDecoration>
 					</ChildItems>
-				</Table>
+				</UsualGroup>
+				<UsualGroup name="ГруппаПлан" id="134">
+					<Title>
+						<v8:item>
+							<v8:lang/>
+							<v8:content>Группа план</v8:content>
+						</v8:item>
+					</Title>
+					<ToolTip>
+						<v8:item>
+							<v8:lang/>
+							<v8:content>Группа план</v8:content>
+						</v8:item>
+					</ToolTip>
+					<Representation>None</Representation>
+					<ShowTitle>false</ShowTitle>
+					<ExtendedTooltip name="ГруппаПланРасширеннаяПодсказка" id="135"/>
+					<ChildItems>
+						<Table name="ПланЗадач" id="133">
+							<Representation>List</Representation>
+							<CommandBarLocation>None</CommandBarLocation>
+							<AutoMaxWidth>false</AutoMaxWidth>
+							<MaxWidth>10</MaxWidth>
+							<AutoInsertNewRow>true</AutoInsertNewRow>
+							<HorizontalStretch>false</HorizontalStretch>
+							<EnableStartDrag>true</EnableStartDrag>
+							<EnableDrag>true</EnableDrag>
+							<DataPath>ПланЗадач</DataPath>
+							<CommandSet>
+								<ExcludedCommand>Add</ExcludedCommand>
+								<ExcludedCommand>CancelSearch</ExcludedCommand>
+								<ExcludedCommand>Change</ExcludedCommand>
+								<ExcludedCommand>Copy</ExcludedCommand>
+								<ExcludedCommand>CopyToClipboard</ExcludedCommand>
+								<ExcludedCommand>Delete</ExcludedCommand>
+								<ExcludedCommand>EndEdit</ExcludedCommand>
+								<ExcludedCommand>Find</ExcludedCommand>
+								<ExcludedCommand>FindByCurrentValue</ExcludedCommand>
+								<ExcludedCommand>MoveDown</ExcludedCommand>
+								<ExcludedCommand>MoveUp</ExcludedCommand>
+								<ExcludedCommand>OutputList</ExcludedCommand>
+								<ExcludedCommand>SearchEverywhere</ExcludedCommand>
+								<ExcludedCommand>SearchHistory</ExcludedCommand>
+								<ExcludedCommand>SelectAll</ExcludedCommand>
+								<ExcludedCommand>ShowMultipleSelection</ExcludedCommand>
+								<ExcludedCommand>ShowRowRearrangement</ExcludedCommand>
+								<ExcludedCommand>SortListAsc</ExcludedCommand>
+								<ExcludedCommand>SortListDesc</ExcludedCommand>
+							</CommandSet>
+							<GroupHorizontalAlign>Right</GroupHorizontalAlign>
+							<RowFilter xsi:nil="true"/>
+							<ContextMenu name="ПланЗадачКонтекстноеМеню" id="96"/>
+							<AutoCommandBar name="ПланЗадачКоманднаяПанель" id="95"/>
+							<ExtendedTooltip name="ПланЗадачРасширеннаяПодсказка" id="97"/>
+							<SearchStringAddition name="ПланЗадачСтрокаПоиска" id="98">
+								<AdditionSource>
+									<Item>ПланЗадач</Item>
+									<Type>SearchStringRepresentation</Type>
+								</AdditionSource>
+								<ContextMenu name="ПланЗадачСтрокаПоискаКонтекстноеМеню" id="99"/>
+								<ExtendedTooltip name="ПланЗадачСтрокаПоискаРасширеннаяПодсказка" id="100"/>
+							</SearchStringAddition>
+							<ViewStatusAddition name="ПланЗадачСостояниеПросмотра" id="104">
+								<AdditionSource>
+									<Item>ПланЗадач</Item>
+									<Type>ViewStatusRepresentation</Type>
+								</AdditionSource>
+								<ContextMenu name="ПланЗадачСостояниеПросмотраКонтекстноеМеню" id="105"/>
+								<ExtendedTooltip name="ПланЗадачСостояниеПросмотраРасширеннаяПодсказка" id="106"/>
+							</ViewStatusAddition>
+							<SearchControlAddition name="ПланЗадачУправлениеПоиском" id="101">
+								<AdditionSource>
+									<Item>ПланЗадач</Item>
+									<Type>SearchControl</Type>
+								</AdditionSource>
+								<ContextMenu name="ПланЗадачУправлениеПоискомКонтекстноеМеню" id="102"/>
+								<ExtendedTooltip name="ПланЗадачУправлениеПоискомРасширеннаяПодсказка" id="103"/>
+							</SearchControlAddition>
+							<ChildItems>
+								<InputField name="ПланЗадачЗадача" id="107">
+									<DataPath>ПланЗадач.Задача</DataPath>
+									<EditMode>EnterOnInput</EditMode>
+									<ContextMenu name="ПланЗадачЗадачаКонтекстноеМеню" id="108"/>
+									<ExtendedTooltip name="ПланЗадачЗадачаРасширеннаяПодсказка" id="109"/>
+								</InputField>
+								<CheckBoxField name="ПланЗадачВыполнена" id="110">
+									<DataPath>ПланЗадач.Выполнена</DataPath>
+									<EditMode>EnterOnInput</EditMode>
+									<CheckBoxType>Auto</CheckBoxType>
+									<ContextMenu name="ПланЗадачВыполненаКонтекстноеМеню" id="111"/>
+									<ExtendedTooltip name="ПланЗадачВыполненаРасширеннаяПодсказка" id="112"/>
+								</CheckBoxField>
+								<InputField name="ПланЗадачРезультат" id="113">
+									<DataPath>ПланЗадач.Результат</DataPath>
+									<EditMode>EnterOnInput</EditMode>
+									<ContextMenu name="ПланЗадачРезультатКонтекстноеМеню" id="114"/>
+									<ExtendedTooltip name="ПланЗадачРезультатРасширеннаяПодсказка" id="115"/>
+								</InputField>
+							</ChildItems>
+						</Table>
+					</ChildItems>
+				</UsualGroup>
 			</ChildItems>
 		</UsualGroup>
 	</ChildItems>
@@ -375,17 +406,6 @@
 			</Title>
 			<Type>
 				<v8:Type>xs:boolean</v8:Type>
-			</Type>
-		</Attribute>
-		<Attribute name="ТекущаяМодель" id="23">
-			<Title>
-				<v8:item>
-					<v8:lang>ru</v8:lang>
-					<v8:content>Текущая модель</v8:content>
-				</v8:item>
-			</Title>
-			<Type>
-				<v8:TypeId>93491c3b-9bcb-40f0-9aab-5f2d98d42a11</v8:TypeId>
 			</Type>
 		</Attribute>
 		<Attribute name="ЛогСсылка" id="24">
