@@ -87,9 +87,9 @@
 			<CommonCommand>ИИА_Агент</CommonCommand>
 			<CommonForm>ИИА_Агент</CommonForm>
 			<CommonForm>ИИА_РегистрацияGitsell</CommonForm>
+			<CommonForm>ИИА_Настройки</CommonForm>
 			<Catalog>ИИА_Диалоги</Catalog>
 			<Enum>ИИА_АвторСообщения</Enum>
-			<Enum>ИИА_РежимыПодключения</Enum>
 			<Enum>ИИА_СтатусDSL</Enum>
 			<Enum>ИИА_ТипДиалога</Enum>
 			<Enum>ИИА_ТипСообщения</Enum>
