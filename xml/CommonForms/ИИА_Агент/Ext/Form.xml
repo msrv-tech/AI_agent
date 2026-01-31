@@ -385,7 +385,7 @@
 				</v8:item>
 			</Title>
 			<Type>
-				<v8:Type>cfg:EnumRef.ИИА_Модели</v8:Type>
+				<v8:TypeId>93491c3b-9bcb-40f0-9aab-5f2d98d42a11</v8:TypeId>
 			</Type>
 		</Attribute>
 		<Attribute name="ЛогСсылка" id="24">

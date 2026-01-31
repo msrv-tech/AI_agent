@@ -89,7 +89,6 @@
 			<CommonForm>ИИА_РегистрацияGitsell</CommonForm>
 			<Catalog>ИИА_Диалоги</Catalog>
 			<Enum>ИИА_АвторСообщения</Enum>
-			<Enum>ИИА_Модели</Enum>
 			<Enum>ИИА_РежимыПодключения</Enum>
 			<Enum>ИИА_СтатусDSL</Enum>
 			<Enum>ИИА_ТипДиалога</Enum>
