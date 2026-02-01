@@ -64,6 +64,12 @@
 							<CommandName>Form.Command.Настройка</CommandName>
 							<ExtendedTooltip name="НастройкаРасширеннаяПодсказка" id="119"/>
 						</Button>
+						<LabelField name="ПотреченоТокенов" id="139">
+							<DataPath>ПотреченоТокенов</DataPath>
+							<TitleLocation>None</TitleLocation>
+							<ContextMenu name="ПотреченоТокеновКонтекстноеМеню" id="140"/>
+							<ExtendedTooltip name="ПотреченоТокеновРасширеннаяПодсказка" id="141"/>
+						</LabelField>
 						<LabelField name="ОркестраторРаботает" id="78">
 							<DataPath>ОркестраторРаботает</DataPath>
 							<ContextMenu name="ОркестраторРаботаетКонтекстноеМеню" id="79"/>
@@ -476,6 +482,22 @@
 					</Type>
 				</Column>
 			</Columns>
+		</Attribute>
+		<Attribute name="ПотреченоТокенов" id="2">
+			<Title>
+				<v8:item>
+					<v8:lang/>
+					<v8:content>Потречено токенов</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:Type>xs:decimal</v8:Type>
+				<v8:NumberQualifiers>
+					<v8:Digits>10</v8:Digits>
+					<v8:FractionDigits>0</v8:FractionDigits>
+					<v8:AllowedSign>Any</v8:AllowedSign>
+				</v8:NumberQualifiers>
+			</Type>
 		</Attribute>
 	</Attributes>
 	<Commands>
