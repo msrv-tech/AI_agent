@@ -250,6 +250,14 @@
 	"Ограничения для next_step_dsl:" + Символы.ПС +
 	"- steps[].action ТОЛЬКО из поддерживаемых DSL действий: RunQuery, ShowInfo, GetMetadata, GetObjectFields, CheckObjectExists, CreateReference, FindReferenceByGUID, SelectObject, SetField, Write, Delete, ForEach, SaveToStorage." + Символы.ПС +
 	"- ЗАПРЕЩЕНЫ любые UI/браузерные действия и выдуманные action: click, find_element, open_form, ui_*, navigate и т.п." + Символы.ПС +
+	"- ЗАПРЕЩЕНО использовать вложенные объекты params/args/parameters. Все обязательные поля должны быть на верхнем уровне шага." + Символы.ПС +
+	"" + Символы.ПС +
+	"СХЕМЫ (СТРОГО):" + Символы.ПС +
+	"- CheckObjectExists: {""action"":""CheckObjectExists"",""object_type"":""Справочник"",""object_name"":""Контрагенты""}" + Символы.ПС +
+	"- GetObjectFields: {""action"":""GetObjectFields"",""object_type"":""Справочник"",""object_name"":""Контрагенты""}" + Символы.ПС +
+	"- RunQuery: {""action"":""RunQuery"",""query"":""ВЫБРАТЬ ...""}" + Символы.ПС +
+	"- ShowInfo: {""action"":""ShowInfo"",""message"":""...""}" + Символы.ПС +
+	"НЕЛЬЗЯ писать object_name=""Справочник.Контрагенты"" — нужно object_type=""Справочник"" и object_name=""Контрагенты""." + Символы.ПС +
 	"" + Символы.ПС +
 	"Ответ: только JSON объект вида {""updated_plan"":[...],""next_step_dsl"":{""dsl_version"":1,""steps"":[...]}}. " +
 	"Не меняй Выполнена=true на false. Без пояснений и без Markdown.";
