@@ -65,13 +65,14 @@
 							<ExtendedTooltip name="НастройкаРасширеннаяПодсказка" id="119"/>
 						</Button>
 						<LabelField name="ПотреченоТокенов" id="139">
-							<DataPath>ПотреченоТокенов</DataPath>
+							<DataPath>ПотраченоТокенов</DataPath>
 							<TitleLocation>None</TitleLocation>
 							<ContextMenu name="ПотреченоТокеновКонтекстноеМеню" id="140"/>
 							<ExtendedTooltip name="ПотреченоТокеновРасширеннаяПодсказка" id="141"/>
 						</LabelField>
 						<LabelField name="ОркестраторРаботает" id="78">
 							<DataPath>ОркестраторРаботает</DataPath>
+							<TitleLocation>None</TitleLocation>
 							<ContextMenu name="ОркестраторРаботаетКонтекстноеМеню" id="79"/>
 							<ExtendedTooltip name="ОркестраторРаботаетРасширеннаяПодсказка" id="80"/>
 						</LabelField>
@@ -483,11 +484,11 @@
 				</Column>
 			</Columns>
 		</Attribute>
-		<Attribute name="ПотреченоТокенов" id="2">
+		<Attribute name="ПотраченоТокенов" id="2">
 			<Title>
 				<v8:item>
 					<v8:lang/>
-					<v8:content>Потречено токенов</v8:content>
+					<v8:content>Потрачено токенов</v8:content>
 				</v8:item>
 			</Title>
 			<Type>
