@@ -131,20 +131,20 @@
 
 &НаСервере
 Функция Gitsell_НачатьDeviceFlowНаСервере()
-	Возврат ИИА_Сервер.Gitsell_НачатьDeviceFlow();
+	Возврат ИИА_GitsellСервер.Gitsell_НачатьDeviceFlow();
 КонецФункции
 
 &НаСервере
 Функция Gitsell_ОпросТокенаНаСервере(DeviceCode)
-	Возврат ИИА_Сервер.Gitsell_ОпросТокена(DeviceCode);
+	Возврат ИИА_GitsellСервер.Gitsell_ОпросТокена(DeviceCode);
 КонецФункции
 
 &НаСервере
 Процедура Gitsell_СохранитьТокенНаСервере(Токен, Email)
-	ИИА_Сервер.Gitsell_СохранитьAiProxyToken(Токен, Email);
+	ИИА_GitsellСервер.Gitsell_СохранитьAiProxyToken(Токен, Email);
 КонецПроцедуры
 
 &НаСервере
 Функция Gitsell_ПроверитьModelsНаСервере()
-	Возврат ИИА_Сервер.Gitsell_ПроверитьModels();
+	Возврат ИИА_GitsellСервер.Gitsell_ПроверитьModels();
 КонецФункции
