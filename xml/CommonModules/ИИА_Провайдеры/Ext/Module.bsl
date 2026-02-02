@@ -1,4 +1,4 @@
-﻿#Область ПрограммныйИнтерфейс
+#Область ПрограммныйИнтерфейс
 
 // Вызывает ИИ для получения ответа
 //
@@ -177,7 +177,11 @@
 			// Usage
 			Если Данные.Свойство("usage") Тогда
 				UsageStruct = Новый Структура;
-				UsageStruct.Вставить("TotalTokens", ?(Данные.usage.Свойство("total_tokens"), Данные.usage.total_tokens, 0));
+				Если Данные.usage.Свойство("gitsell_tokens") Тогда
+					UsageStruct.Вставить("TotalTokens", Данные.usage.gitsell_tokens);
+				Иначе
+					UsageStruct.Вставить("TotalTokens", ?(Данные.usage.Свойство("total_tokens"), Данные.usage.total_tokens, 0));
+				КонецЕсли;
 				Результат.Usage = UsageStruct;
 			КонецЕсли;
 			
