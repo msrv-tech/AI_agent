@@ -512,15 +512,6 @@
 			<Shortcut>Enter</Shortcut>
 			<Action>КомандаОтправить</Action>
 		</Command>
-		<Command name="ТестDSL" id="2">
-			<Title>
-				<v8:item>
-					<v8:lang>ru</v8:lang>
-					<v8:content>Тест DSL</v8:content>
-				</v8:item>
-			</Title>
-			<Action>ТестDSL</Action>
-		</Command>
 		<Command name="НовыйДиалог" id="3">
 			<Title>
 				<v8:item>
