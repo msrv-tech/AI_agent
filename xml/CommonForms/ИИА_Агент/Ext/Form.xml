@@ -179,36 +179,36 @@
 				</v8:item>
 			</Title>
 			<HorizontalStretch>true</HorizontalStretch>
+			<VerticalStretch>true</VerticalStretch>
 			<Group>AlwaysHorizontal</Group>
 			<Representation>None</Representation>
 			<ShowTitle>false</ShowTitle>
 			<ExtendedTooltip name="ГруппаТелоРасширеннаяПодсказка" id="117"/>
 			<ChildItems>
-				<UsualGroup name="ГруппаИсторияЧата" id="84">
+				<UsualGroup name="ГруппаИсторияЧата" id="142">
 					<Title>
 						<v8:item>
 							<v8:lang>ru</v8:lang>
-							<v8:content>Группа история чата</v8:content>
+							<v8:content>История чата</v8:content>
 						</v8:item>
 					</Title>
-					<Width>50</Width>
 					<HorizontalStretch>true</HorizontalStretch>
-					<GroupHorizontalAlign>Left</GroupHorizontalAlign>
+					<VerticalStretch>true</VerticalStretch>
+					<Group>Vertical</Group>
 					<Representation>None</Representation>
 					<ShowTitle>false</ShowTitle>
-					<ExtendedTooltip name="ГруппаИсторияЧатаРасширеннаяПодсказка" id="85"/>
+					<ExtendedTooltip name="ГруппаИсторияЧатаРасширеннаяПодсказка" id="143"/>
 					<ChildItems>
-						<LabelDecoration name="Декорация1" id="136">
+						<LabelDecoration name="Декорация1" id="144">
 							<AutoMaxWidth>false</AutoMaxWidth>
-							<HorizontalStretch>true</HorizontalStretch>
 							<Title formatted="false">
 								<v8:item>
 									<v8:lang/>
-									<v8:content>Проверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка Проверка</v8:content>
+									<v8:content>вап вап вап вап вап вап вап вап вап варар апыр 12323 4234 234 234 234 234 234 234 23 4234 234 23</v8:content>
 								</v8:item>
 							</Title>
-							<ContextMenu name="Декорация1КонтекстноеМеню" id="137"/>
-							<ExtendedTooltip name="Декорация1РасширеннаяПодсказка" id="138"/>
+							<ContextMenu name="Декорация1КонтекстноеМеню" id="145"/>
+							<ExtendedTooltip name="Декорация1РасширеннаяПодсказка" id="146"/>
 						</LabelDecoration>
 					</ChildItems>
 				</UsualGroup>
@@ -219,12 +219,10 @@
 							<v8:content>Группа план</v8:content>
 						</v8:item>
 					</Title>
-					<ToolTip>
-						<v8:item>
-							<v8:lang/>
-							<v8:content>Группа план</v8:content>
-						</v8:item>
-					</ToolTip>
+					<Width>40</Width>
+					<HorizontalStretch>false</HorizontalStretch>
+					<VerticalStretch>true</VerticalStretch>
+					<Group>Vertical</Group>
 					<Representation>None</Representation>
 					<ShowTitle>false</ShowTitle>
 					<ExtendedTooltip name="ГруппаПланРасширеннаяПодсказка" id="135"/>
@@ -233,9 +231,8 @@
 							<Representation>List</Representation>
 							<CommandBarLocation>None</CommandBarLocation>
 							<AutoMaxWidth>false</AutoMaxWidth>
-							<MaxWidth>10</MaxWidth>
+							<MaxWidth>40</MaxWidth>
 							<AutoInsertNewRow>true</AutoInsertNewRow>
-							<HorizontalStretch>false</HorizontalStretch>
 							<EnableStartDrag>true</EnableStartDrag>
 							<EnableDrag>true</EnableDrag>
 							<DataPath>ПланЗадач</DataPath>
@@ -260,7 +257,6 @@
 								<ExcludedCommand>SortListAsc</ExcludedCommand>
 								<ExcludedCommand>SortListDesc</ExcludedCommand>
 							</CommandSet>
-							<GroupHorizontalAlign>Right</GroupHorizontalAlign>
 							<RowFilter xsi:nil="true"/>
 							<ContextMenu name="ПланЗадачКонтекстноеМеню" id="96"/>
 							<AutoCommandBar name="ПланЗадачКоманднаяПанель" id="95"/>
