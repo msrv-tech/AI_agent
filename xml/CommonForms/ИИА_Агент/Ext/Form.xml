@@ -191,16 +191,20 @@
 							<v8:content>Группа история чата</v8:content>
 						</v8:item>
 					</Title>
+					<Width>50</Width>
 					<HorizontalStretch>true</HorizontalStretch>
+					<GroupHorizontalAlign>Left</GroupHorizontalAlign>
 					<Representation>None</Representation>
 					<ShowTitle>false</ShowTitle>
 					<ExtendedTooltip name="ГруппаИсторияЧатаРасширеннаяПодсказка" id="85"/>
 					<ChildItems>
 						<LabelDecoration name="Декорация1" id="136">
+							<AutoMaxWidth>false</AutoMaxWidth>
+							<HorizontalStretch>true</HorizontalStretch>
 							<Title formatted="false">
 								<v8:item>
 									<v8:lang/>
-									<v8:content>История</v8:content>
+									<v8:content>Проверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка ПроверкаПроверка Проверка</v8:content>
 								</v8:item>
 							</Title>
 							<ContextMenu name="Декорация1КонтекстноеМеню" id="137"/>
