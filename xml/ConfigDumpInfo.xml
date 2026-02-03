@@ -67,6 +67,7 @@
 			<Metadata name="Enum.ИИА_СтатусDSL.EnumValue.ОбработанУспешно" id="1f894dab-4eef-4980-8104-e970722934c3"/>
 			<Metadata name="Enum.ИИА_СтатусDSL.EnumValue.НеПрименяется" id="7fe27c4b-c4ec-430c-91d5-57fae1a9cc44"/>
 			<Metadata name="Enum.ИИА_СтатусDSL.EnumValue.ВОчереди" id="9b73dc56-4cbe-47e8-9df9-de6af4eeb6ed"/>
+			<Metadata name="Enum.ИИА_СтатусDSL.EnumValue.Выполняется" id="bade7fa6-02bf-43ed-ab4a-535c532878c8"/>
 			<Metadata name="Enum.ИИА_СтатусDSL.EnumValue.ОбработанСОшибкой" id="d79eccfa-a128-420b-bfad-ae7a67bd78b0"/>
 			<Metadata name="Enum.ИИА_СтатусDSL.EnumValue.Исправляется" id="f7184682-071b-466a-a0e3-81145dec6811"/>
 		</Metadata>
