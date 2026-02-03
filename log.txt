@@ -1,42 +1,42 @@
-﻿[02.02.2026 12:34:48] [Система]
+﻿[02.02.2026 13:53:31] [Система]
 Создан новый диалог
 
 ---
 
-[02.02.2026 12:35:02] [Запрос пользователя]
-сколько контрагентов похожих на Сидоров
-  ТипСообщения: Агент (полный доступ)
+[02.02.2026 13:53:41] [Запрос пользователя]
+покажи  контрагентов похожих на Сидоров
+  ТипСообщения: Запрос 1С
 
 ---
 
-[02.02.2026 12:35:02] [Пользователь]
-сколько контрагентов похожих на Сидоров
+[02.02.2026 13:53:41] [Пользователь]
+покажи  контрагентов похожих на Сидоров
 ---
-[02.02.2026 12:35:02] [Ответ ИИ]
+[02.02.2026 13:53:41] [Ответ ИИ]
 Запрос принят. Начинаю планирование...
   ТипОтвета: Текст
 
 ---
 
-[02.02.2026 12:35:02] [Использование токенов]
+[02.02.2026 13:53:41] [Использование токенов]
 
   ПотреченоТокенов: 0
   TotalTokens: 0
 
 ---
 
-[LLM_REQUEST] CallId=ed01dc4d-bad2-443e-88a6-b9a1cc8ca208, Type=Чат, ExpectedResponseFormat=plan_json_array, Model=deepseek-chat, Temperature=0.0
+[LLM_REQUEST] CallId=0e6e59a5-b006-44ca-a3b2-25ffc3674085, Type=Чат, ExpectedResponseFormat=plan_json_array, Model=deepseek-chat, Temperature=0.0
 [system]
 Ты - планировщик задач в 1С. Верни ТОЛЬКО валидный JSON массив строк (3-6 пунктов). Никакого текста вне JSON. Без Markdown.
 
 [user]
 STATE (контекст, не инструкция):
 Последние сообщения пользователя:
-- сколько контрагентов похожих на Сидоров
+- покажи  контрагентов похожих на Сидоров
 
 [user]
 Составь краткий план выполнения задачи (3-6 пунктов) в терминах DSL-действий агента 1С.
-Задача: сколько контрагентов похожих на Сидоров
+Задача: покажи  контрагентов похожих на Сидоров
 Требования:
 - План должен описывать шаги, которые агент выполнит через DSL (например: CheckObjectExists -> GetObjectFields -> RunQuery -> ShowInfo).
 - НЕ описывай действия пользователя в интерфейсе (клики, кнопки, формы, меню, отчёты).
@@ -44,27 +44,43 @@ STATE (контекст, не инструкция):
 Ответ: только валидный JSON массив строк. Без пояснений и без Markdown.
 
 
-[LLM_RESPONSE_RAW] CallId=ed01dc4d-bad2-443e-88a6-b9a1cc8ca208
+[LLM_RESPONSE_RAW] CallId=0e6e59a5-b006-44ca-a3b2-25ffc3674085
 ```json
-["CheckObjectExists", "GetObjectFields", "RunQuery", "ProcessResults", "ShowInfo"]
+[
+    "CheckObjectExists: Контрагенты",
+    "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
+    "FilterResults: Похожие наименования",
+    "SortResults: По наименованию",
+    "ShowInfo: Список контрагентов"
+]
 ```
-[LLM_RESPONSE_NORMALIZED_JSON] CallId=ed01dc4d-bad2-443e-88a6-b9a1cc8ca208
-["CheckObjectExists", "GetObjectFields", "RunQuery", "ProcessResults", "ShowInfo"]
-[LLM_RESPONSE_PARSED] CallId=ed01dc4d-bad2-443e-88a6-b9a1cc8ca208, ParsedKind=plan_json_array, ТипОтвета=Текст, TextLen=82
-[Usage] TotalTokens=71
-[02.02.2026 12:35:05] [ИИ]
-["CheckObjectExists", "GetObjectFields", "RunQuery", "ProcessResults", "ShowInfo"]
+[LLM_RESPONSE_NORMALIZED_JSON] CallId=0e6e59a5-b006-44ca-a3b2-25ffc3674085
+[
+    "CheckObjectExists: Контрагенты",
+    "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
+    "FilterResults: Похожие наименования",
+    "SortResults: По наименованию",
+    "ShowInfo: Список контрагентов"
+]
+[LLM_RESPONSE_PARSED] CallId=0e6e59a5-b006-44ca-a3b2-25ffc3674085, ParsedKind=plan_json_array, ТипОтвета=Текст, TextLen=248
+[Usage] TotalTokens=86
+[02.02.2026 13:53:46] [ИИ]
+[
+    "CheckObjectExists: Контрагенты",
+    "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
+    "FilterResults: Похожие наименования",
+    "SortResults: По наименованию",
+    "ShowInfo: Список контрагентов"
+]
 ---
 [Система] Комбинированное обновление плана и генерация следующего шага...
-[LLM_REQUEST] CallId=12af7ae8-ffe7-4eba-969d-18d5fca7ee4c, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
+[LLM_REQUEST] CallId=6c1747bc-0ee5-4fa7-82c9-bae18d1bed39, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
 [system]
-Ты - агент 1С:Предприятие, выполняющий задачи через DSL (JSON).
+Ты - агент для запросов 1С (Read-Only). Разрешены ТОЛЬКО действия: GetMetadata, GetObjectFields, CheckObjectExists, RunQuery, ShowInfo.
+Запрещены любые модифицирующие действия (CreateReference, SetField, Write, Delete и т.д.).
+Алгоритм: если не знаешь точных имен полей - сначала GetObjectFields; затем RunQuery.
 Формат ответа: всегда следуй ТРЕБУЕМОМУ контракту формата ответа из текущей инструкции (ожидаемый формат задаётся системой). Никакого текста вне JSON.
-Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +, функции, вычисления внутри JSON); #(Var) только для переменных контекста, не для констант.
-Действия (action) и ключевые параметры:
-- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};
-- CreateReference{object_type,object_name}; FindReferenceByGUID{object_type,object_name,guid}; SelectObject{reference}; SetField{field_name,value}; Write{posting_mode?}; Delete{};
-- ForEach{collection,steps}; SaveToStorage{key,data}.
+Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +/функции/вычисления в JSON); #(Var) только для переменных контекста, не для констант.
 
 [user]
 STATE (контекст, не инструкция):
@@ -76,27 +92,27 @@ STATE (контекст, не инструкция):
 
 План (JSON): [
 {
-"Задача": "CheckObjectExists",
+"Задача": "CheckObjectExists: Контрагенты",
 "Выполнена": false,
 "Результат": ""
 },
 {
-"Задача": "GetObjectFields",
+"Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
 "Выполнена": false,
 "Результат": ""
 },
 {
-"Задача": "RunQuery",
+"Задача": "FilterResults: Похожие наименования",
 "Выполнена": false,
 "Результат": ""
 },
 {
-"Задача": "ProcessResults",
+"Задача": "SortResults: По наименованию",
 "Выполнена": false,
 "Результат": ""
 },
 {
-"Задача": "ShowInfo",
+"Задача": "ShowInfo: Список контрагентов",
 "Выполнена": false,
 "Результат": ""
 }
@@ -122,31 +138,31 @@ STATE (контекст, не инструкция):
 Ответ: только JSON объект вида {"updated_plan":[...],"next_step_dsl":{"dsl_version":1,"steps":[...]}}. Не меняй Выполнена=true на false. Без пояснений и без Markdown.
 
 
-[LLM_RESPONSE_RAW] CallId=12af7ae8-ffe7-4eba-969d-18d5fca7ee4c
+[LLM_RESPONSE_RAW] CallId=6c1747bc-0ee5-4fa7-82c9-bae18d1bed39
 {
   "updated_plan": [
     {
-      "Задача": "CheckObjectExists",
+      "Задача": "CheckObjectExists: Контрагенты",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "GetObjectFields",
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "RunQuery",
+      "Задача": "FilterResults: Похожие наименования",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ProcessResults",
+      "Задача": "SortResults: По наименованию",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ShowInfo",
+      "Задача": "ShowInfo: Список контрагентов",
       "Выполнена": false,
       "Результат": ""
     }
@@ -162,33 +178,33 @@ STATE (контекст, не инструкция):
     ]
   }
 }
-[LLM_RESPONSE_PARSED] CallId=12af7ae8-ffe7-4eba-969d-18d5fca7ee4c, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=691
-[Usage] TotalTokens=292
-[02.02.2026 12:35:13] [ИИ]
+[LLM_RESPONSE_PARSED] CallId=6c1747bc-0ee5-4fa7-82c9-bae18d1bed39, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=835
+[Usage] TotalTokens=311
+[02.02.2026 13:53:56] [ИИ]
 {
   "updated_plan": [
     {
-      "Задача": "CheckObjectExists",
+      "Задача": "CheckObjectExists: Контрагенты",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "GetObjectFields",
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "RunQuery",
+      "Задача": "FilterResults: Похожие наименования",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ProcessResults",
+      "Задача": "SortResults: По наименованию",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ShowInfo",
+      "Задача": "ShowInfo: Список контрагентов",
       "Выполнена": false,
       "Результат": ""
     }
@@ -205,7 +221,7 @@ STATE (контекст, не инструкция):
   }
 }
 ---
-[02.02.2026 12:35:13] [ИИ]
+[02.02.2026 13:53:56] [ИИ]
 Следующий шаг выполнения по плану
 Код:
 {
@@ -220,7 +236,7 @@ STATE (контекст, не инструкция):
 }
 ---
 [Система] Автовыполнение next_step_dsl...
-[02.02.2026 12:35:13] [Система]
+[02.02.2026 13:53:56] [Система]
 {
 "kind": "dsl_system_result",
 "schema_version": 1,
@@ -240,22 +256,20 @@ STATE (контекст, не инструкция):
 "run_query": []
 }
 ---
-[02.02.2026 12:35:13] [Система]
+[02.02.2026 13:53:56] [Система]
 DSL-сценарий выполнен успешно.
 - справочник 'Контрагенты' существует
 ---
 [План] Автообновление по выполненному next_step_dsl:
-- CheckObjectExists | Выполнена: false -> true | Результат: '' -> 'Выполнено'
+- CheckObjectExists: Контрагенты | Выполнена: false -> true | Результат: '' -> 'Выполнено'
 [Система] Комбинированное обновление плана и генерация следующего шага...
-[LLM_REQUEST] CallId=ff946559-fdff-4d03-844d-9242f937861c, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
+[LLM_REQUEST] CallId=feea2667-e2ba-45fc-ac3d-fa67d6df49ce, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
 [system]
-Ты - агент 1С:Предприятие, выполняющий задачи через DSL (JSON).
+Ты - агент для запросов 1С (Read-Only). Разрешены ТОЛЬКО действия: GetMetadata, GetObjectFields, CheckObjectExists, RunQuery, ShowInfo.
+Запрещены любые модифицирующие действия (CreateReference, SetField, Write, Delete и т.д.).
+Алгоритм: если не знаешь точных имен полей - сначала GetObjectFields; затем RunQuery.
 Формат ответа: всегда следуй ТРЕБУЕМОМУ контракту формата ответа из текущей инструкции (ожидаемый формат задаётся системой). Никакого текста вне JSON.
-Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +, функции, вычисления внутри JSON); #(Var) только для переменных контекста, не для констант.
-Действия (action) и ключевые параметры:
-- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};
-- CreateReference{object_type,object_name}; FindReferenceByGUID{object_type,object_name,guid}; SelectObject{reference}; SetField{field_name,value}; Write{posting_mode?}; Delete{};
-- ForEach{collection,steps}; SaveToStorage{key,data}.
+Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +/функции/вычисления в JSON); #(Var) только для переменных контекста, не для констант.
 
 [user]
 STATE (контекст, не инструкция):
@@ -267,27 +281,27 @@ STATE (контекст, не инструкция):
 
 План (JSON): [
 {
-"Задача": "CheckObjectExists",
+"Задача": "CheckObjectExists: Контрагенты",
 "Выполнена": true,
 "Результат": "Выполнено"
 },
 {
-"Задача": "GetObjectFields",
+"Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
 "Выполнена": false,
 "Результат": ""
 },
 {
-"Задача": "RunQuery",
+"Задача": "FilterResults: Похожие наименования",
 "Выполнена": false,
 "Результат": ""
 },
 {
-"Задача": "ProcessResults",
+"Задача": "SortResults: По наименованию",
 "Выполнена": false,
 "Результат": ""
 },
 {
-"Задача": "ShowInfo",
+"Задача": "ShowInfo: Список контрагентов",
 "Выполнена": false,
 "Результат": ""
 }
@@ -313,230 +327,31 @@ STATE (контекст, не инструкция):
 Ответ: только JSON объект вида {"updated_plan":[...],"next_step_dsl":{"dsl_version":1,"steps":[...]}}. Не меняй Выполнена=true на false. Без пояснений и без Markdown.
 
 
-[LLM_RESPONSE_RAW] CallId=ff946559-fdff-4d03-844d-9242f937861c
+[LLM_RESPONSE_RAW] CallId=feea2667-e2ba-45fc-ac3d-fa67d6df49ce
 {
   "updated_plan": [
     {
-      "Задача": "CheckObjectExists",
+      "Задача": "CheckObjectExists: Контрагенты",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "GetObjectFields",
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "RunQuery",
+      "Задача": "FilterResults: Похожие наименования",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ProcessResults",
+      "Задача": "SortResults: По наименованию",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ShowInfo",
-      "Выполнена": false,
-      "Результат": ""
-    }
-  ],
-  "next_step_dsl": {
-    "dsl_version": 1,
-    "steps": [
-      {
-        "action": "GetObjectFields",
-        "object_type": "Справочник",
-        "object_name": "Контрагенты"
-      }
-    ]
-  }
-}
-[LLM_RESPONSE_PARSED] CallId=ff946559-fdff-4d03-844d-9242f937861c, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=697
-[Usage] TotalTokens=295
-[02.02.2026 12:35:21] [ИИ]
-{
-  "updated_plan": [
-    {
-      "Задача": "CheckObjectExists",
-      "Выполнена": true,
-      "Результат": "Выполнено"
-    },
-    {
-      "Задача": "GetObjectFields",
-      "Выполнена": false,
-      "Результат": ""
-    },
-    {
-      "Задача": "RunQuery",
-      "Выполнена": false,
-      "Результат": ""
-    },
-    {
-      "Задача": "ProcessResults",
-      "Выполнена": false,
-      "Результат": ""
-    },
-    {
-      "Задача": "ShowInfo",
-      "Выполнена": false,
-      "Результат": ""
-    }
-  ],
-  "next_step_dsl": {
-    "dsl_version": 1,
-    "steps": [
-      {
-        "action": "GetObjectFields",
-        "object_type": "Справочник",
-        "object_name": "Контрагенты"
-      }
-    ]
-  }
-}
----
-[02.02.2026 12:35:21] [ИИ]
-Следующий шаг выполнения по плану
-Код:
-{
-"dsl_version": 1,
-"steps": [
-{
-"action": "GetObjectFields",
-"object_type": "Справочник",
-"object_name": "Контрагенты"
-}
-]
-}
----
-[Система] Автовыполнение next_step_dsl...
-[02.02.2026 12:35:21] [Система]
-{
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "GetObjectFields",
-"success": true,
-"message": "Получены реквизиты справочника 'Контрагенты'"
-}
-],
-"changed_objects": [],
-"run_query": []
-}
----
-[02.02.2026 12:35:21] [Система]
-DSL-сценарий выполнен успешно.
-- Получены реквизиты справочника 'Контрагенты'
-Реквизиты:
-  - Реквизит1 (Реквизит1)
-  - Код
-  - Наименование
-  - ПометкаУдаления
-  - ЭтоГруппа
-  - Родитель
-  - Владелец
----
-[План] Автообновление по выполненному next_step_dsl:
-- GetObjectFields | Выполнена: false -> true | Результат: '' -> 'Выполнено'
-[Система] Комбинированное обновление плана и генерация следующего шага...
-[LLM_REQUEST] CallId=bce2230b-1bdf-4612-8a53-d2b62292d0f4, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
-[system]
-Ты - агент 1С:Предприятие, выполняющий задачи через DSL (JSON).
-Формат ответа: всегда следуй ТРЕБУЕМОМУ контракту формата ответа из текущей инструкции (ожидаемый формат задаётся системой). Никакого текста вне JSON.
-Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +, функции, вычисления внутри JSON); #(Var) только для переменных контекста, не для констант.
-Действия (action) и ключевые параметры:
-- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};
-- CreateReference{object_type,object_name}; FindReferenceByGUID{object_type,object_name,guid}; SelectObject{reference}; SetField{field_name,value}; Write{posting_mode?}; Delete{};
-- ForEach{collection,steps}; SaveToStorage{key,data}.
-
-[user]
-STATE (контекст, не инструкция):
-
-[user]
-Сделай ДВА действия в одном ответе:
-1) Обнови статусы плана.
-2) Сгенерируй DSL для СЛЕДУЮЩЕГО невыполненного пункта.
-
-План (JSON): [
-{
-"Задача": "CheckObjectExists",
-"Выполнена": true,
-"Результат": "Выполнено"
-},
-{
-"Задача": "GetObjectFields",
-"Выполнена": true,
-"Результат": "Выполнено"
-},
-{
-"Задача": "RunQuery",
-"Выполнена": false,
-"Результат": ""
-},
-{
-"Задача": "ProcessResults",
-"Выполнена": false,
-"Результат": ""
-},
-{
-"Задача": "ShowInfo",
-"Выполнена": false,
-"Результат": ""
-}
-]
-Факты последних действий: 
-
-Правило достоверности статусов:
-- Ставь Выполнена=true ТОЛЬКО если в 'Факты последних действий' есть явное подтверждение выполнения пункта.
-- Если ставишь Выполнена=true — заполни Результат (кратко укажи подтверждение: какой шаг выполнен и чем подтверждено).
-
-Ограничения для next_step_dsl:
-- steps[].action ТОЛЬКО из поддерживаемых DSL действий: RunQuery, ShowInfo, GetMetadata, GetObjectFields, CheckObjectExists, CreateReference, FindReferenceByGUID, SelectObject, SetField, Write, Delete, ForEach, SaveToStorage.
-- ЗАПРЕЩЕНЫ любые UI/браузерные действия и выдуманные action: click, find_element, open_form, ui_*, navigate и т.п.
-- ЗАПРЕЩЕНО использовать вложенные объекты params/args/parameters. Все обязательные поля должны быть на верхнем уровне шага.
-
-СХЕМЫ (СТРОГО):
-- CheckObjectExists: {"action":"CheckObjectExists","object_type":"Справочник","object_name":"Контрагенты"}
-- GetObjectFields: {"action":"GetObjectFields","object_type":"Справочник","object_name":"Контрагенты"}
-- RunQuery: {"action":"RunQuery","query":"ВЫБРАТЬ ..."}
-- ShowInfo: {"action":"ShowInfo","message":"..."}
-НЕЛЬЗЯ писать object_name="Справочник.Контрагенты" — нужно object_type="Справочник" и object_name="Контрагенты".
-
-Ответ: только JSON объект вида {"updated_plan":[...],"next_step_dsl":{"dsl_version":1,"steps":[...]}}. Не меняй Выполнена=true на false. Без пояснений и без Markdown.
-
-
-[LLM_RESPONSE_RAW] CallId=bce2230b-1bdf-4612-8a53-d2b62292d0f4
-{
-  "updated_plan": [
-    {
-      "Задача": "CheckObjectExists",
-      "Выполнена": true,
-      "Результат": "Выполнено"
-    },
-    {
-      "Задача": "GetObjectFields",
-      "Выполнена": true,
-      "Результат": "Выполнено"
-    },
-    {
-      "Задача": "RunQuery",
-      "Выполнена": false,
-      "Результат": ""
-    },
-    {
-      "Задача": "ProcessResults",
-      "Выполнена": false,
-      "Результат": ""
-    },
-    {
-      "Задача": "ShowInfo",
+      "Задача": "ShowInfo: Список контрагентов",
       "Выполнена": false,
       "Результат": ""
     }
@@ -546,38 +361,38 @@ STATE (контекст, не инструкция):
     "steps": [
       {
         "action": "RunQuery",
-        "query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты"
+        "query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\""
       }
     ]
   }
 }
-[LLM_RESPONSE_PARSED] CallId=bce2230b-1bdf-4612-8a53-d2b62292d0f4, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=698
-[Usage] TotalTokens=299
-[02.02.2026 12:35:30] [ИИ]
+[LLM_RESPONSE_PARSED] CallId=feea2667-e2ba-45fc-ac3d-fa67d6df49ce, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=854
+[Usage] TotalTokens=317
+[02.02.2026 13:54:06] [ИИ]
 {
   "updated_plan": [
     {
-      "Задача": "CheckObjectExists",
+      "Задача": "CheckObjectExists: Контрагенты",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "GetObjectFields",
-      "Выполнена": true,
-      "Результат": "Выполнено"
-    },
-    {
-      "Задача": "RunQuery",
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ProcessResults",
+      "Задача": "FilterResults: Похожие наименования",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ShowInfo",
+      "Задача": "SortResults: По наименованию",
+      "Выполнена": false,
+      "Результат": ""
+    },
+    {
+      "Задача": "ShowInfo: Список контрагентов",
       "Выполнена": false,
       "Результат": ""
     }
@@ -587,13 +402,13 @@ STATE (контекст, не инструкция):
     "steps": [
       {
         "action": "RunQuery",
-        "query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты"
+        "query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\""
       }
     ]
   }
 }
 ---
-[02.02.2026 12:35:30] [ИИ]
+[02.02.2026 13:54:06] [ИИ]
 Следующий шаг выполнения по плану
 Код:
 {
@@ -601,14 +416,14 @@ STATE (контекст, не инструкция):
 "steps": [
 {
 "action": "RunQuery",
-"query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты"
+"query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\""
 }
 ]
 }
 ---
 [Система] Автовыполнение next_step_dsl...
-RunQuery: сохранены данные запроса в хранилище (строк=188, колонок=3, колонки(до10)="Ссылка, Наименование, УИД")
-[02.02.2026 12:35:30] [Система]
+RunQuery: сохранены данные запроса в хранилище (строк=11, колонок=9, колонки(до10)="Ссылка, ВерсияДанных, ПометкаУдаления, Код, Наименование, Реквизит1, Предопределенный, ИмяПредопределенныхДанных, УИД")
+[02.02.2026 13:54:06] [Система]
 {
 "kind": "dsl_system_result",
 "schema_version": 1,
@@ -621,64 +436,100 @@ RunQuery: сохранены данные запроса в хранилище (
 "index": 1,
 "action": "RunQuery",
 "success": true,
-"message": "Запрос выполнен успешно. Получено строк: 188",
+"message": "Запрос выполнен успешно. Получено строк: 11",
 "details": {
 "run_query": {
-"row_count": 188,
+"row_count": 11,
 "truncated": true,
 "rows_limit": 5,
 "columns": [
 "Ссылка",
-"Наименование"
+"ВерсияДанных",
+"ПометкаУдаления",
+"Код",
+"Наименование",
+"Реквизит1",
+"Предопределенный",
+"ИмяПредопределенныхДанных"
 ],
 "rows": [
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "22b797c9-d900-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEiAAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000024",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "22b797c9-d900-11f0-ad69-74563c6c9fea"
 },
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "cead7f02-d70d-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "7c13f2df-d904-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "cead7f02-d70d-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEiQAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000025",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "7c13f2df-d904-11f0-ad69-74563c6c9fea"
 },
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "51cdd992-d70e-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "7c13f2e0-d904-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "51cdd992-d70e-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEigAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000026",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "7c13f2e0-d904-11f0-ad69-74563c6c9fea"
 },
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "0706a0b8-d70f-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "a335c7f9-d962-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "0706a0b8-d70f-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEiwAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000027",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "a335c7f9-d962-11f0-ad69-74563c6c9fea"
 },
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "7c66490b-d710-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "a335c7fa-d962-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "7c66490b-d710-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEjAAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000028",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "a335c7fa-d962-11f0-ad69-74563c6c9fea"
 }
 ],
-"query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты",
+"query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
 "query_truncated": false,
 "query_normalized": false
 }
@@ -688,82 +539,122 @@ RunQuery: сохранены данные запроса в хранилище (
 "changed_objects": [],
 "run_query": [
 {
-"row_count": 188,
+"row_count": 11,
 "truncated": true,
 "rows_limit": 5,
 "columns": [
 "Ссылка",
-"Наименование"
+"ВерсияДанных",
+"ПометкаУдаления",
+"Код",
+"Наименование",
+"Реквизит1",
+"Предопределенный",
+"ИмяПредопределенныхДанных"
 ],
 "rows": [
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "22b797c9-d900-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEiAAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000024",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "22b797c9-d900-11f0-ad69-74563c6c9fea"
 },
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "cead7f02-d70d-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "7c13f2df-d904-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "cead7f02-d70d-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEiQAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000025",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "7c13f2df-d904-11f0-ad69-74563c6c9fea"
 },
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "51cdd992-d70e-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "7c13f2e0-d904-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "51cdd992-d70e-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEigAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000026",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "7c13f2e0-d904-11f0-ad69-74563c6c9fea"
 },
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "0706a0b8-d70f-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "a335c7f9-d962-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "0706a0b8-d70f-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEiwAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000027",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "a335c7f9-d962-11f0-ad69-74563c6c9fea"
 },
 {
 "Ссылка": {
-"ref": "<>",
-"guid": "7c66490b-d710-11f0-ad69-74563c6c9fea",
+"ref": "Сидоров",
+"guid": "a335c7fa-d962-11f0-ad69-74563c6c9fea",
 "meta_name": "Контрагенты"
 },
-"Наименование": "",
-"УИД": "7c66490b-d710-11f0-ad69-74563c6c9fea"
+"ВерсияДанных": "AAAEjAAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000028",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "a335c7fa-d962-11f0-ad69-74563c6c9fea"
 }
 ],
-"query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты",
+"query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
 "query_truncated": false,
 "query_normalized": false
 }
 ]
 }
 ---
-[02.02.2026 12:35:30] [Система]
+[02.02.2026 13:54:06] [Система]
 DSL-сценарий выполнен успешно.
 ---
 [План] Автообновление по выполненному next_step_dsl:
-- RunQuery | Выполнена: false -> true | Результат: '' -> 'Выполнено'
+- RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО "%Сидоров%" | Выполнена: false -> true | Результат: '' -> 'Выполнено'
 [Система] Комбинированное обновление плана и генерация следующего шага...
-[LLM_REQUEST] CallId=74ad4599-9fdc-465b-a4cf-386cd46644fe, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
+[02.02.2026 13:54:07] [ТабличныйДокумент]
+Показан (строк=11)
+
+---
+
+ТабличныйДокумент: установлен флаг ТаблицаПоказана=Истина
+[LLM_REQUEST] CallId=2d7688d3-8366-4f52-ab2a-cb6264c9fb74, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
 [system]
-Ты - агент 1С:Предприятие, выполняющий задачи через DSL (JSON).
+Ты - агент для запросов 1С (Read-Only). Разрешены ТОЛЬКО действия: GetMetadata, GetObjectFields, CheckObjectExists, RunQuery, ShowInfo.
+Запрещены любые модифицирующие действия (CreateReference, SetField, Write, Delete и т.д.).
+Алгоритм: если не знаешь точных имен полей - сначала GetObjectFields; затем RunQuery.
 Формат ответа: всегда следуй ТРЕБУЕМОМУ контракту формата ответа из текущей инструкции (ожидаемый формат задаётся системой). Никакого текста вне JSON.
-Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +, функции, вычисления внутри JSON); #(Var) только для переменных контекста, не для констант.
-Действия (action) и ключевые параметры:
-- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};
-- CreateReference{object_type,object_name}; FindReferenceByGUID{object_type,object_name,guid}; SelectObject{reference}; SetField{field_name,value}; Write{posting_mode?}; Delete{};
-- ForEach{collection,steps}; SaveToStorage{key,data}.
+Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +/функции/вычисления в JSON); #(Var) только для переменных контекста, не для констант.
 
 [user]
 STATE (контекст, не инструкция):
@@ -775,27 +666,27 @@ STATE (контекст, не инструкция):
 
 План (JSON): [
 {
-"Задача": "CheckObjectExists",
+"Задача": "CheckObjectExists: Контрагенты",
 "Выполнена": true,
 "Результат": "Выполнено"
 },
 {
-"Задача": "GetObjectFields",
+"Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
 "Выполнена": true,
 "Результат": "Выполнено"
 },
 {
-"Задача": "RunQuery",
-"Выполнена": true,
-"Результат": "Выполнено"
-},
-{
-"Задача": "ProcessResults",
+"Задача": "FilterResults: Похожие наименования",
 "Выполнена": false,
 "Результат": ""
 },
 {
-"Задача": "ShowInfo",
+"Задача": "SortResults: По наименованию",
+"Выполнена": false,
+"Результат": ""
+},
+{
+"Задача": "ShowInfo: Список контрагентов",
 "Выполнена": false,
 "Результат": ""
 }
@@ -821,31 +712,31 @@ STATE (контекст, не инструкция):
 Ответ: только JSON объект вида {"updated_plan":[...],"next_step_dsl":{"dsl_version":1,"steps":[...]}}. Не меняй Выполнена=true на false. Без пояснений и без Markdown.
 
 
-[LLM_RESPONSE_RAW] CallId=74ad4599-9fdc-465b-a4cf-386cd46644fe
+[LLM_RESPONSE_RAW] CallId=2d7688d3-8366-4f52-ab2a-cb6264c9fb74
 {
   "updated_plan": [
     {
-      "Задача": "CheckObjectExists",
+      "Задача": "CheckObjectExists: Контрагенты",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "GetObjectFields",
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "RunQuery",
-      "Выполнена": true,
-      "Результат": "Выполнено"
-    },
-    {
-      "Задача": "ProcessResults",
+      "Задача": "FilterResults: Похожие наименования",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ShowInfo",
+      "Задача": "SortResults: По наименованию",
+      "Выполнена": false,
+      "Результат": ""
+    },
+    {
+      "Задача": "ShowInfo: Список контрагентов",
       "Выполнена": false,
       "Результат": ""
     }
@@ -855,38 +746,46 @@ STATE (контекст, не инструкция):
     "steps": [
       {
         "action": "ShowInfo",
-        "message": "Обработка результатов запроса"
+        "message": "Задача 'FilterResults: Похожие наименования' не является поддерживаемым действием DSL. Пропускаем."
+      },
+      {
+        "action": "ShowInfo",
+        "message": "Задача 'SortResults: По наименованию' не является поддерживаемым действием DSL. Пропускаем."
+      },
+      {
+        "action": "ShowInfo",
+        "message": "Список контрагентов"
       }
     ]
   }
 }
-[LLM_RESPONSE_PARSED] CallId=74ad4599-9fdc-465b-a4cf-386cd46644fe, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=683
-[Usage] TotalTokens=298
-[02.02.2026 12:35:39] [ИИ]
+[LLM_RESPONSE_PARSED] CallId=2d7688d3-8366-4f52-ab2a-cb6264c9fb74, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=1 136
+[Usage] TotalTokens=331
+[02.02.2026 13:54:19] [ИИ]
 {
   "updated_plan": [
     {
-      "Задача": "CheckObjectExists",
+      "Задача": "CheckObjectExists: Контрагенты",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "GetObjectFields",
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "RunQuery",
-      "Выполнена": true,
-      "Результат": "Выполнено"
-    },
-    {
-      "Задача": "ProcessResults",
+      "Задача": "FilterResults: Похожие наименования",
       "Выполнена": false,
       "Результат": ""
     },
     {
-      "Задача": "ShowInfo",
+      "Задача": "SortResults: По наименованию",
+      "Выполнена": false,
+      "Результат": ""
+    },
+    {
+      "Задача": "ShowInfo: Список контрагентов",
       "Выполнена": false,
       "Результат": ""
     }
@@ -896,13 +795,21 @@ STATE (контекст, не инструкция):
     "steps": [
       {
         "action": "ShowInfo",
-        "message": "Обработка результатов запроса"
+        "message": "Задача 'FilterResults: Похожие наименования' не является поддерживаемым действием DSL. Пропускаем."
+      },
+      {
+        "action": "ShowInfo",
+        "message": "Задача 'SortResults: По наименованию' не является поддерживаемым действием DSL. Пропускаем."
+      },
+      {
+        "action": "ShowInfo",
+        "message": "Список контрагентов"
       }
     ]
   }
 }
 ---
-[02.02.2026 12:35:39] [ИИ]
+[02.02.2026 13:54:19] [ИИ]
 Следующий шаг выполнения по плану
 Код:
 {
@@ -910,13 +817,21 @@ STATE (контекст, не инструкция):
 "steps": [
 {
 "action": "ShowInfo",
-"message": "Обработка результатов запроса"
+"message": "Задача 'FilterResults: Похожие наименования' не является поддерживаемым действием DSL. Пропускаем."
+},
+{
+"action": "ShowInfo",
+"message": "Задача 'SortResults: По наименованию' не является поддерживаемым действием DSL. Пропускаем."
+},
+{
+"action": "ShowInfo",
+"message": "Список контрагентов"
 }
 ]
 }
 ---
 [Система] Автовыполнение next_step_dsl...
-[02.02.2026 12:35:39] [Система]
+[02.02.2026 13:54:19] [Система]
 {
 "kind": "dsl_system_result",
 "schema_version": 1,
@@ -929,31 +844,47 @@ STATE (контекст, не инструкция):
 "index": 1,
 "action": "ShowInfo",
 "success": true,
-"message": "Обработка результатов запроса"
+"message": "Задача 'FilterResults: Похожие наименования' не является поддерживаемым действием DSL. Пропускаем."
+},
+{
+"index": 2,
+"action": "ShowInfo",
+"success": true,
+"message": "Задача 'SortResults: По наименованию' не является поддерживаемым действием DSL. Пропускаем."
+},
+{
+"index": 3,
+"action": "ShowInfo",
+"success": true,
+"message": "Список контрагентов"
 }
 ],
 "changed_objects": [],
 "run_query": []
 }
 ---
-[02.02.2026 12:35:39] [ИИ]
-Обработка результатов запроса
+[02.02.2026 13:54:19] [ИИ]
+Задача 'FilterResults: Похожие наименования' не является поддерживаемым действием DSL. Пропускаем.
 ---
-[02.02.2026 12:35:39] [Система]
+[02.02.2026 13:54:19] [ИИ]
+Задача 'SortResults: По наименованию' не является поддерживаемым действием DSL. Пропускаем.
+---
+[02.02.2026 13:54:19] [ИИ]
+Список контрагентов
+---
+[02.02.2026 13:54:19] [Система]
 DSL-сценарий выполнен успешно.
 ---
 [План] Автообновление по выполненному next_step_dsl:
-- ProcessResults | Выполнена: false -> true | Результат: '' -> 'Выполнено'
+- FilterResults: Похожие наименования | Выполнена: false -> true | Результат: '' -> 'Выполнено'
 [Система] Комбинированное обновление плана и генерация следующего шага...
-[LLM_REQUEST] CallId=306af5cf-54e0-40c3-8586-031701b39375, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
+[LLM_REQUEST] CallId=a0da19bc-b66a-46c1-98a6-af70b7f747d2, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
 [system]
-Ты - агент 1С:Предприятие, выполняющий задачи через DSL (JSON).
+Ты - агент для запросов 1С (Read-Only). Разрешены ТОЛЬКО действия: GetMetadata, GetObjectFields, CheckObjectExists, RunQuery, ShowInfo.
+Запрещены любые модифицирующие действия (CreateReference, SetField, Write, Delete и т.д.).
+Алгоритм: если не знаешь точных имен полей - сначала GetObjectFields; затем RunQuery.
 Формат ответа: всегда следуй ТРЕБУЕМОМУ контракту формата ответа из текущей инструкции (ожидаемый формат задаётся системой). Никакого текста вне JSON.
-Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +, функции, вычисления внутри JSON); #(Var) только для переменных контекста, не для констант.
-Действия (action) и ключевые параметры:
-- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};
-- CreateReference{object_type,object_name}; FindReferenceByGUID{object_type,object_name,guid}; SelectObject{reference}; SetField{field_name,value}; Write{posting_mode?}; Delete{};
-- ForEach{collection,steps}; SaveToStorage{key,data}.
+Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +/функции/вычисления в JSON); #(Var) только для переменных контекста, не для констант.
 
 [user]
 STATE (контекст, не инструкция):
@@ -965,27 +896,27 @@ STATE (контекст, не инструкция):
 
 План (JSON): [
 {
-"Задача": "CheckObjectExists",
+"Задача": "CheckObjectExists: Контрагенты",
 "Выполнена": true,
 "Результат": "Выполнено"
 },
 {
-"Задача": "GetObjectFields",
+"Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
 "Выполнена": true,
 "Результат": "Выполнено"
 },
 {
-"Задача": "RunQuery",
+"Задача": "FilterResults: Похожие наименования",
 "Выполнена": true,
 "Результат": "Выполнено"
 },
 {
-"Задача": "ProcessResults",
-"Выполнена": true,
-"Результат": "Выполнено"
+"Задача": "SortResults: По наименованию",
+"Выполнена": false,
+"Результат": ""
 },
 {
-"Задача": "ShowInfo",
+"Задача": "ShowInfo: Список контрагентов",
 "Выполнена": false,
 "Результат": ""
 }
@@ -1011,31 +942,31 @@ STATE (контекст, не инструкция):
 Ответ: только JSON объект вида {"updated_plan":[...],"next_step_dsl":{"dsl_version":1,"steps":[...]}}. Не меняй Выполнена=true на false. Без пояснений и без Markdown.
 
 
-[LLM_RESPONSE_RAW] CallId=306af5cf-54e0-40c3-8586-031701b39375
+[LLM_RESPONSE_RAW] CallId=a0da19bc-b66a-46c1-98a6-af70b7f747d2
 {
   "updated_plan": [
     {
-      "Задача": "CheckObjectExists",
+      "Задача": "CheckObjectExists: Контрагенты",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "GetObjectFields",
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "RunQuery",
+      "Задача": "FilterResults: Похожие наименования",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "ProcessResults",
-      "Выполнена": true,
-      "Результат": "Выполнено"
+      "Задача": "SortResults: По наименованию",
+      "Выполнена": false,
+      "Результат": ""
     },
     {
-      "Задача": "ShowInfo",
+      "Задача": "ShowInfo: Список контрагентов",
       "Выполнена": false,
       "Результат": ""
     }
@@ -1044,39 +975,39 @@ STATE (контекст, не инструкция):
     "dsl_version": 1,
     "steps": [
       {
-        "action": "ShowInfo",
-        "message": "Выполнение плана завершено."
+        "action": "RunQuery",
+        "query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\" УПОРЯДОЧИТЬ ПО Наименование"
       }
     ]
   }
 }
-[LLM_RESPONSE_PARSED] CallId=306af5cf-54e0-40c3-8586-031701b39375, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=689
-[Usage] TotalTokens=300
-[02.02.2026 12:35:48] [ИИ]
+[LLM_RESPONSE_PARSED] CallId=a0da19bc-b66a-46c1-98a6-af70b7f747d2, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=898
+[Usage] TotalTokens=324
+[02.02.2026 13:54:30] [ИИ]
 {
   "updated_plan": [
     {
-      "Задача": "CheckObjectExists",
+      "Задача": "CheckObjectExists: Контрагенты",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "GetObjectFields",
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "RunQuery",
+      "Задача": "FilterResults: Похожие наименования",
       "Выполнена": true,
       "Результат": "Выполнено"
     },
     {
-      "Задача": "ProcessResults",
-      "Выполнена": true,
-      "Результат": "Выполнено"
+      "Задача": "SortResults: По наименованию",
+      "Выполнена": false,
+      "Результат": ""
     },
     {
-      "Задача": "ShowInfo",
+      "Задача": "ShowInfo: Список контрагентов",
       "Выполнена": false,
       "Результат": ""
     }
@@ -1085,14 +1016,399 @@ STATE (контекст, не инструкция):
     "dsl_version": 1,
     "steps": [
       {
-        "action": "ShowInfo",
-        "message": "Выполнение плана завершено."
+        "action": "RunQuery",
+        "query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\" УПОРЯДОЧИТЬ ПО Наименование"
       }
     ]
   }
 }
 ---
-[02.02.2026 12:35:48] [ИИ]
+[02.02.2026 13:54:30] [ИИ]
+Следующий шаг выполнения по плану
+Код:
+{
+"dsl_version": 1,
+"steps": [
+{
+"action": "RunQuery",
+"query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\" УПОРЯДОЧИТЬ ПО Наименование"
+}
+]
+}
+---
+[Система] Автовыполнение next_step_dsl...
+RunQuery: сохранены данные запроса в хранилище (строк=11, колонок=9, колонки(до10)="Ссылка, ВерсияДанных, ПометкаУдаления, Код, Наименование, Реквизит1, Предопределенный, ИмяПредопределенныхДанных, УИД")
+[02.02.2026 13:54:30] [Система]
+{
+"kind": "dsl_system_result",
+"schema_version": 1,
+"success": true,
+"error": null,
+"error_code": "",
+"error_context": null,
+"steps": [
+{
+"index": 1,
+"action": "RunQuery",
+"success": true,
+"message": "Запрос выполнен успешно. Получено строк: 11",
+"details": {
+"run_query": {
+"row_count": 11,
+"truncated": true,
+"rows_limit": 5,
+"columns": [
+"Ссылка",
+"ВерсияДанных",
+"ПометкаУдаления",
+"Код",
+"Наименование",
+"Реквизит1",
+"Предопределенный",
+"ИмяПредопределенныхДанных"
+],
+"rows": [
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "22b797c9-d900-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEiAAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000024",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "22b797c9-d900-11f0-ad69-74563c6c9fea"
+},
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "7c13f2df-d904-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEiQAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000025",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "7c13f2df-d904-11f0-ad69-74563c6c9fea"
+},
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "7c13f2e0-d904-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEigAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000026",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "7c13f2e0-d904-11f0-ad69-74563c6c9fea"
+},
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "a335c7f9-d962-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEiwAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000027",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "a335c7f9-d962-11f0-ad69-74563c6c9fea"
+},
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "a335c7fa-d962-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEjAAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000028",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "a335c7fa-d962-11f0-ad69-74563c6c9fea"
+}
+],
+"query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\" УПОРЯДОЧИТЬ ПО Наименование",
+"query_truncated": false,
+"query_normalized": false
+}
+}
+}
+],
+"changed_objects": [],
+"run_query": [
+{
+"row_count": 11,
+"truncated": true,
+"rows_limit": 5,
+"columns": [
+"Ссылка",
+"ВерсияДанных",
+"ПометкаУдаления",
+"Код",
+"Наименование",
+"Реквизит1",
+"Предопределенный",
+"ИмяПредопределенныхДанных"
+],
+"rows": [
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "22b797c9-d900-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEiAAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000024",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "22b797c9-d900-11f0-ad69-74563c6c9fea"
+},
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "7c13f2df-d904-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEiQAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000025",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "7c13f2df-d904-11f0-ad69-74563c6c9fea"
+},
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "7c13f2e0-d904-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEigAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000026",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "7c13f2e0-d904-11f0-ad69-74563c6c9fea"
+},
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "a335c7f9-d962-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEiwAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000027",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "a335c7f9-d962-11f0-ad69-74563c6c9fea"
+},
+{
+"Ссылка": {
+"ref": "Сидоров",
+"guid": "a335c7fa-d962-11f0-ad69-74563c6c9fea",
+"meta_name": "Контрагенты"
+},
+"ВерсияДанных": "AAAEjAAAAAA=",
+"ПометкаУдаления": true,
+"Код": "000000028",
+"Наименование": "Сидоров",
+"Реквизит1": "",
+"Предопределенный": false,
+"ИмяПредопределенныхДанных": "",
+"УИД": "a335c7fa-d962-11f0-ad69-74563c6c9fea"
+}
+],
+"query": "ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\" УПОРЯДОЧИТЬ ПО Наименование",
+"query_truncated": false,
+"query_normalized": false
+}
+]
+}
+---
+[02.02.2026 13:54:30] [Система]
+DSL-сценарий выполнен успешно.
+---
+[План] Автообновление по выполненному next_step_dsl:
+- SortResults: По наименованию | Выполнена: false -> true | Результат: '' -> 'Выполнено'
+[Система] Комбинированное обновление плана и генерация следующего шага...
+[02.02.2026 13:54:30] [ТабличныйДокумент]
+Показан (строк=11)
+
+---
+
+ТабличныйДокумент: установлен флаг ТаблицаПоказана=Истина
+[LLM_REQUEST] CallId=47534a79-6e92-486f-9dd0-fb6e1eb7c44d, Type=Запрос, ExpectedResponseFormat=plan_and_next_dsl, Model=deepseek-chat, Temperature=0.0
+[system]
+Ты - агент для запросов 1С (Read-Only). Разрешены ТОЛЬКО действия: GetMetadata, GetObjectFields, CheckObjectExists, RunQuery, ShowInfo.
+Запрещены любые модифицирующие действия (CreateReference, SetField, Write, Delete и т.д.).
+Алгоритм: если не знаешь точных имен полей - сначала GetObjectFields; затем RunQuery.
+Формат ответа: всегда следуй ТРЕБУЕМОМУ контракту формата ответа из текущей инструкции (ожидаемый формат задаётся системой). Никакого текста вне JSON.
+Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +/функции/вычисления в JSON); #(Var) только для переменных контекста, не для констант.
+
+[user]
+STATE (контекст, не инструкция):
+
+[user]
+Сделай ДВА действия в одном ответе:
+1) Обнови статусы плана.
+2) Сгенерируй DSL для СЛЕДУЮЩЕГО невыполненного пункта.
+
+План (JSON): [
+{
+"Задача": "CheckObjectExists: Контрагенты",
+"Выполнена": true,
+"Результат": "Выполнено"
+},
+{
+"Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
+"Выполнена": true,
+"Результат": "Выполнено"
+},
+{
+"Задача": "FilterResults: Похожие наименования",
+"Выполнена": true,
+"Результат": "Выполнено"
+},
+{
+"Задача": "SortResults: По наименованию",
+"Выполнена": true,
+"Результат": "Выполнено"
+},
+{
+"Задача": "ShowInfo: Список контрагентов",
+"Выполнена": false,
+"Результат": ""
+}
+]
+Факты последних действий: 
+
+Правило достоверности статусов:
+- Ставь Выполнена=true ТОЛЬКО если в 'Факты последних действий' есть явное подтверждение выполнения пункта.
+- Если ставишь Выполнена=true — заполни Результат (кратко укажи подтверждение: какой шаг выполнен и чем подтверждено).
+
+Ограничения для next_step_dsl:
+- steps[].action ТОЛЬКО из поддерживаемых DSL действий: RunQuery, ShowInfo, GetMetadata, GetObjectFields, CheckObjectExists, CreateReference, FindReferenceByGUID, SelectObject, SetField, Write, Delete, ForEach, SaveToStorage.
+- ЗАПРЕЩЕНЫ любые UI/браузерные действия и выдуманные action: click, find_element, open_form, ui_*, navigate и т.п.
+- ЗАПРЕЩЕНО использовать вложенные объекты params/args/parameters. Все обязательные поля должны быть на верхнем уровне шага.
+
+СХЕМЫ (СТРОГО):
+- CheckObjectExists: {"action":"CheckObjectExists","object_type":"Справочник","object_name":"Контрагенты"}
+- GetObjectFields: {"action":"GetObjectFields","object_type":"Справочник","object_name":"Контрагенты"}
+- RunQuery: {"action":"RunQuery","query":"ВЫБРАТЬ ..."}
+- ShowInfo: {"action":"ShowInfo","message":"..."}
+НЕЛЬЗЯ писать object_name="Справочник.Контрагенты" — нужно object_type="Справочник" и object_name="Контрагенты".
+
+Ответ: только JSON объект вида {"updated_plan":[...],"next_step_dsl":{"dsl_version":1,"steps":[...]}}. Не меняй Выполнена=true на false. Без пояснений и без Markdown.
+
+
+[LLM_RESPONSE_RAW] CallId=47534a79-6e92-486f-9dd0-fb6e1eb7c44d
+{
+  "updated_plan": [
+    {
+      "Задача": "CheckObjectExists: Контрагенты",
+      "Выполнена": true,
+      "Результат": "Выполнено"
+    },
+    {
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
+      "Выполнена": true,
+      "Результат": "Выполнено"
+    },
+    {
+      "Задача": "FilterResults: Похожие наименования",
+      "Выполнена": true,
+      "Результат": "Выполнено"
+    },
+    {
+      "Задача": "SortResults: По наименованию",
+      "Выполнена": true,
+      "Результат": "Выполнено"
+    },
+    {
+      "Задача": "ShowInfo: Список контрагентов",
+      "Выполнена": false,
+      "Результат": ""
+    }
+  ],
+  "next_step_dsl": {
+    "dsl_version": 1,
+    "steps": [
+      {
+        "action": "ShowInfo",
+        "message": "Список контрагентов"
+      }
+    ]
+  }
+}
+[LLM_RESPONSE_PARSED] CallId=47534a79-6e92-486f-9dd0-fb6e1eb7c44d, ParsedKind=plan_and_next_dsl, ТипОтвета=Текст, TextLen=825
+[Usage] TotalTokens=318
+[02.02.2026 13:54:40] [ИИ]
+{
+  "updated_plan": [
+    {
+      "Задача": "CheckObjectExists: Контрагенты",
+      "Выполнена": true,
+      "Результат": "Выполнено"
+    },
+    {
+      "Задача": "RunQuery: ВЫБРАТЬ * ИЗ Справочник.Контрагенты ГДЕ Наименование ПОДОБНО \"%Сидоров%\"",
+      "Выполнена": true,
+      "Результат": "Выполнено"
+    },
+    {
+      "Задача": "FilterResults: Похожие наименования",
+      "Выполнена": true,
+      "Результат": "Выполнено"
+    },
+    {
+      "Задача": "SortResults: По наименованию",
+      "Выполнена": true,
+      "Результат": "Выполнено"
+    },
+    {
+      "Задача": "ShowInfo: Список контрагентов",
+      "Выполнена": false,
+      "Результат": ""
+    }
+  ],
+  "next_step_dsl": {
+    "dsl_version": 1,
+    "steps": [
+      {
+        "action": "ShowInfo",
+        "message": "Список контрагентов"
+      }
+    ]
+  }
+}
+---
+[02.02.2026 13:54:40] [ИИ]
 Следующий шаг выполнения по плану
 Код:
 {
@@ -1100,13 +1416,13 @@ STATE (контекст, не инструкция):
 "steps": [
 {
 "action": "ShowInfo",
-"message": "Выполнение плана завершено."
+"message": "Список контрагентов"
 }
 ]
 }
 ---
 [Система] Автовыполнение next_step_dsl...
-[02.02.2026 12:35:48] [Система]
+[02.02.2026 13:54:40] [Система]
 {
 "kind": "dsl_system_result",
 "schema_version": 1,
@@ -1119,706 +1435,27 @@ STATE (контекст, не инструкция):
 "index": 1,
 "action": "ShowInfo",
 "success": true,
-"message": "Выполнение плана завершено."
+"message": "Список контрагентов"
 }
 ],
 "changed_objects": [],
 "run_query": []
 }
 ---
-[02.02.2026 12:35:48] [ИИ]
-Выполнение плана завершено.
+[02.02.2026 13:54:40] [ИИ]
+Список контрагентов
 ---
-[02.02.2026 12:35:48] [Система]
+[02.02.2026 13:54:40] [Система]
 DSL-сценарий выполнен успешно.
 ---
 [План] Автообновление по выполненному next_step_dsl:
-- ShowInfo | Выполнена: false -> true | Результат: '' -> 'Выполнено'
-[LLM_REQUEST] CallId=13678344-5985-44b4-bd76-b4ad06fd7256, Type=Чат, ExpectedResponseFormat=dsl, Model=deepseek-chat, Temperature=0.0
-[system]
-Ты - агент 1С:Предприятие, выполняющий задачи через DSL (JSON).
-Формат ответа: всегда следуй ТРЕБУЕМОМУ контракту формата ответа из текущей инструкции (ожидаемый формат задаётся системой). Никакого текста вне JSON.
-Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +, функции, вычисления внутри JSON); #(Var) только для переменных контекста, не для констант.
-Действия (action) и ключевые параметры:
-- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};
-- CreateReference{object_type,object_name}; FindReferenceByGUID{object_type,object_name,guid}; SelectObject{reference}; SetField{field_name,value}; Write{posting_mode?}; Delete{};
-- ForEach{collection,steps}; SaveToStorage{key,data}.
+- ShowInfo: Список контрагентов | Выполнена: false -> true | Результат: '' -> 'Выполнено'
+[02.02.2026 13:55:33] [Система]
+Остановка оркестратора: нажата кнопка 'Остановить' (пользователь)
 
-[user]
-STATE (контекст, не инструкция):
-
-[user]
-Проанализируй задачу пользователя и результаты выполнения действий.
-Задача пользователя: сколько контрагентов похожих на Сидоров
-Результаты выполнения: 
-
-{
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "CheckObjectExists",
-"success": true,
-"message": "справочник 'Контрагенты' существует"
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-DSL-сценарий выполнен успешно.
-- справочник 'Контрагенты' существует
-{
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "GetObjectFields",
-"success": true,
-"message": "Получены реквизиты справочника 'Контрагенты'"
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-DSL-сценарий выполнен успешно.
-- Получены реквизиты справочника 'Контрагенты'
-Реквизиты:
-  - Реквизит1 (Реквизит1)
-  - Код
-  - Наименование
-  - ПометкаУдаления
-  - ЭтоГруппа
-  - Родитель
-  - Владелец
-{
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "RunQuery",
-"success": true,
-"message": "Запрос выполнен успешно. Получено строк: 188",
-"details": {
-"run_query": {
-"row_count": 188,
-"truncated": true,
-"rows_limit": 5,
-"columns": [
-"Ссылка",
-"Наименование"
-],
-"rows": [
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "cead7f02-d70d-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "cead7f02-d70d-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "51cdd992-d70e-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "51cdd992-d70e-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "0706a0b8-d70f-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "0706a0b8-d70f-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "7c66490b-d710-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "7c66490b-d710-11f0-ad69-74563c6c9fea"
-}
-],
-"query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты",
-"query_truncated": false,
-"query_normalized": false
-}
-}
-}
-],
-"changed_objects": [],
-"run_query": [
-{
-"row_count": 188,
-"truncated": true,
-"rows_limit": 5,
-"columns": [
-"Ссылка",
-"Наименование"
-],
-"rows": [
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "cead7f02-d70d-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "cead7f02-d70d-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "51cdd992-d70e-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "51cdd992-d70e-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "0706a0b8-d70f-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "0706a0b8-d70f-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "7c66490b-d710-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "7c66490b-d710-11f0-ad69-74563c6c9fea"
-}
-],
-"query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты",
-"query_truncated": false,
-"query_normalized": false
-}
-]
-}
-DSL-сценарий выполнен успешно.
-{
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "ShowInfo",
-"success": true,
-"message": "Обработка результатов запроса"
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-DSL-сценарий выполнен успешно.
-{
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "ShowInfo",
-"success": true,
-"message": "Выполнение плана завершено."
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-DSL-сценарий выполнен успешно.
-
-Твоя задача - проверить, выполнена ли задача пользователя ПОЛНОСТЬЮ. 
-СТРОГИЕ КРИТЕРИИ ПРОВЕРКИ:
-1. Если задача требует ПОЛУЧИТЬ или ВЫВЕСТИ данные (например "выведи", "покажи", "найди"), то в результатах выполнения ОБЯЗАТЕЛЬНО должно быть успешное действие 'RunQuery' или 'ShowInfo' с выводом таблицы.
-2. Если выполнено ТОЛЬКО 'GetObjectFields' или 'GetMetadata' - задача НЕ выполнена. Это лишь подготовительный этап (получение списка полей). Сами данные еще не получены. Отвечай 'НЕТ'.
-3. Список реквизитов (fields) - это НЕ данные (data). Не путай их. Сообщения вида "Реквизиты: ..." или "Создано/изменено объектов: 0" НЕ являются данными.
-4. Ты не должен ВЕРИТЬ, что данные выведены, если не видишь явного сообщения с данными или результата запроса в тексте 'Результаты выполнения'. Слова "Успех: Да" относятся к выполнению шага DSL, а не к решению задачи.
-5. Если ты только что получил поля объекта - это НЕ выполнение задачи, даже если пользователь просил "вывести всех". Это только ПЕРВЫЙ ШАГ. Вторым шагом должен быть RunQuery.
-
-ВНИМАНИЕ: Для проверки используй ТОЛЬКО диагностические действия:
-1. RunQuery или ShowInfo - для вывода данных пользователю. Считай задачу выполненной ТОЛЬКО если эти действия были выполнены УСПЕШНО с реальными данными.
-2. CheckObjectExists - для проверки наличия объектов
-3. GetObjectFields - для проверки значений полей
-4. ShowInfo - для вывода результата проверки
-
-ЗАПРЕЩЕНО использовать модифицирующие действия (Write, Delete, SetField, CreateReference) на этапе проверки!
-
-ФОРМАТ ОТВЕТА (СТРОГО): верни ТОЛЬКО DSL-сценарий (JSON объект) вида {"dsl_version":1,"steps":[{"action":"ShowInfo","message":"..."}]}.
-Сообщение ShowInfo должно начинаться с 'ДА' (если выполнена) или 'НЕТ' (если не выполнена или есть ошибки) и содержать краткое пояснение.
-ПРИМЕРЫ ОТВЕТОВ:
-- НЕТ. Выполнен только GetObjectFields, запрос данных еще не сделан.
-- ДА. Данные получены и выведены с помощью ShowInfo.
-- НЕТ. Запрос выполнен, но данных не найдено (если это ошибка).
-- ДА. Объект успешно создан.
-
-
-[LLM_RESPONSE_RAW] CallId=13678344-5985-44b4-bd76-b4ad06fd7256
-```json
-{
-    "dsl_version": 1,
-    "steps": [
-        {
-            "action": "ShowInfo",
-            "message": "НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием."
-        }
-    ]
-}
-```
-[LLM_RESPONSE_NORMALIZED_JSON] CallId=13678344-5985-44b4-bd76-b4ad06fd7256
-{
-    "dsl_version": 1,
-    "steps": [
-        {
-            "action": "ShowInfo",
-            "message": "НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием."
-        }
-    ]
-}
-[LLM_RESPONSE_PARSED] CallId=13678344-5985-44b4-bd76-b4ad06fd7256, ParsedKind=dsl, ТипОтвета=DSL, TextLen=261
-[Usage] TotalTokens=872
-[DSL]
-{
-    "dsl_version": 1,
-    "steps": [
-        {
-            "action": "ShowInfo",
-            "message": "НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием."
-        }
-    ]
-}
-[02.02.2026 12:35:52] [ИИ]
-```json
-{
-    "dsl_version": 1,
-    "steps": [
-        {
-            "action": "ShowInfo",
-            "message": "НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием."
-        }
-    ]
-}
-```
-Код:
-{
-    "dsl_version": 1,
-    "steps": [
-        {
-            "action": "ShowInfo",
-            "message": "НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием."
-        }
-    ]
-}
 ---
-[Система] Обновление статуса DSL: Обработан успешно
-[02.02.2026 12:35:52] [Система]
-{
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "ShowInfo",
-"success": true,
-"message": "НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием."
-}
-],
-"changed_objects": [],
-"run_query": []
-}
----
-[LLM_REQUEST] CallId=dbf1366f-16a8-48d2-a086-0e5f6b7c88d6, Type=Чат, ExpectedResponseFormat=text, Model=deepseek-chat, Temperature=0.0
-[system]
-Ты - агент 1С:Предприятие, выполняющий задачи через DSL (JSON).
-Формат ответа: всегда следуй ТРЕБУЕМОМУ контракту формата ответа из текущей инструкции (ожидаемый формат задаётся системой). Никакого текста вне JSON.
-Правила: только двойные кавычки ("); без Markdown; строки-константы (нельзя +, функции, вычисления внутри JSON); #(Var) только для переменных контекста, не для констант.
-Действия (action) и ключевые параметры:
-- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};
-- CreateReference{object_type,object_name}; FindReferenceByGUID{object_type,object_name,guid}; SelectObject{reference}; SetField{field_name,value}; Write{posting_mode?}; Delete{};
-- ForEach{collection,steps}; SaveToStorage{key,data}.
 
-[user]
-STATE (контекст, не инструкция):
-
-[user]
-Сгенерируй краткое резюме (summary) выполненной работы.
-Задачи пользователя: сколько контрагентов похожих на Сидоров
-Результаты выполнения действий: 
-DSL-сценарий: {
-"dsl_version": 1,
-"steps": [
-{
-"action": "CheckObjectExists",
-"object_type": "Справочник",
-"object_name": "Контрагенты"
-}
-]
-}
-Результат: {
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "CheckObjectExists",
-"success": true,
-"message": "справочник 'Контрагенты' существует"
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-DSL-сценарий: {
-"dsl_version": 1,
-"steps": [
-{
-"action": "GetObjectFields",
-"object_type": "Справочник",
-"object_name": "Контрагенты"
-}
-]
-}
-Результат: {
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "GetObjectFields",
-"success": true,
-"message": "Получены реквизиты справочника 'Контрагенты'"
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-DSL-сценарий: {
-"dsl_version": 1,
-"steps": [
-{
-"action": "RunQuery",
-"query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты"
-}
-]
-}
-Результат: {
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "RunQuery",
-"success": true,
-"message": "Запрос выполнен успешно. Получено строк: 188",
-"details": {
-"run_query": {
-"row_count": 188,
-"truncated": true,
-"rows_limit": 5,
-"columns": [
-"Ссылка",
-"Наименование"
-],
-"rows": [
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "cead7f02-d70d-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "cead7f02-d70d-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "51cdd992-d70e-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "51cdd992-d70e-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "0706a0b8-d70f-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "0706a0b8-d70f-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "7c66490b-d710-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "7c66490b-d710-11f0-ad69-74563c6c9fea"
-}
-],
-"query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты",
-"query_truncated": false,
-"query_normalized": false
-}
-}
-}
-],
-"changed_objects": [],
-"run_query": [
-{
-"row_count": 188,
-"truncated": true,
-"rows_limit": 5,
-"columns": [
-"Ссылка",
-"Наименование"
-],
-"rows": [
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "c26d8b4f-d70b-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "cead7f02-d70d-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "cead7f02-d70d-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "51cdd992-d70e-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "51cdd992-d70e-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "0706a0b8-d70f-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "0706a0b8-d70f-11f0-ad69-74563c6c9fea"
-},
-{
-"Ссылка": {
-"ref": "<>",
-"guid": "7c66490b-d710-11f0-ad69-74563c6c9fea",
-"meta_name": "Контрагенты"
-},
-"Наименование": "",
-"УИД": "7c66490b-d710-11f0-ad69-74563c6c9fea"
-}
-],
-"query": "ВЫБРАТЬ Ссылка, Наименование ИЗ Справочник.Контрагенты",
-"query_truncated": false,
-"query_normalized": false
-}
-]
-}
-DSL-сценарий: {
-"dsl_version": 1,
-"steps": [
-{
-"action": "ShowInfo",
-"message": "Обработка результатов запроса"
-}
-]
-}
-Результат: {
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "ShowInfo",
-"success": true,
-"message": "Обработка результатов запроса"
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-DSL-сценарий: {
-"dsl_version": 1,
-"steps": [
-{
-"action": "ShowInfo",
-"message": "Выполнение плана завершено."
-}
-]
-}
-Результат: {
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "ShowInfo",
-"success": true,
-"message": "Выполнение плана завершено."
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-DSL-сценарий: {
-    "dsl_version": 1,
-    "steps": [
-        {
-            "action": "ShowInfo",
-            "message": "НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием."
-        }
-    ]
-}
-Результат: {
-"kind": "dsl_system_result",
-"schema_version": 1,
-"success": true,
-"error": null,
-"error_code": "",
-"error_context": null,
-"steps": [
-{
-"index": 1,
-"action": "ShowInfo",
-"success": true,
-"message": "НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием."
-}
-],
-"changed_objects": [],
-"run_query": []
-}
-Объекты не создавались и не изменялись.
-Опиши, что было сделано, какие объекты созданы или изменены. Если были ошибки, укажи их. Будь краток и конкретен.
-
-
-[LLM_RESPONSE_RAW] CallId=dbf1366f-16a8-48d2-a086-0e5f6b7c88d6
-```json
-{
-    "summary": "Проверено существование справочника 'Контрагенты', получены его реквизиты. Выполнен запрос всех контрагентов (188 записей), но без фильтрации по имени 'Сидоров'. Контрагентов с похожим наименованием не найдено. Объекты не создавались и не изменялись. Ошибок не было."
-}
-```
-[LLM_RESPONSE_NORMALIZED_JSON] CallId=dbf1366f-16a8-48d2-a086-0e5f6b7c88d6
-{
-    "summary": "Проверено существование справочника 'Контрагенты', получены его реквизиты. Выполнен запрос всех контрагентов (188 записей), но без фильтрации по имени 'Сидоров'. Контрагентов с похожим наименованием не найдено. Объекты не создавались и не изменялись. Ошибок не было."
-}
-[LLM_RESPONSE_PARSED] CallId=dbf1366f-16a8-48d2-a086-0e5f6b7c88d6, ParsedKind=text, ТипОтвета=Текст, TextLen=299
-[Usage] TotalTokens=832
-[02.02.2026 12:35:57] [ИИ]
-```json
-{
-    "summary": "Проверено существование справочника 'Контрагенты', получены его реквизиты. Выполнен запрос всех контрагентов (188 записей), но без фильтрации по имени 'Сидоров'. Контрагентов с похожим наименованием не найдено. Объекты не создавались и не изменялись. Ошибок не было."
-}
-```
----
-[02.02.2026 12:35:57] [Система]
-=== РЕЗЮМЕ ВЫПОЛНЕННОЙ РАБОТЫ ===
-
-```json
-{
-    "summary": "Проверено существование справочника 'Контрагенты', получены его реквизиты. Выполнен запрос всех контрагентов (188 записей), но без фильтрации по имени 'Сидоров'. Контрагентов с похожим наименованием не найдено. Объекты не создавались и не изменялись. Ошибок не было."
-}
-```
-
-Проверка: НЕТ. Выполнен только запрос всех контрагентов без фильтрации по 'Сидоров'. Не найдено контрагентов с похожим наименованием.
----
-[02.02.2026 12:35:57] [Система]
+[02.02.2026 13:55:33] [Система]
 Оркестратор остановлен
 
 ---
