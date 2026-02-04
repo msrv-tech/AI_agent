@@ -1,0 +1,4 @@
+# Зависимости для запуска через COM (подключение к 1С из Python)
+# Установка: pip install -r requirements-com.txt
+pywin32>=306
+python-dotenv>=1.0
