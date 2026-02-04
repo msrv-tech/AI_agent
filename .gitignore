@@ -24,6 +24,9 @@ README_КАРКАС.md
 **/settings/
 *.prefs
 
+# Локальные переменные окружения (копия .env.example)
+.env
+
 # Тестовые конфигурации
 КонфигурацияТест/
 automation/vanessa/logs/

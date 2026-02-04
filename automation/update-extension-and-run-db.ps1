@@ -29,7 +29,7 @@
 [CmdletBinding()]
 param(
     [string]$PlatformExe = 'C:\Program Files\1cv8\8.3.27.1859\bin\1cv8.exe',
-    [string]$ConnectionString = 'File="D:\EDT_base\КонфигурацияТест";',
+    [string]$ConnectionString = '',
     [string]$UserName = '',
     [string]$Password = '',
     [string]$LogDir = "$PSScriptRoot\logs",
@@ -44,6 +44,23 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+
+# Загрузка .env из корня проекта (если есть)
+$projectRoot = Split-Path $PSScriptRoot -Parent
+$envPath = Join-Path $projectRoot '.env'
+if (Test-Path -LiteralPath $envPath -PathType Leaf) {
+    Get-Content -LiteralPath $envPath -Encoding UTF8 | ForEach-Object {
+        if ($_ -match '^\s*#' -or $_ -notmatch '^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$') { return }
+        if ($_ -match '^\s*([A-Za-z0-9_]+)\s*=\s*(.*)$') {
+            [System.Environment]::SetEnvironmentVariable($matches[1].Trim(), $matches[2].Trim(), 'Process')
+        }
+    }
+}
+
+# Строка подключения: параметр → 1C_CONNECTION_STRING из .env/env → значение по умолчанию
+if (-not $ConnectionString -and $env:1C_CONNECTION_STRING) { $ConnectionString = $env:1C_CONNECTION_STRING }
+if (-not $ConnectionString) { $ConnectionString = 'File="D:\EDT_base\КонфигурацияТест";' }
+$env:1C_CONNECTION_STRING = $ConnectionString
 
 # Кодировка консоли UTF-8 для корректного отображения кириллицы
 $OutputEncoding = [System.Text.Encoding]::UTF8
