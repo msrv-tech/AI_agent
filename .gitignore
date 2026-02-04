@@ -28,3 +28,6 @@ README_КАРКАС.md
 КонфигурацияТест/
 automation/vanessa/logs/
 
+# Логи сборки и запуска
+automation/logs/
+
