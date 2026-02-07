@@ -28,7 +28,7 @@
 
 [CmdletBinding()]
 param(
-    [string]$PlatformExe = 'C:\Program Files\1cv8\8.3.27.1859\bin\1cv8.exe',
+    [string]$PlatformExe = 'C:\Program Files\1cv8\8.5.1.1150\bin\1cv8.exe',
     [string]$ConnectionString = '',
     [string]$UserName = '',
     [string]$Password = '',
