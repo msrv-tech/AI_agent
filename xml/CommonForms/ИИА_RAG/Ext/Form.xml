@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Form xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.21">
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Form xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcssch="http://v8.1c.ru/8.1/data-composition-system/schema" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.21">
 	<Title>
 		<v8:item>
 			<v8:lang>ru</v8:lang>
@@ -17,7 +17,7 @@
 		</ChildItems>
 	</AutoCommandBar>
 	<Events>
-		<Event name="ПриСозданииНаСервере">ПриСозданииНаСервере</Event>
+		<Event name="OnCreateAtServer">ПриСозданииНаСервере</Event>
 	</Events>
 	<ChildItems>
 		<LabelField name="СтатусИндекса" id="3">
@@ -75,9 +75,8 @@
 					<Representation>List</Representation>
 					<AutoMaxHeight>false</AutoMaxHeight>
 					<MaxHeight>10</MaxHeight>
-					<Header>true</Header>
-					<HorizontalLines>true</HorizontalLines>
-					<VerticalLines>true</VerticalLines>
+					<HorizontalLinesBWA>true</HorizontalLinesBWA>
+					<VerticalLinesBWA>true</VerticalLinesBWA>
 					<AutoInsertNewRow>true</AutoInsertNewRow>
 					<DataPath>РезультатыПоиска</DataPath>
 					<RowFilter xsi:nil="true"/>
@@ -86,8 +85,32 @@
 						<Autofill>false</Autofill>
 					</AutoCommandBar>
 					<ExtendedTooltip name="РезультатыПоискаРасширеннаяПодсказка" id="18"/>
+					<SearchStringAddition name="РезультатыПоискаСтрокаПоиска" id="51">
+						<AdditionSource>
+							<Item>РезультатыПоиска</Item>
+							<Type>SearchStringRepresentation</Type>
+						</AdditionSource>
+						<ContextMenu name="РезультатыПоискаСтрокаПоискаКонтекстноеМеню" id="52"/>
+						<ExtendedTooltip name="РезультатыПоискаСтрокаПоискаРасширеннаяПодсказка" id="53"/>
+					</SearchStringAddition>
+					<ViewStatusAddition name="РезультатыПоискаСостояниеПросмотра" id="54">
+						<AdditionSource>
+							<Item>РезультатыПоиска</Item>
+							<Type>ViewStatusRepresentation</Type>
+						</AdditionSource>
+						<ContextMenu name="РезультатыПоискаСостояниеПросмотраКонтекстноеМеню" id="55"/>
+						<ExtendedTooltip name="РезультатыПоискаСостояниеПросмотраРасширеннаяПодсказка" id="56"/>
+					</ViewStatusAddition>
+					<SearchControlAddition name="РезультатыПоискаУправлениеПоиском" id="57">
+						<AdditionSource>
+							<Item>РезультатыПоиска</Item>
+							<Type>SearchControl</Type>
+						</AdditionSource>
+						<ContextMenu name="РезультатыПоискаУправлениеПоискомКонтекстноеМеню" id="58"/>
+						<ExtendedTooltip name="РезультатыПоискаУправлениеПоискомРасширеннаяПодсказка" id="59"/>
+					</SearchControlAddition>
 					<Events>
-						<Event name="ПриАктивизацииСтроки">РезультатыПоискаПриАктивизацииСтроки</Event>
+						<Event name="OnActivateRow">РезультатыПоискаПриАктивизацииСтроки</Event>
 					</Events>
 					<ChildItems>
 						<InputField name="РезультатыПоискаRank" id="28">
