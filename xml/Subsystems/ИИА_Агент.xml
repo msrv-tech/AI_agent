@@ -19,6 +19,7 @@
 				<xr:Item xsi:type="xr:MDObjectRef">CommonCommand.ИИА_Агент</xr:Item>
 				<xr:Item xsi:type="xr:MDObjectRef">Catalog.ИИА_Диалоги</xr:Item>
 				<xr:Item xsi:type="xr:MDObjectRef">InformationRegister.ИИА_НастройкиПользователей</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">CommonCommand.ИИА_RAG</xr:Item>
 			</Content>
 		</Properties>
 		<ChildObjects/>
