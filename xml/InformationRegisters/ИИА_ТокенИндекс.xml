@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.21">
+	<InformationRegister uuid="42ff98ac-4ce8-4a49-97b7-8c04c7b0a528">
+		<InternalInfo>
+			<xr:GeneratedType name="InformationRegisterRecord.ИИА_ТокенИндекс" category="Record">
+				<xr:TypeId>d9d41498-11dd-4bf7-8bd2-048bb383fc30</xr:TypeId>
+				<xr:ValueId>45d0b1ac-35a6-49ee-a05e-fafa69f4f03a</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterManager.ИИА_ТокенИндекс" category="Manager">
+				<xr:TypeId>de093076-b1b8-482e-8a5d-62f38694a8b2</xr:TypeId>
+				<xr:ValueId>5ace8e5a-368c-446d-9ea2-eaede1d3622c</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterSelection.ИИА_ТокенИндекс" category="Selection">
+				<xr:TypeId>12364ba3-31d8-4e72-9d11-6bcf473211e1</xr:TypeId>
+				<xr:ValueId>b0645102-f6ff-45aa-8892-4a504bcc4e72</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterList.ИИА_ТокенИндекс" category="List">
+				<xr:TypeId>6f3fa31b-23b8-4441-a4cb-8729e125301c</xr:TypeId>
+				<xr:ValueId>158b1eac-4009-493b-8986-0b1b80e10f4b</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordSet.ИИА_ТокенИндекс" category="RecordSet">
+				<xr:TypeId>27b39102-87e4-4fad-93e3-bd2d976a84c7</xr:TypeId>
+				<xr:ValueId>3dfeb24e-fc77-4102-aae1-e72bddf56f78</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordKey.ИИА_ТокенИндекс" category="RecordKey">
+				<xr:TypeId>defac96a-3fd5-4128-ac3f-87dcf45b74ad</xr:TypeId>
+				<xr:ValueId>e2689932-b49b-48e2-ad17-d11538548c2f</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordManager.ИИА_ТокенИндекс" category="RecordManager">
+				<xr:TypeId>fde6f5a7-1d55-4192-9c35-2278d0495f07</xr:TypeId>
+				<xr:ValueId>4eff11b3-c5cc-46ce-bb6a-8af1310aaa82</xr:ValueId>
+			</xr:GeneratedType>
+		</InternalInfo>
+		<Properties>
+			<Name>ИИА_ТокенИндекс</Name>
+			<Synonym>
+				<v8:item>
+					<v8:lang/>
+					<v8:content>ИИА токен индекс</v8:content>
+				</v8:item>
+			</Synonym>
+			<Comment/>
+			<UseStandardCommands>true</UseStandardCommands>
+			<EditType>InDialog</EditType>
+			<DefaultRecordForm/>
+			<DefaultListForm/>
+			<AuxiliaryRecordForm/>
+			<AuxiliaryListForm/>
+			<InformationRegisterPeriodicity>Nonperiodical</InformationRegisterPeriodicity>
+			<WriteMode>Independent</WriteMode>
+			<MainFilterOnPeriod>false</MainFilterOnPeriod>
+			<IncludeHelpInContents>false</IncludeHelpInContents>
+			<DataLockControlMode>Managed</DataLockControlMode>
+			<FullTextSearch>DontUse</FullTextSearch>
+			<EnableTotalsSliceFirst>false</EnableTotalsSliceFirst>
+			<EnableTotalsSliceLast>false</EnableTotalsSliceLast>
+			<RecordPresentation/>
+			<ExtendedRecordPresentation/>
+			<ListPresentation/>
+			<ExtendedListPresentation/>
+			<Explanation/>
+			<DataHistory>DontUse</DataHistory>
+			<UpdateDataHistoryImmediatelyAfterWrite>false</UpdateDataHistoryImmediatelyAfterWrite>
+			<ExecuteAfterWriteDataHistoryVersionProcessing>false</ExecuteAfterWriteDataHistoryVersionProcessing>
+		</Properties>
+		<ChildObjects/>
+	</InformationRegister>
+</MetaDataObject>

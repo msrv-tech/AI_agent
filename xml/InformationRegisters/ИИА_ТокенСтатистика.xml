@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.21">
+	<InformationRegister uuid="b55f384e-4dec-484e-87b9-1d1f3393ac8f">
+		<InternalInfo>
+			<xr:GeneratedType name="InformationRegisterRecord.ИИА_ТокенСтатистика" category="Record">
+				<xr:TypeId>2b23592b-ec4d-4db7-ad80-eb8f45d1a86d</xr:TypeId>
+				<xr:ValueId>cd7888e3-ee21-4b81-b62d-dec49100de25</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterManager.ИИА_ТокенСтатистика" category="Manager">
+				<xr:TypeId>953ce0d6-2317-4241-af2d-2deeecfe01ce</xr:TypeId>
+				<xr:ValueId>f0d1f511-2731-451f-b477-2ce8d6172b98</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterSelection.ИИА_ТокенСтатистика" category="Selection">
+				<xr:TypeId>6ed61ffb-a85b-441c-be57-63c2721fb28f</xr:TypeId>
+				<xr:ValueId>344283b6-013c-4453-b491-fba22e75d4d3</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterList.ИИА_ТокенСтатистика" category="List">
+				<xr:TypeId>51bc31bc-16d1-4aa0-94df-418c0abfe51f</xr:TypeId>
+				<xr:ValueId>65781d60-3427-4e1d-899e-7fd5b0346fad</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordSet.ИИА_ТокенСтатистика" category="RecordSet">
+				<xr:TypeId>a7845316-6b14-40e6-859b-e9891f7e32be</xr:TypeId>
+				<xr:ValueId>173fcae8-d723-4bc7-93ce-d485fcdc8c72</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordKey.ИИА_ТокенСтатистика" category="RecordKey">
+				<xr:TypeId>58941dba-e165-4ce2-a183-b1eb7a870582</xr:TypeId>
+				<xr:ValueId>d73a8123-a2a0-45cf-9a1e-356b2cfc65f1</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordManager.ИИА_ТокенСтатистика" category="RecordManager">
+				<xr:TypeId>bd2c3f23-1cce-4678-bce1-5476ea54ad7d</xr:TypeId>
+				<xr:ValueId>836c7d96-9c8c-4b26-b2e7-364623542a79</xr:ValueId>
+			</xr:GeneratedType>
+		</InternalInfo>
+		<Properties>
+			<Name>ИИА_ТокенСтатистика</Name>
+			<Synonym>
+				<v8:item>
+					<v8:lang/>
+					<v8:content>ИИА токен статистика</v8:content>
+				</v8:item>
+			</Synonym>
+			<Comment/>
+			<UseStandardCommands>true</UseStandardCommands>
+			<EditType>InDialog</EditType>
+			<DefaultRecordForm/>
+			<DefaultListForm/>
+			<AuxiliaryRecordForm/>
+			<AuxiliaryListForm/>
+			<InformationRegisterPeriodicity>Nonperiodical</InformationRegisterPeriodicity>
+			<WriteMode>Independent</WriteMode>
+			<MainFilterOnPeriod>false</MainFilterOnPeriod>
+			<IncludeHelpInContents>false</IncludeHelpInContents>
+			<DataLockControlMode>Managed</DataLockControlMode>
+			<FullTextSearch>DontUse</FullTextSearch>
+			<EnableTotalsSliceFirst>false</EnableTotalsSliceFirst>
+			<EnableTotalsSliceLast>false</EnableTotalsSliceLast>
+			<RecordPresentation/>
+			<ExtendedRecordPresentation/>
+			<ListPresentation/>
+			<ExtendedListPresentation/>
+			<Explanation/>
+			<DataHistory>DontUse</DataHistory>
+			<UpdateDataHistoryImmediatelyAfterWrite>false</UpdateDataHistoryImmediatelyAfterWrite>
+			<ExecuteAfterWriteDataHistoryVersionProcessing>false</ExecuteAfterWriteDataHistoryVersionProcessing>
+		</Properties>
+		<ChildObjects/>
+	</InformationRegister>
+</MetaDataObject>

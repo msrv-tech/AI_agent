@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.21">
+	<InformationRegister uuid="d7395ddb-12b1-47f1-98d8-371bfdbfed3a">
+		<InternalInfo>
+			<xr:GeneratedType name="InformationRegisterRecord.ИИА_СтатусИндексаRAG" category="Record">
+				<xr:TypeId>601f0b2f-cb3d-4ef2-aca0-80771345444e</xr:TypeId>
+				<xr:ValueId>9bcfe55e-8bdc-429b-b7c6-3f6906eded6b</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterManager.ИИА_СтатусИндексаRAG" category="Manager">
+				<xr:TypeId>193e2962-4223-44cb-88bb-a49e9592ff94</xr:TypeId>
+				<xr:ValueId>e1dd4d33-deda-427e-8029-261a573fb7fe</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterSelection.ИИА_СтатусИндексаRAG" category="Selection">
+				<xr:TypeId>0c5c7207-8b57-4a8c-a502-26ab821fb003</xr:TypeId>
+				<xr:ValueId>b62b6caa-6bab-4913-a911-d83e8ea81b95</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterList.ИИА_СтатусИндексаRAG" category="List">
+				<xr:TypeId>cafaa852-c366-49ce-8465-2709b2ecb446</xr:TypeId>
+				<xr:ValueId>5b87cd85-85c5-4a1f-a36c-ef91c4ac4dba</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordSet.ИИА_СтатусИндексаRAG" category="RecordSet">
+				<xr:TypeId>31491685-96d9-4a18-9761-8af1a2e734a9</xr:TypeId>
+				<xr:ValueId>440cff7b-f1b1-4173-aef0-45aeb9a73632</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordKey.ИИА_СтатусИндексаRAG" category="RecordKey">
+				<xr:TypeId>999bbedb-4c8d-42e9-b18d-589d687bfdc8</xr:TypeId>
+				<xr:ValueId>32fe4a76-afbf-4d41-b7ef-f2f937ad117f</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordManager.ИИА_СтатусИндексаRAG" category="RecordManager">
+				<xr:TypeId>8b27fd3f-ec18-4165-83ad-d4364b03ce7d</xr:TypeId>
+				<xr:ValueId>cbcc915a-bd74-4b7a-8c8b-4210a895ac14</xr:ValueId>
+			</xr:GeneratedType>
+		</InternalInfo>
+		<Properties>
+			<Name>ИИА_СтатусИндексаRAG</Name>
+			<Synonym>
+				<v8:item>
+					<v8:lang/>
+					<v8:content>ИИА статус индекса RAG</v8:content>
+				</v8:item>
+			</Synonym>
+			<Comment/>
+			<UseStandardCommands>true</UseStandardCommands>
+			<EditType>InDialog</EditType>
+			<DefaultRecordForm/>
+			<DefaultListForm/>
+			<AuxiliaryRecordForm/>
+			<AuxiliaryListForm/>
+			<InformationRegisterPeriodicity>Nonperiodical</InformationRegisterPeriodicity>
+			<WriteMode>Independent</WriteMode>
+			<MainFilterOnPeriod>false</MainFilterOnPeriod>
+			<IncludeHelpInContents>false</IncludeHelpInContents>
+			<DataLockControlMode>Managed</DataLockControlMode>
+			<FullTextSearch>DontUse</FullTextSearch>
+			<EnableTotalsSliceFirst>false</EnableTotalsSliceFirst>
+			<EnableTotalsSliceLast>false</EnableTotalsSliceLast>
+			<RecordPresentation/>
+			<ExtendedRecordPresentation/>
+			<ListPresentation/>
+			<ExtendedListPresentation/>
+			<Explanation/>
+			<DataHistory>DontUse</DataHistory>
+			<UpdateDataHistoryImmediatelyAfterWrite>false</UpdateDataHistoryImmediatelyAfterWrite>
+			<ExecuteAfterWriteDataHistoryVersionProcessing>false</ExecuteAfterWriteDataHistoryVersionProcessing>
+		</Properties>
+		<ChildObjects/>
+	</InformationRegister>
+</MetaDataObject>

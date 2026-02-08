@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.21">
+	<InformationRegister uuid="70552e3b-5ef7-42d6-9a0f-e24c9fdd5958">
+		<InternalInfo>
+			<xr:GeneratedType name="InformationRegisterRecord.ИИА_Чанки" category="Record">
+				<xr:TypeId>ffa36cfc-42be-43f7-9ffa-0fb799793240</xr:TypeId>
+				<xr:ValueId>f8a0f2b8-17db-40a9-b582-0352ede55d5d</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterManager.ИИА_Чанки" category="Manager">
+				<xr:TypeId>23204df7-f16a-4737-bb4a-a1247e909daf</xr:TypeId>
+				<xr:ValueId>346afe3f-a159-4efb-ab41-4b8dcc93b269</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterSelection.ИИА_Чанки" category="Selection">
+				<xr:TypeId>2cfaf612-184b-40d2-8564-e9d1e6508f9e</xr:TypeId>
+				<xr:ValueId>ce19df09-900a-40b4-9c2e-3a23fd5f3de1</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterList.ИИА_Чанки" category="List">
+				<xr:TypeId>47909282-4992-4892-a360-51749f76bc47</xr:TypeId>
+				<xr:ValueId>2a0ba354-203c-4fcb-86bb-f80eb9d4669c</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordSet.ИИА_Чанки" category="RecordSet">
+				<xr:TypeId>d4627030-09b7-4923-a380-29b6a4d5c163</xr:TypeId>
+				<xr:ValueId>43d07321-ffd4-4b99-9f6a-1d26ca03dc38</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordKey.ИИА_Чанки" category="RecordKey">
+				<xr:TypeId>5016f70b-9f76-4331-bb6e-faa67bbae79a</xr:TypeId>
+				<xr:ValueId>4b767bac-677d-4216-99d7-3b196f985064</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="InformationRegisterRecordManager.ИИА_Чанки" category="RecordManager">
+				<xr:TypeId>22e3ac0f-6a35-4d21-bf35-4eaf031385c0</xr:TypeId>
+				<xr:ValueId>e5c0e159-23ad-4f25-938c-013139122f44</xr:ValueId>
+			</xr:GeneratedType>
+		</InternalInfo>
+		<Properties>
+			<Name>ИИА_Чанки</Name>
+			<Synonym>
+				<v8:item>
+					<v8:lang/>
+					<v8:content>ИИА чанки</v8:content>
+				</v8:item>
+			</Synonym>
+			<Comment/>
+			<UseStandardCommands>true</UseStandardCommands>
+			<EditType>InDialog</EditType>
+			<DefaultRecordForm/>
+			<DefaultListForm/>
+			<AuxiliaryRecordForm/>
+			<AuxiliaryListForm/>
+			<InformationRegisterPeriodicity>Nonperiodical</InformationRegisterPeriodicity>
+			<WriteMode>Independent</WriteMode>
+			<MainFilterOnPeriod>false</MainFilterOnPeriod>
+			<IncludeHelpInContents>false</IncludeHelpInContents>
+			<DataLockControlMode>Managed</DataLockControlMode>
+			<FullTextSearch>DontUse</FullTextSearch>
+			<EnableTotalsSliceFirst>false</EnableTotalsSliceFirst>
+			<EnableTotalsSliceLast>false</EnableTotalsSliceLast>
+			<RecordPresentation/>
+			<ExtendedRecordPresentation/>
+			<ListPresentation/>
+			<ExtendedListPresentation/>
+			<Explanation/>
+			<DataHistory>DontUse</DataHistory>
+			<UpdateDataHistoryImmediatelyAfterWrite>false</UpdateDataHistoryImmediatelyAfterWrite>
+			<ExecuteAfterWriteDataHistoryVersionProcessing>false</ExecuteAfterWriteDataHistoryVersionProcessing>
+		</Properties>
+		<ChildObjects/>
+	</InformationRegister>
+</MetaDataObject>

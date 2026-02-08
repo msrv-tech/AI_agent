@@ -87,16 +87,25 @@
 			<CommonModule>ИИА_СправкаЗапросы1С</CommonModule>
 			<CommonModule>ИИА_GitsellСервер</CommonModule>
 			<CommonModule>ИИА_Оркестратор</CommonModule>
+			<CommonModule>ИИА_RAG_Текст</CommonModule>
+			<CommonModule>ИИА_RAG_Индексатор</CommonModule>
+			<CommonModule>ИИА_RAG_Поиск</CommonModule>
 			<CommonCommand>ИИА_Агент</CommonCommand>
 			<CommonForm>ИИА_Агент</CommonForm>
 			<CommonForm>ИИА_РегистрацияGitsell</CommonForm>
 			<CommonForm>ИИА_Настройки</CommonForm>
+			<CommonForm>ИИА_RAG</CommonForm>
 			<Catalog>ИИА_Диалоги</Catalog>
+			<Catalog>ИИА_Настройки</Catalog>
 			<Enum>ИИА_АвторСообщения</Enum>
 			<Enum>ИИА_СтатусDSL</Enum>
 			<Enum>ИИА_ТипДиалога</Enum>
 			<Enum>ИИА_ТипСообщения</Enum>
 			<InformationRegister>ИИА_НастройкиПользователей</InformationRegister>
+			<InformationRegister>ИИА_Чанки</InformationRegister>
+			<InformationRegister>ИИА_ТокенИндекс</InformationRegister>
+			<InformationRegister>ИИА_ТокенСтатистика</InformationRegister>
+			<InformationRegister>ИИА_СтатусИндексаRAG</InformationRegister>
 		</ChildObjects>
 	</Configuration>
 </MetaDataObject>
