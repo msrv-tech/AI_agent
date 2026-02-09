@@ -104,6 +104,9 @@
 								</v8:item>
 							</Title>
 							<TitleLocation>None</TitleLocation>
+							<AutoMaxWidth>false</AutoMaxWidth>
+							<Height>2</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
 							<HorizontalStretch>true</HorizontalStretch>
 							<ContextMenu name="СтрокаСтатусаКонтекстноеМеню" id="5"/>
 							<ExtendedTooltip name="СтрокаСтатусаРасширеннаяПодсказка" id="6"/>

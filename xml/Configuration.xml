@@ -86,12 +86,12 @@
 			<CommonModule>ИИА_Промты</CommonModule>
 			<CommonModule>ИИА_Сервер</CommonModule>
 			<CommonModule>ИИА_СправкаЗапросы1С</CommonModule>
-			<CommonModule>ИИА_GitsellСервер</CommonModule>
 			<CommonModule>ИИА_Оркестратор</CommonModule>
 			<CommonModule>ИИА_RAG_Текст</CommonModule>
 			<CommonModule>ИИА_RAG_Настройки</CommonModule>
 			<CommonModule>ИИА_RAG_Индексатор</CommonModule>
 			<CommonModule>ИИА_RAG_Поиск</CommonModule>
+			<CommonModule>ИИА_GitsellСервер</CommonModule>
 			<CommonCommand>ИИА_Агент</CommonCommand>
 			<CommonCommand>ИИА_RAG</CommonCommand>
 			<CommonForm>ИИА_Агент</CommonForm>
