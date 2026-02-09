@@ -32,9 +32,9 @@
 		<Metadata name="Catalog.ИИА_Диалоги.Form.ФормаЭлемента.Form" id="68f8da50-d6c7-489e-89ed-25a6244d7603.0" configVersion="6cf5d5fdb563aacc349c410a93f81f2293847cfe"/>
 		<Metadata name="Catalog.ИИА_Настройки" id="b91d6009-ced3-46e6-ae38-017b4d479326" configVersion="88c5b3a649a92cdec31230983304a8d72607e881"/>
 		<Metadata name="CommonCommand.ИИА_RAG" id="326c3dec-8e61-4293-8fbf-90f7903f76b1" configVersion="879d54544162367d0c467ded31965f0774bf17aa"/>
-		<Metadata name="CommonCommand.ИИА_RAG.CommandModule" id="326c3dec-8e61-4293-8fbf-90f7903f76b1.2" configVersion="bbb92a90e8fe40db6e1102c7c93c0775563a9bf4"/>
+		<Metadata name="CommonCommand.ИИА_RAG.CommandModule" id="326c3dec-8e61-4293-8fbf-90f7903f76b1.2" configVersion="f8a1f9b1101572c69bb40c4f25091e8e64366145"/>
 		<Metadata name="CommonCommand.ИИА_Агент" id="136e083c-c7c6-4904-83e0-c1af2a1a7e09" configVersion="b15182797a6ab436eb9828b955571fa0e9cdc104"/>
-		<Metadata name="CommonCommand.ИИА_Агент.CommandModule" id="136e083c-c7c6-4904-83e0-c1af2a1a7e09.2" configVersion="e2eb9136340790546fc8d2b4e13d1c51a2dfb8f6"/>
+		<Metadata name="CommonCommand.ИИА_Агент.CommandModule" id="136e083c-c7c6-4904-83e0-c1af2a1a7e09.2" configVersion="1a96b2d7daf7ad2bf77aed29854ba201263c92b5"/>
 		<Metadata name="CommonForm.ИИА_RAG" id="d7395ddb-12b1-47f1-98d8-371bfdbfed3b" configVersion="777cf7c439e463748559566c017241d7286f82bc"/>
 		<Metadata name="CommonForm.ИИА_RAG.Form" id="d7395ddb-12b1-47f1-98d8-371bfdbfed3b.0" configVersion="09535c225346d30ddfaaf596f7ce3edb55a7f60b"/>
 		<Metadata name="CommonForm.ИИА_Агент" id="62ecb59f-45f9-4eeb-9bcf-2fc6a892bb66" configVersion="86625f3eed310c477d19075327dcdd38f9da1006"/>
@@ -44,36 +44,36 @@
 		<Metadata name="CommonForm.ИИА_РегистрацияGitsell" id="ebf1702d-1f39-4f95-8832-232f37f32691" configVersion="b35a3619ca24f2d09108074927b9d266d0fdbf5f"/>
 		<Metadata name="CommonForm.ИИА_РегистрацияGitsell.Form" id="ebf1702d-1f39-4f95-8832-232f37f32691.0" configVersion="80d26b4f40c88d255106469d2c3c877ec9c193fe"/>
 		<Metadata name="CommonModule.ИИА_DSL" id="2135f774-d65f-45b6-86dd-ffdb4c45be6a" configVersion="d9f16c50fe5f1c44a2b74291cd956d84f3b9dc15"/>
-		<Metadata name="CommonModule.ИИА_DSL.Module" id="2135f774-d65f-45b6-86dd-ffdb4c45be6a.0" configVersion="fab6f94f2f9b33d810adcf9efc19c020ae9c1f84"/>
+		<Metadata name="CommonModule.ИИА_DSL.Module" id="2135f774-d65f-45b6-86dd-ffdb4c45be6a.0" configVersion="ef6f3286b8d5ee4e8244f1df2089436cd3241468"/>
 		<Metadata name="CommonModule.ИИА_GitsellСервер" id="e0f98cc6-de35-4d40-973c-4e95bd532eb4" configVersion="3f6e870de0343511a721b26d077c4590e307388f"/>
-		<Metadata name="CommonModule.ИИА_GitsellСервер.Module" id="e0f98cc6-de35-4d40-973c-4e95bd532eb4.0" configVersion="033d46d770f094118523219b79c69a15201af434"/>
+		<Metadata name="CommonModule.ИИА_GitsellСервер.Module" id="e0f98cc6-de35-4d40-973c-4e95bd532eb4.0" configVersion="75fdfbf2440ec0821ed7da4ffaaf9c39680002da"/>
 		<Metadata name="CommonModule.ИИА_RAG_Индексатор" id="a8e36cfc-42be-43f7-9ffa-0fb799793252" configVersion="deae49c6f19b0d31c646b07b0d5873e16c8a8967"/>
-		<Metadata name="CommonModule.ИИА_RAG_Индексатор.Module" id="a8e36cfc-42be-43f7-9ffa-0fb799793252.0" configVersion="946e9bf86c02c542f732600f95e8ac1d1b557939"/>
+		<Metadata name="CommonModule.ИИА_RAG_Индексатор.Module" id="a8e36cfc-42be-43f7-9ffa-0fb799793252.0" configVersion="71a90232bcb821773367f14ac9d5216db9d81a4b"/>
 		<Metadata name="CommonModule.ИИА_RAG_Настройки" id="a8e36cfc-42be-43f7-9ffa-0fb799793251" configVersion="fe61adf8731d18a35598a7bba0e0acbdc523d674"/>
-		<Metadata name="CommonModule.ИИА_RAG_Настройки.Module" id="a8e36cfc-42be-43f7-9ffa-0fb799793251.0" configVersion="faaf61043b9c7aca22d603c89f25a75961aa1701"/>
+		<Metadata name="CommonModule.ИИА_RAG_Настройки.Module" id="a8e36cfc-42be-43f7-9ffa-0fb799793251.0" configVersion="fb15749808289cee84a2b7ae1d5861d0e678886c"/>
 		<Metadata name="CommonModule.ИИА_RAG_Поиск" id="a8e36cfc-42be-43f7-9ffa-0fb799793253" configVersion="ab3d435af50355236183fe451b9ed1b8121a391f"/>
-		<Metadata name="CommonModule.ИИА_RAG_Поиск.Module" id="a8e36cfc-42be-43f7-9ffa-0fb799793253.0" configVersion="008ee379d58f6db5e9112c77e04af806285af88e"/>
+		<Metadata name="CommonModule.ИИА_RAG_Поиск.Module" id="a8e36cfc-42be-43f7-9ffa-0fb799793253.0" configVersion="f083141f7d30a56a8f2292268f9e0316576615a2"/>
 		<Metadata name="CommonModule.ИИА_RAG_Текст" id="a8e36cfc-42be-43f7-9ffa-0fb799793250" configVersion="bb01941773b3e986e182b00b92a2aec405e94305"/>
-		<Metadata name="CommonModule.ИИА_RAG_Текст.Module" id="a8e36cfc-42be-43f7-9ffa-0fb799793250.0" configVersion="fb4cc81de801879b89b274e09591bbe82c6b0f7b"/>
+		<Metadata name="CommonModule.ИИА_RAG_Текст.Module" id="a8e36cfc-42be-43f7-9ffa-0fb799793250.0" configVersion="2fb79e0ae2c6eac9d003ac44df0f60bbd7beb1a1"/>
 		<Metadata name="CommonModule.ИИА_ВызовСервера" id="0a1750ff-1598-487b-acee-0de837ea7aa1" configVersion="cc151c8fabfb82ae52163432dea4c791a50364b6"/>
-		<Metadata name="CommonModule.ИИА_ВызовСервера.Module" id="0a1750ff-1598-487b-acee-0de837ea7aa1.0" configVersion="e98ed7cc365bbacbf16978c54dad8a9a436cc527"/>
+		<Metadata name="CommonModule.ИИА_ВызовСервера.Module" id="0a1750ff-1598-487b-acee-0de837ea7aa1.0" configVersion="ab4502ebbbff919f6cf5e4b2d235a7f2ffe5f75e"/>
 		<Metadata name="CommonModule.ИИА_Клиент" id="3264369b-77bd-414a-ac96-af5da0ed4cbd" configVersion="4f6fd2f0194a655abd77f489e340bb5cc06d7e17"/>
-		<Metadata name="CommonModule.ИИА_Клиент.Module" id="3264369b-77bd-414a-ac96-af5da0ed4cbd.0" configVersion="aa000e8fc9e4ae14d402f705d624aa38b24dfa0d"/>
+		<Metadata name="CommonModule.ИИА_Клиент.Module" id="3264369b-77bd-414a-ac96-af5da0ed4cbd.0" configVersion="4241cce5f34cf9714a84a901d222e35d52b1f3f9"/>
 		<Metadata name="CommonModule.ИИА_Метаданные" id="b63280f6-0aec-4d81-8ba4-bb062e64f2eb" configVersion="c6f8853c10d207106c363a336c5762da23425ef7"/>
-		<Metadata name="CommonModule.ИИА_Метаданные.Module" id="b63280f6-0aec-4d81-8ba4-bb062e64f2eb.0" configVersion="c02cccc005cce026bc59a3dc5c8bdd20ce7ff801"/>
+		<Metadata name="CommonModule.ИИА_Метаданные.Module" id="b63280f6-0aec-4d81-8ba4-bb062e64f2eb.0" configVersion="dec67fc667cb89d5dea796082568a26bee486a6f"/>
 		<Metadata name="CommonModule.ИИА_Оркестратор" id="dc5614f6-e561-484b-b92c-9a15b593c086" configVersion="d7d4d0a266c5d5602bd301ca346a07e348edee2a"/>
-		<Metadata name="CommonModule.ИИА_Оркестратор.Module" id="dc5614f6-e561-484b-b92c-9a15b593c086.0" configVersion="beff0b317250dab3673f0ed76f0f47a5394c675d"/>
+		<Metadata name="CommonModule.ИИА_Оркестратор.Module" id="dc5614f6-e561-484b-b92c-9a15b593c086.0" configVersion="a6cb9dc483ae13bb6f24957d70c16f151363a3e8"/>
 		<Metadata name="CommonModule.ИИА_Провайдеры" id="7b4f4807-bb7d-4de9-924d-c08f9e2eb406" configVersion="be4721e93ddbadc0d3be7d8377add112c85e37eb"/>
-		<Metadata name="CommonModule.ИИА_Провайдеры.Module" id="7b4f4807-bb7d-4de9-924d-c08f9e2eb406.0" configVersion="0e32796d843953bda846f3391fa26828fcdf201f"/>
+		<Metadata name="CommonModule.ИИА_Провайдеры.Module" id="7b4f4807-bb7d-4de9-924d-c08f9e2eb406.0" configVersion="ee20e32dea24016940e7b1e4ea2fd3d9eeb4f3b3"/>
 		<Metadata name="CommonModule.ИИА_Промты" id="8866f95b-1bfe-47e5-9b89-29fe2257a38e" configVersion="caa0fc944ac6389699fe006838dfcc6cc4f29862"/>
-		<Metadata name="CommonModule.ИИА_Промты.Module" id="8866f95b-1bfe-47e5-9b89-29fe2257a38e.0" configVersion="5246761dd3e02aca90e185fba36dfa19562c3672"/>
+		<Metadata name="CommonModule.ИИА_Промты.Module" id="8866f95b-1bfe-47e5-9b89-29fe2257a38e.0" configVersion="04b471dce771e2b10219169ba9eac9335537074c"/>
 		<Metadata name="CommonModule.ИИА_Сервер" id="c0051718-0993-43be-a07c-d860d1d34585" configVersion="afb46329314fab6009868c21f9f3ca8b86be29bb"/>
-		<Metadata name="CommonModule.ИИА_Сервер.Module" id="c0051718-0993-43be-a07c-d860d1d34585.0" configVersion="11a9c93781ec6e5798093fb09acde14e40d93e92"/>
+		<Metadata name="CommonModule.ИИА_Сервер.Module" id="c0051718-0993-43be-a07c-d860d1d34585.0" configVersion="c93bef27d270a4c73c75bc42721f88f42aa2c2fd"/>
 		<Metadata name="CommonModule.ИИА_СправкаЗапросы1С" id="ac1c9697-b5a3-401f-898a-f07b7f2b5157" configVersion="76ccc04d25e9a752395adfc8df90ebe9c5e40b04"/>
-		<Metadata name="CommonModule.ИИА_СправкаЗапросы1С.Module" id="ac1c9697-b5a3-401f-898a-f07b7f2b5157.0" configVersion="170475fd6d9240ba3b98de7d88c4f2997c4a02f3"/>
+		<Metadata name="CommonModule.ИИА_СправкаЗапросы1С.Module" id="ac1c9697-b5a3-401f-898a-f07b7f2b5157.0" configVersion="a759296a831861e4097e51544cda2b3aed8c2bee"/>
 		<Metadata name="CommonPicture.ИИА_ДлительнаяОперация" id="d88d525a-9a0f-4caf-a7dc-1ad50facf600" configVersion="8a16bf163f82e747f586f88248507c82af06dd4e"/>
 		<Metadata name="CommonPicture.ИИА_ДлительнаяОперация.Picture" id="d88d525a-9a0f-4caf-a7dc-1ad50facf600.0" configVersion="4bd7d4c0c4f61d3e896b7907e22834e3d102f8d7"/>
-		<Metadata name="Configuration.ИИ_Агент" id="6cbb4561-9519-4036-9398-d7bfc4581319" configVersion="bacc21399b8d4eb6007595da95d818fc7367f6a1"/>
+		<Metadata name="Configuration.ИИ_Агент" id="6cbb4561-9519-4036-9398-d7bfc4581319" configVersion="4d963288d2fcf98585f444bcfd36d61e62e51694"/>
 		<Metadata name="Enum.ИИА_АвторСообщения" id="34283a9a-7520-4733-a5da-3ca28b749a46" configVersion="03859a3627b0139666e93377bb05c89a290195a1">
 			<Metadata name="Enum.ИИА_АвторСообщения.EnumValue.Пользователь" id="13406b63-d3a0-469c-b94b-9121ebd29a6a"/>
 			<Metadata name="Enum.ИИА_АвторСообщения.EnumValue.Система" id="1daf7626-7d19-4b08-b9f5-bf5a0a3dfb4f"/>
@@ -96,6 +96,10 @@
 			<Metadata name="Enum.ИИА_ТипСообщения.EnumValue.Код" id="4a6bb93d-8e3a-47d4-ad4f-84eff3993fb8"/>
 			<Metadata name="Enum.ИИА_ТипСообщения.EnumValue.Запрос" id="99120734-99af-44fa-8787-1bba69dd5244"/>
 			<Metadata name="Enum.ИИА_ТипСообщения.EnumValue.Ошибка" id="fb8be96e-ea9c-400c-b3d2-0c8a3a5ff0ca"/>
+		</Metadata>
+		<Metadata name="InformationRegister.ИИА_Логи" id="0357947f-2ffe-4da6-b06f-27cd35c60913" configVersion="be76f6d1e5f30a68cd212635fc542739035ea74a">
+			<Metadata name="InformationRegister.ИИА_Логи.Dimension.Диалог" id="35314035-263b-44f7-992e-c75fd7744834"/>
+			<Metadata name="InformationRegister.ИИА_Логи.Resource.Лог" id="c40a5c0d-8fee-46b9-a716-6e3fa52121fc"/>
 		</Metadata>
 		<Metadata name="InformationRegister.ИИА_НастройкиПользователей" id="5d9efe1e-6613-4375-9116-d44fa6db7292" configVersion="e77bc10da0472f289d6cb525ff574ff90e672a13">
 			<Metadata name="InformationRegister.ИИА_НастройкиПользователей.Resource.email" id="0bd4fc27-a80d-4003-bfac-ef499faa4323"/>

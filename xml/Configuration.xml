@@ -109,6 +109,7 @@
 			<InformationRegister>ИИА_ТокенИндекс</InformationRegister>
 			<InformationRegister>ИИА_ТокенСтатистика</InformationRegister>
 			<InformationRegister>ИИА_СтатусИндексаRAG</InformationRegister>
+			<InformationRegister>ИИА_Логи</InformationRegister>
 		</ChildObjects>
 	</Configuration>
 </MetaDataObject>
