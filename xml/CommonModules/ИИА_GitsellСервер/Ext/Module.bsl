@@ -1,4 +1,4 @@
-// Серверная интеграция с Gitsell
+﻿// Серверная интеграция с Gitsell
 
 #Область Integration_Gitsell
 
