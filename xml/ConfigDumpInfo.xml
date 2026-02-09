@@ -29,7 +29,7 @@
 		<Metadata name="Catalog.ИИА_Диалоги.Form.ФормаСписка" id="13f74d53-c6d7-460e-9d89-3bd5da9d32d4" configVersion="9013a6d29ac6a57c0f053d8ced4d1f56bbad2651"/>
 		<Metadata name="Catalog.ИИА_Диалоги.Form.ФормаСписка.Form" id="13f74d53-c6d7-460e-9d89-3bd5da9d32d4.0" configVersion="e5c19339a47499a8ccf5996cb2dd75ef470cecbe"/>
 		<Metadata name="Catalog.ИИА_Диалоги.Form.ФормаЭлемента" id="68f8da50-d6c7-489e-89ed-25a6244d7603" configVersion="b758f6eaac2d8fc1635383a3a9594d8ea73d4ae1"/>
-		<Metadata name="Catalog.ИИА_Диалоги.Form.ФормаЭлемента.Form" id="68f8da50-d6c7-489e-89ed-25a6244d7603.0" configVersion="7e25a9fcd544dffd32fa6cd379dbce331b3844e2"/>
+		<Metadata name="Catalog.ИИА_Диалоги.Form.ФормаЭлемента.Form" id="68f8da50-d6c7-489e-89ed-25a6244d7603.0" configVersion="0a547e9814a5e83729cb6981d14ba10c723dbb19"/>
 		<Metadata name="Catalog.ИИА_Настройки" id="b91d6009-ced3-46e6-ae38-017b4d479326" configVersion="88c5b3a649a92cdec31230983304a8d72607e881"/>
 		<Metadata name="CommonCommand.ИИА_RAG" id="326c3dec-8e61-4293-8fbf-90f7903f76b1" configVersion="879d54544162367d0c467ded31965f0774bf17aa"/>
 		<Metadata name="CommonCommand.ИИА_RAG.CommandModule" id="326c3dec-8e61-4293-8fbf-90f7903f76b1.2" configVersion="308386d789f0e37ef913b90724d941d8f27c1c8d"/>

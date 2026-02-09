@@ -3,63 +3,90 @@
 	<WindowOpeningMode>LockOwner</WindowOpeningMode>
 	<Group>Vertical</Group>
 	<UseForFoldersAndItems>Items</UseForFoldersAndItems>
-	<AutoCommandBar name="" id="-1"/>
+	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1"/>
 	<ChildItems>
-		<InputField name="Код" id="1">
-			<DataPath>Объект.Code</DataPath>
-			<EditMode>EnterOnInput</EditMode>
-			<AutoEditMode>true</AutoEditMode>
-			<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
-			<ContextMenu name="КодКонтекстноеМеню" id="2"/>
-			<ExtendedTooltip name="КодРасширеннаяПодсказка" id="3"/>
-		</InputField>
-		<InputField name="Наименование" id="4">
-			<DataPath>Объект.Description</DataPath>
-			<EditMode>EnterOnInput</EditMode>
-			<AutoEditMode>true</AutoEditMode>
-			<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
-			<ContextMenu name="НаименованиеКонтекстноеМеню" id="5"/>
-			<ExtendedTooltip name="НаименованиеРасширеннаяПодсказка" id="6"/>
-		</InputField>
-		<InputField name="Пользователь" id="7">
-			<DataPath>Объект.Пользователь</DataPath>
-			<EditMode>EnterOnInput</EditMode>
-			<AutoEditMode>true</AutoEditMode>
-			<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
-			<ContextMenu name="ПользовательКонтекстноеМеню" id="8"/>
-			<ExtendedTooltip name="ПользовательРасширеннаяПодсказка" id="9"/>
-		</InputField>
-		<InputField name="Имя" id="10">
-			<DataPath>Объект.Имя</DataPath>
-			<EditMode>EnterOnInput</EditMode>
-			<AutoEditMode>true</AutoEditMode>
-			<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
-			<ContextMenu name="ИмяКонтекстноеМеню" id="11"/>
-			<ExtendedTooltip name="ИмяРасширеннаяПодсказка" id="12"/>
-		</InputField>
-		<InputField name="ТипДиалога" id="13">
-			<DataPath>Объект.ТипДиалога</DataPath>
-			<EditMode>EnterOnInput</EditMode>
-			<AutoEditMode>true</AutoEditMode>
-			<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
-			<ContextMenu name="ТипДиалогаКонтекстноеМеню" id="14"/>
-			<ExtendedTooltip name="ТипДиалогаРасширеннаяПодсказка" id="15"/>
-		</InputField>
-		<InputField name="ДатаСоздания" id="16">
-			<DataPath>Объект.ДатаСоздания</DataPath>
-			<EditMode>EnterOnInput</EditMode>
-			<AutoEditMode>true</AutoEditMode>
-			<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
-			<ContextMenu name="ДатаСозданияКонтекстноеМеню" id="17"/>
-			<ExtendedTooltip name="ДатаСозданияРасширеннаяПодсказка" id="18"/>
-		</InputField>
-		<CheckBoxField name="Активный" id="19">
-			<DataPath>Объект.Активный</DataPath>
-			<EditMode>EnterOnInput</EditMode>
-			<AutoEditMode>true</AutoEditMode>
-			<ContextMenu name="АктивныйКонтекстноеМеню" id="20"/>
-			<ExtendedTooltip name="АктивныйРасширеннаяПодсказка" id="21"/>
-		</CheckBoxField>
+		<UsualGroup name="Группа1" id="164">
+			<Group>AlwaysHorizontal</Group>
+			<Representation>None</Representation>
+			<ShowTitle>false</ShowTitle>
+			<ExtendedTooltip name="Группа1РасширеннаяПодсказка" id="165"/>
+			<ChildItems>
+				<InputField name="Код" id="1">
+					<DataPath>Объект.Code</DataPath>
+					<EditMode>EnterOnInput</EditMode>
+					<AutoEditMode>true</AutoEditMode>
+					<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
+					<ContextMenu name="КодКонтекстноеМеню" id="2"/>
+					<ExtendedTooltip name="КодРасширеннаяПодсказка" id="3"/>
+				</InputField>
+				<InputField name="Наименование" id="4">
+					<DataPath>Объект.Description</DataPath>
+					<EditMode>EnterOnInput</EditMode>
+					<AutoEditMode>true</AutoEditMode>
+					<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
+					<ContextMenu name="НаименованиеКонтекстноеМеню" id="5"/>
+					<ExtendedTooltip name="НаименованиеРасширеннаяПодсказка" id="6"/>
+				</InputField>
+				<InputField name="Имя" id="10">
+					<DataPath>Объект.Имя</DataPath>
+					<EditMode>EnterOnInput</EditMode>
+					<AutoEditMode>true</AutoEditMode>
+					<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
+					<ContextMenu name="ИмяКонтекстноеМеню" id="11"/>
+					<ExtendedTooltip name="ИмяРасширеннаяПодсказка" id="12"/>
+				</InputField>
+			</ChildItems>
+		</UsualGroup>
+		<UsualGroup name="Группа2" id="166">
+			<Representation>None</Representation>
+			<ShowTitle>false</ShowTitle>
+			<ExtendedTooltip name="Группа2РасширеннаяПодсказка" id="167"/>
+			<ChildItems>
+				<InputField name="Пользователь" id="7">
+					<DataPath>Объект.Пользователь</DataPath>
+					<EditMode>EnterOnInput</EditMode>
+					<AutoEditMode>true</AutoEditMode>
+					<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
+					<ContextMenu name="ПользовательКонтекстноеМеню" id="8"/>
+					<ExtendedTooltip name="ПользовательРасширеннаяПодсказка" id="9"/>
+				</InputField>
+				<InputField name="ТипДиалога" id="13">
+					<DataPath>Объект.ТипДиалога</DataPath>
+					<EditMode>EnterOnInput</EditMode>
+					<AutoEditMode>true</AutoEditMode>
+					<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
+					<ContextMenu name="ТипДиалогаКонтекстноеМеню" id="14"/>
+					<ExtendedTooltip name="ТипДиалогаРасширеннаяПодсказка" id="15"/>
+				</InputField>
+			</ChildItems>
+		</UsualGroup>
+		<UsualGroup name="Группа3" id="168">
+			<Representation>None</Representation>
+			<ShowTitle>false</ShowTitle>
+			<ExtendedTooltip name="Группа3РасширеннаяПодсказка" id="169"/>
+			<ChildItems>
+				<InputField name="ДатаСоздания" id="16">
+					<DataPath>Объект.ДатаСоздания</DataPath>
+					<EditMode>EnterOnInput</EditMode>
+					<AutoEditMode>true</AutoEditMode>
+					<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
+					<ContextMenu name="ДатаСозданияКонтекстноеМеню" id="17"/>
+					<ExtendedTooltip name="ДатаСозданияРасширеннаяПодсказка" id="18"/>
+				</InputField>
+				<CheckBoxField name="Активный" id="19">
+					<DataPath>Объект.Активный</DataPath>
+					<EditMode>EnterOnInput</EditMode>
+					<AutoEditMode>true</AutoEditMode>
+					<ContextMenu name="АктивныйКонтекстноеМеню" id="20"/>
+					<ExtendedTooltip name="АктивныйРасширеннаяПодсказка" id="21"/>
+				</CheckBoxField>
+				<CheckBoxField name="ОркестраторВключен" id="170">
+					<DataPath>Объект.ОркестраторВключен</DataPath>
+					<ContextMenu name="ОркестраторВключенКонтекстноеМеню" id="171"/>
+					<ExtendedTooltip name="ОркестраторВключенРасширеннаяПодсказка" id="172"/>
+				</CheckBoxField>
+			</ChildItems>
+		</UsualGroup>
 		<InputField name="Лог" id="22">
 			<DataPath>Объект.Лог</DataPath>
 			<EditMode>EnterOnInput</EditMode>
@@ -207,6 +234,12 @@
 							<v8:content>ИзмененныеОбъекты</v8:content>
 						</v8:item>
 					</Title>
+					<ToolTip>
+						<v8:item>
+							<v8:lang/>
+							<v8:content>Группа измененные объекты</v8:content>
+						</v8:item>
+					</ToolTip>
 					<Group>Vertical</Group>
 					<ScrollOnCompress>false</ScrollOnCompress>
 					<ExtendedTooltip name="ГруппаИзмененныеОбъектыРасширеннаяПодсказка" id="70"/>
