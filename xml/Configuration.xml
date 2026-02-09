@@ -76,6 +76,7 @@
 		</Properties>
 		<ChildObjects>
 			<Subsystem>ИИА_Агент</Subsystem>
+			<CommonPicture>ИИА_ДлительнаяОперация</CommonPicture>
 			<Role>ИИА_ОсновнаяРоль</Role>
 			<CommonModule>ИИА_DSL</CommonModule>
 			<CommonModule>ИИА_ВызовСервера</CommonModule>

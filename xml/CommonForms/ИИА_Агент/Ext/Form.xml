@@ -74,6 +74,7 @@
 						</LabelField>
 						<LabelField name="ОркестраторРаботает" id="78">
 							<DataPath>ОркестраторРаботает</DataPath>
+							<Visible>false</Visible>
 							<TitleLocation>None</TitleLocation>
 							<ContextMenu name="ОркестраторРаботаетКонтекстноеМеню" id="79"/>
 							<ExtendedTooltip name="ОркестраторРаботаетРасширеннаяПодсказка" id="80"/>
@@ -107,6 +108,20 @@
 							<ContextMenu name="СтрокаСтатусаКонтекстноеМеню" id="5"/>
 							<ExtendedTooltip name="СтрокаСтатусаРасширеннаяПодсказка" id="6"/>
 						</LabelField>
+						<PictureDecoration name="ДекорацияДлительнаяОперация" id="165">
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content>Декорация длительная операция</v8:content>
+								</v8:item>
+							</Title>
+							<Picture>
+								<xr:Ref>CommonPicture.ИИА_ДлительнаяОперация</xr:Ref>
+								<xr:LoadTransparent>true</xr:LoadTransparent>
+							</Picture>
+							<ContextMenu name="ДекорацияДлительнаяОперацияКонтекстноеМеню" id="166"/>
+							<ExtendedTooltip name="ДекорацияДлительнаяОперацияРасширеннаяПодсказка" id="167"/>
+						</PictureDecoration>
 					</ChildItems>
 				</UsualGroup>
 				<UsualGroup name="ГруппаВвод" id="51">
