@@ -10,6 +10,7 @@
 
 import sys
 import os
+from datetime import datetime
 
 # Поддержка запуска из каталога automation
 _script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +20,9 @@ if _script_dir not in sys.path:
 from com_1c import connect_to_1c, call_procedure, get_enum_value
 from com_1c.com_connector import setup_console_encoding
 from com_1c.config import get_connection_string
+
+# Максимальный размер лог-файла в байтах (по умолчанию 10 МБ)
+DEFAULT_MAX_LOG_SIZE = 10 * 1024 * 1024
 
 
 def main():
@@ -53,6 +57,13 @@ def main():
         "--log-file",
         default=None,
         help="Путь к файлу для записи лога (опционально)",
+    )
+    parser.add_argument(
+        "--log-max-size",
+        type=int,
+        default=DEFAULT_MAX_LOG_SIZE,
+        metavar="BYTES",
+        help=f"Макс. размер лог-файла в байтах, при превышении выполняется ротация (по умолчанию {DEFAULT_MAX_LOG_SIZE})",
     )
     parser.add_argument(
         "--verbose", "-v",
@@ -116,11 +127,28 @@ def main():
     print("--- Лог ---")
     print(log_text or "(пусто)")
 
-    if args.log_file and log_text:
+    if args.log_file:
         try:
-            with open(args.log_file, "a", encoding="utf-8") as f:
-                f.write("\n=== run_dialog ===\n")
-                f.write(log_text)
+            log_path = os.path.abspath(args.log_file)
+            # Ротация: если файл превышает лимит, сохраняем в .old и начинаем заново
+            if os.path.exists(log_path) and os.path.getsize(log_path) >= args.log_max_size:
+                old_path = log_path + ".old"
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+                os.rename(log_path, old_path)
+                if args.verbose:
+                    print(f"Ротация лога: {log_path} -> {old_path}")
+            # Заголовок сессии: дата, диалог, задача, результат
+            session_header = (
+                f"\n{'='*60}\n"
+                f"run_dialog | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                f"Диалог: {ref_str} | Успех: {success}\n"
+                f"Задача: {args.text[:80]}{'...' if len(args.text) > 80 else ''}\n"
+                f"{'='*60}\n"
+            )
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(session_header)
+                f.write(log_text or "(лог пуст)")
                 f.write("\n")
             print(f"\nЛог дописан в {args.log_file}")
         except Exception as e:
