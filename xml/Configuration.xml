@@ -62,7 +62,7 @@
 				<xr:Item xsi:type="xr:MDObjectRef">Role.ИИА_ОсновнаяРоль</xr:Item>
 			</DefaultRoles>
 			<Vendor/>
-			<Version/>
+			<Version>0.8.0</Version>
 			<Caption/>
 			<ShortCaption/>
 			<DefaultStyle/>
