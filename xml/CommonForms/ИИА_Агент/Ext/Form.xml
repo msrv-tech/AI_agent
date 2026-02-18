@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <Form xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcssch="http://v8.1c.ru/8.1/data-composition-system/schema" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.21">
 	<WindowOpeningMode>DontBlock</WindowOpeningMode>
 	<Group>Vertical</Group>
@@ -241,8 +241,9 @@
 						</v8:item>
 					</Title>
 					<Width>40</Width>
+					<Height>30</Height>
 					<HorizontalStretch>false</HorizontalStretch>
-					<VerticalStretch>true</VerticalStretch>
+					<VerticalStretch>false</VerticalStretch>
 					<Group>Vertical</Group>
 					<Representation>None</Representation>
 					<ShowTitle>false</ShowTitle>
@@ -253,6 +254,9 @@
 							<CommandBarLocation>None</CommandBarLocation>
 							<AutoMaxWidth>false</AutoMaxWidth>
 							<MaxWidth>40</MaxWidth>
+							<Height>12</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<VerticalStretch>false</VerticalStretch>
 							<RowSelectionMode>Cell</RowSelectionMode>
 							<UseAlternationRowColorBWA>false</UseAlternationRowColorBWA>
 							<AutoInsertNewRow>true</AutoInsertNewRow>
@@ -329,6 +333,61 @@
 									<AutoEditMode>true</AutoEditMode>
 									<ContextMenu name="ПланЗадачРезультатКонтекстноеМеню" id="114"/>
 									<ExtendedTooltip name="ПланЗадачРезультатРасширеннаяПодсказка" id="115"/>
+								</InputField>
+							</ChildItems>
+						</Table>
+						<LabelDecoration name="ЗаголовокИзмененныеОбъекты" id="168">
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content>Измененные объекты</v8:content>
+								</v8:item>
+							</Title>
+							<ContextMenu name="ЗаголовокИзмененныеОбъектыКонтекстноеМеню" id="169"/>
+							<ExtendedTooltip name="ЗаголовокИзмененныеОбъектыРасширеннаяПодсказка" id="170"/>
+						</LabelDecoration>
+						<Table name="ИзмененныеОбъекты" id="171">
+							<Representation>List</Representation>
+							<CommandBarLocation>None</CommandBarLocation>
+							<AutoMaxWidth>false</AutoMaxWidth>
+							<MaxWidth>40</MaxWidth>
+							<Height>8</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<VerticalStretch>false</VerticalStretch>
+							<RowSelectionMode>Cell</RowSelectionMode>
+							<DataPath>ИзмененныеОбъекты</DataPath>
+							<CommandSet>
+								<ExcludedCommand>Add</ExcludedCommand>
+								<ExcludedCommand>CancelSearch</ExcludedCommand>
+								<ExcludedCommand>Change</ExcludedCommand>
+								<ExcludedCommand>Copy</ExcludedCommand>
+								<ExcludedCommand>CopyToClipboard</ExcludedCommand>
+								<ExcludedCommand>Delete</ExcludedCommand>
+								<ExcludedCommand>EndEdit</ExcludedCommand>
+								<ExcludedCommand>Find</ExcludedCommand>
+								<ExcludedCommand>FindByCurrentValue</ExcludedCommand>
+								<ExcludedCommand>MoveDown</ExcludedCommand>
+								<ExcludedCommand>MoveUp</ExcludedCommand>
+								<ExcludedCommand>OutputList</ExcludedCommand>
+								<ExcludedCommand>SearchEverywhere</ExcludedCommand>
+								<ExcludedCommand>SearchHistory</ExcludedCommand>
+								<ExcludedCommand>SelectAll</ExcludedCommand>
+								<ExcludedCommand>ShowMultipleSelection</ExcludedCommand>
+								<ExcludedCommand>ShowRowRearrangement</ExcludedCommand>
+								<ExcludedCommand>SortListAsc</ExcludedCommand>
+								<ExcludedCommand>SortListDesc</ExcludedCommand>
+							</CommandSet>
+							<RowFilter xsi:nil="true"/>
+							<ContextMenu name="ИзмененныеОбъектыКонтекстноеМеню" id="172"/>
+							<AutoCommandBar name="ИзмененныеОбъектыКоманднаяПанель" id="173"/>
+							<ExtendedTooltip name="ИзмененныеОбъектыРасширеннаяПодсказка" id="174"/>
+							<ChildItems>
+								<InputField name="ИзмененныеОбъектыСсылкаНаОбъект" id="175">
+									<DataPath>ИзмененныеОбъекты.СсылкаНаОбъект</DataPath>
+									<EditMode>EnterOnInput</EditMode>
+									<AutoEditMode>true</AutoEditMode>
+									<ContextMenu name="ИзмененныеОбъектыСсылкаНаОбъектКонтекстноеМеню" id="176"/>
+									<ExtendedTooltip name="ИзмененныеОбъектыСсылкаНаОбъектРасширеннаяПодсказка" id="177"/>
 								</InputField>
 							</ChildItems>
 						</Table>
