@@ -283,6 +283,85 @@ def create_query(com_object, query_text: str):
     return query
 
 
+def get_enum_value(conn, enum_name: str, value_name: str):
+    """
+    Получает значение перечисления 1С для передачи в вызов процедур через COM.
+
+    Args:
+        conn: COM-объект соединения с 1С
+        enum_name: имя перечисления (напр. "ИИА_ТипДиалога")
+        value_name: имя значения (напр. "Агент", "Запрос1С")
+
+    Returns:
+        COM-объект значения перечисления или None при ошибке
+    """
+    try:
+        enums = safe_getattr(conn, "Перечисления", None)
+        if enums is None:
+            return None
+        enum_obj = safe_getattr(enums, enum_name, None)
+        if enum_obj is None:
+            return None
+        return safe_getattr(enum_obj, value_name, None)
+    except Exception:
+        return None
+
+
+def call_procedure(conn, module_name: str, procedure_name: str, *args):
+    """
+    Вызывает экспортную процедуру/функцию общего модуля 1С через COM.
+
+    Args:
+        conn: COM-объект соединения с 1С
+        module_name: имя общего модуля (напр. "ИИА_ДиалогCOM")
+        procedure_name: имя экспортной процедуры/функции (напр. "СоздатьДиалогИВыполнитьАгентаСинхронно")
+        *args: аргументы процедуры
+
+    Returns:
+        Возвращаемое значение процедуры/функции или None при ошибке
+    """
+    try:
+        module = safe_getattr(conn, module_name, None)
+        if module is None:
+            raise RuntimeError(f"Модуль '{module_name}' не найден. Проверьте ExternalConnection.")
+        proc = safe_getattr(module, procedure_name, None)
+        if proc is None:
+            raise RuntimeError(f"Процедура '{procedure_name}' не найдена в модуле '{module_name}'.")
+        if not callable(proc):
+            raise RuntimeError(f"'{procedure_name}' не является вызываемым.")
+        return proc(*args)
+    except Exception as exc:
+        raise
+
+
+def structure_to_dict(com_structure):
+    """
+    Преобразует COM-структуру 1С в Python dict (если возможно).
+    Для примитивов возвращает как есть.
+    """
+    if com_structure is None:
+        return None
+    try:
+        if hasattr(com_structure, "_oleobj_"):
+            # COM object — пробуем получить свойства
+            result = {}
+            for attr in ("СсылкаДиалога", "Успех", "Лог", "Сообщения"):
+                try:
+                    val = getattr(com_structure, attr, None)
+                    if val is not None:
+                        if hasattr(val, "_oleobj_"):
+                            result[attr] = str(val)  # COM ref -> string
+                        else:
+                            result[attr] = val
+                except Exception:
+                    pass
+            if result:
+                return result
+        return com_structure
+    except Exception:
+        return com_structure
+
+
 def execute_query(
     com_object,
     query_text: str,

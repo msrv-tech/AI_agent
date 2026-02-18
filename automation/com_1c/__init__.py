@@ -18,6 +18,9 @@ from .com_connector import (
     safe_getattr,
     call_if_callable,
     setup_console_encoding,
+    get_enum_value,
+    call_procedure,
+    structure_to_dict,
 )
 
 __all__ = [
@@ -29,4 +32,7 @@ __all__ = [
     "safe_getattr",
     "call_if_callable",
     "setup_console_encoding",
+    "get_enum_value",
+    "call_procedure",
+    "structure_to_dict",
 ]
