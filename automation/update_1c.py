@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 """
-Сборка расширения из XML, загрузка в конфигурацию, обновление БД и запуск 1С.
+Сборка расширения из XML, обновление БД и запуск 1С.
 
-Использует тот же .env, что run_dialog.py и COM (1C_CONNECTION_STRING).
+По умолчанию: LoadConfigFromFiles (xml) → UpdateDBCfg → запуск 1С.
+Расширение загружается сразу из xml/, без промежуточного .cfe.
 
 Примеры:
     python update_1c.py
-        Полный цикл: xml -> .cfe -> загрузка -> обновление БД -> запуск 1С
+        xml → конфигурация → обновление БД → запуск 1С
 
     python update_1c.py --skip-run-client
-        Сборка и обновление без запуска 1С
+        xml → конфигурация → обновление БД (без запуска)
 
     python update_1c.py --no-build-from-xml
-        Без сборки: только загрузка .cfe и обновление БД
+        Только обновление БД и запуск (расширение уже в конфигурации)
 
-    python update_1c.py --skip-load-extension
-        Только обновление БД (расширение уже загружено)
+    python update_1c.py --dump-cfe
+        Дополнительно выгрузить .cfe в bin/ (для распространения)
 """
 
 import argparse
@@ -43,12 +44,12 @@ def main():
         "--no-build-from-xml",
         dest="build_from_xml",
         action="store_false",
-        help="Пропустить сборку из xml (по умолчанию: собирать)",
+        help="Пропустить LoadConfigFromFiles (расширение уже в конфигурации)",
     )
     parser.add_argument(
-        "--skip-load-extension",
+        "--dump-cfe",
         action="store_true",
-        help="Не загружать .cfe (только обновить БД)",
+        help="Выгрузить расширение в bin/ИИ_Агент.cfe",
     )
     parser.add_argument(
         "--skip-db-update",
@@ -72,6 +73,18 @@ def main():
     os.environ["1C_CONNECTION_STRING"] = connection_string
     print(f"База: {connection_string[:70]}...")
 
+    # Извлекаем путь для /F (файловая база) — 1cv8 лучше работает с /F чем с /IBConnectionString
+    ib_path = None
+    if connection_string.strip().lower().startswith('file='):
+        import re
+        m = re.search(r'file\s*=\s*"([^"]+)"', connection_string, re.I)
+        if m:
+            ib_path = m.group(1).strip().rstrip("\\")
+        m2 = re.search(r'usr\s*=\s*"([^"]*)"', connection_string, re.I)
+        m3 = re.search(r'pwd\s*=\s*"?([^";]*)"?', connection_string, re.I)
+        ib_user = m2.group(1) if m2 else ""
+        ib_pwd = m3.group(1) if m3 else ""
+
     platform_exe = DEFAULT_PLATFORM
     if not os.path.isfile(platform_exe):
         print(f"Ошибка: 1cv8 не найден: {platform_exe}", file=sys.stderr)
@@ -80,11 +93,6 @@ def main():
     os.makedirs(log_dir, exist_ok=True)
 
     cfe_full = os.path.abspath(cfe_path)
-    if not args.skip_load_extension and not args.build_from_xml:
-        if not os.path.isfile(cfe_full):
-            print(f"Ошибка: .cfe не найден: {cfe_full}", file=sys.stderr)
-            sys.exit(1)
-
     if args.build_from_xml:
         if not os.path.isdir(xml_path):
             print(f"Ошибка: каталог xml не найден: {xml_path}", file=sys.stderr)
@@ -105,12 +113,24 @@ def main():
             print(f"Ошибка: 1cv8 завершился с кодом {result.returncode}", file=sys.stderr)
         return result.returncode
 
-    base_args = [
-        "DESIGNER",
-        "/DisableStartupDialogs",
-        "/DisableStartupMessages",
-        "/IBConnectionString", connection_string,
-    ]
+    if ib_path and os.path.isdir(ib_path):
+        base_args = [
+            "DESIGNER",
+            "/DisableStartupDialogs",
+            "/DisableStartupMessages",
+            "/F", ib_path,
+        ]
+        if ib_user:
+            base_args.extend(["/N", ib_user])
+        if ib_pwd is not None and str(ib_pwd).strip():
+            base_args.extend(["/P", ib_pwd])
+    else:
+        base_args = [
+            "DESIGNER",
+            "/DisableStartupDialogs",
+            "/DisableStartupMessages",
+            "/IBConnectionString", connection_string,
+        ]
 
     update_log = os.path.abspath(os.path.join(log_dir, "update-db.log"))
     build_load_log = os.path.abspath(os.path.join(log_dir, "build-load.log"))
@@ -120,9 +140,7 @@ def main():
 
     try:
         if args.build_from_xml:
-            os.makedirs(os.path.dirname(cfe_full), exist_ok=True)
             xml_full = os.path.abspath(xml_path)
-
             load_args = base_args + [
                 "/Out", build_load_log,
                 "/LoadConfigFromFiles", xml_full,
@@ -132,6 +150,8 @@ def main():
                 sys.exit(1)
             done.append("собрано из xml")
 
+        if args.dump_cfe:
+            os.makedirs(os.path.dirname(cfe_full), exist_ok=True)
             dump_args = base_args + [
                 "/Out", build_dump_log,
                 "/DumpCfg", cfe_full,
@@ -139,38 +159,32 @@ def main():
             ]
             if run_1cv8(dump_args, "Выгрузка в .cfe") != 0:
                 sys.exit(1)
+            done.append("выгружено в .cfe")
 
-        need_load = not args.skip_load_extension
-        need_update = not args.skip_db_update
-
-        if need_load or need_update:
+        if not args.skip_db_update:
             base_args.extend(["/Out", update_log])
-
-            if need_load:
-                load_cfg_args = base_args + [
-                    "/LoadCfg", cfe_full,
-                    "-Extension", EXTENSION_NAME,
-                ]
-                if run_1cv8(load_cfg_args, "Загрузка .cfe в конфигурацию") != 0:
-                    sys.exit(1)
-                done.append("загружено")
-
-            if need_update:
-                update_args = base_args + [
-                    "/UpdateDBCfg",
-                    "-Extension", EXTENSION_NAME,
-                ]
-                if run_1cv8(update_args, "Обновление конфигурации БД") != 0:
-                    sys.exit(1)
-                done.append("БД обновлена")
+            update_args = base_args + [
+                "/UpdateDBCfg",
+                "-Extension", EXTENSION_NAME,
+            ]
+            if run_1cv8(update_args, "Обновление конфигурации БД") != 0:
+                sys.exit(1)
+            done.append("БД обновлена")
 
         if not args.skip_run_client:
-            ent_args = [
-                "ENTERPRISE",
-                "/DisableStartupDialogs",
-                "/DisableStartupMessages",
-                "/IBConnectionString", connection_string,
-            ]
+            if ib_path and os.path.isdir(ib_path):
+                ent_args = ["ENTERPRISE", "/DisableStartupDialogs", "/DisableStartupMessages", "/F", ib_path]
+                if ib_user:
+                    ent_args.extend(["/N", ib_user])
+                if ib_pwd is not None and str(ib_pwd).strip():
+                    ent_args.extend(["/P", ib_pwd])
+            else:
+                ent_args = [
+                    "ENTERPRISE",
+                    "/DisableStartupDialogs",
+                    "/DisableStartupMessages",
+                    "/IBConnectionString", connection_string,
+                ]
             proc = subprocess.Popen(
                 [platform_exe] + ent_args,
                 stdout=subprocess.DEVNULL,
