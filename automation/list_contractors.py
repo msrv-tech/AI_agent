@@ -18,10 +18,12 @@ if _script_dir not in sys.path:
     sys.path.insert(0, _script_dir)
 
 from com_1c import connect_to_1c, execute_query
+from com_1c.com_connector import setup_console_encoding
 from com_1c.config import get_connection_string
 
 
 def main():
+    setup_console_encoding()
     import argparse
     parser = argparse.ArgumentParser(description="Вывод всех контрагентов из 1С через COM")
     parser.add_argument("--connection", "-c", default=None, help="Строка подключения к 1С")

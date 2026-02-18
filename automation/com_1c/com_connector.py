@@ -8,7 +8,29 @@
 - выполнение запросов и безопасная работа с COM-объектами.
 """
 
+import re
+import sys
 from typing import Iterable, Optional, Sequence, Tuple
+
+
+def setup_console_encoding():
+    """Настраивает кодировку stdout/stderr для корректного вывода кириллицы в Windows."""
+    if sys.platform != "win32":
+        return
+    try:
+        import ctypes
+        kernel32 = ctypes.windll.kernel32
+        # Переключаем консоль на UTF-8 (65001)
+        kernel32.SetConsoleOutputCP(65001)
+        kernel32.SetConsoleCP(65001)
+    except Exception:
+        pass
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 try:
     import win32com.client
@@ -16,8 +38,9 @@ except ImportError:
     win32com = None  # type: ignore
 
 DEFAULT_COM_PROGIDS: Tuple[str, ...] = (
-    "V83.COMConnector",
-    "V82.COMConnector",
+    "V85.COMConnector",  # платформа 8.5
+    "V83.COMConnector",  # платформа 8.3
+    "V82.COMConnector",  # платформа 8.2
 )
 
 _verbose = False
@@ -167,6 +190,45 @@ def get_com_connector(progids: Optional[Sequence[str]] = None):
     raise RuntimeError(f"Не удалось создать COM-коннектор. Детали: {messages}")
 
 
+def _get_short_path(path: str) -> Optional[str]:
+    """
+    Преобразует путь в короткий формат 8.3 (обход проблем с кириллицей в 1С COM).
+    Возвращает None при ошибке.
+    """
+    if sys.platform != "win32":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+        kernel32 = ctypes.windll.kernel32
+        buf = ctypes.create_unicode_buffer(wintypes.MAX_PATH)
+        if kernel32.GetShortPathNameW(path, buf, len(buf)):
+            return buf.value
+    except Exception:
+        pass
+    return None
+
+
+def _apply_short_path_for_unicode(connection_string: str) -> str:
+    """
+    Заменяет путь в File="..." на короткий (8.3), если путь содержит не-ASCII.
+    Обход проблем с кириллицей в путях при подключении 1С через COM.
+    """
+    match = re.search(r'File="([^"]*)"', connection_string)
+    if not match:
+        return connection_string
+    path = match.group(1).rstrip("\\")
+    if not path or not any(ord(c) > 127 for c in path):
+        return connection_string
+    short_path = _get_short_path(path)
+    if short_path:
+        old_part = match.group(0)
+        new_part = f'File="{short_path}"'
+        connection_string = connection_string.replace(old_part, new_part, 1)
+        _log(f"Путь с кириллицей заменён на короткий: {short_path}")
+    return connection_string
+
+
 def resolve_connection_string(db_path_or_config: str) -> Tuple[str, str]:
     """
     Определяет строку подключения к базе 1С.
@@ -174,7 +236,11 @@ def resolve_connection_string(db_path_or_config: str) -> Tuple[str, str]:
     """
     if "Srvr=" in db_path_or_config or "Ref=" in db_path_or_config:
         return db_path_or_config, "Строка подключения (сервер)"
-    connection_string = f'File="{db_path_or_config}";Usr=;Pwd=;'
+    if 'File="' in db_path_or_config and ";" in db_path_or_config.split("File=", 1)[-1]:
+        connection_string = db_path_or_config
+    else:
+        connection_string = f'File="{db_path_or_config}";Usr=;Pwd=;'
+    connection_string = _apply_short_path_for_unicode(connection_string)
     return connection_string, f"Файловая база: {db_path_or_config}"
 
 

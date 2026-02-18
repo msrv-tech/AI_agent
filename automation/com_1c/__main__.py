@@ -13,7 +13,8 @@ import argparse
 import json
 import sys
 
-from .com_connector import connect_to_1c, execute_query, set_verbose
+
+from .com_connector import connect_to_1c, execute_query, set_verbose, setup_console_encoding
 from .config import get_connection_string
 
 
@@ -24,6 +25,7 @@ def _parse_columns(columns_arg: str) -> list:
 
 
 def main() -> int:
+    setup_console_encoding()
     parser = argparse.ArgumentParser(
         description="Выполнение запроса к базе 1С через COM"
     )

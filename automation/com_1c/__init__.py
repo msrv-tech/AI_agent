@@ -17,6 +17,7 @@ from .com_connector import (
     execute_query,
     safe_getattr,
     call_if_callable,
+    setup_console_encoding,
 )
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
     "execute_query",
     "safe_getattr",
     "call_if_callable",
+    "setup_console_encoding",
 ]
