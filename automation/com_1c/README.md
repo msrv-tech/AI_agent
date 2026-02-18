@@ -76,7 +76,8 @@ copy .env.example .env
 # 1C_CONNECTION_STRING=File="D:\EDT_base\КонфигурацияТест";
 ```
 
-- **PowerShell**: `update-extension-and-run-db.ps1` и `update-and-run-vanessa.ps1` при старте читают `.env` и выставляют переменные окружения.
+- **Python**: `update_1c.py` при старте читает `.env` (1C_CONNECTION_STRING).
+- **PowerShell**: `vanessa/update-and-run-vanessa.ps1` также читает `.env`.
 - **Python** (`python -m com_1c`, `run-com.ps1`): используется `python-dotenv`, загружается `.env` из корня проекта.
 - Файл `.env` в `.gitignore` — в репозиторий не попадает. В репозитории лежит только `.env.example`.
 - При передаче `-ConnectionString` в скрипты сборки параметр имеет приоритет над `.env`.
