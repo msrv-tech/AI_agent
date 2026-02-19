@@ -1,0 +1,23 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		
+		{
+			"name": "Обновить 1С (update_1c)",
+			"type": "python",
+			"request": "launch",
+			"program": "${workspaceFolder}/automation/update_1c.py",
+			"cwd": "${workspaceFolder}/automation",
+			"console": "integratedTerminal"
+		},
+		{
+			"name": "Обновить 1С (без клиента)",
+			"type": "python",
+			"request": "launch",
+			"program": "${workspaceFolder}/automation/update_1c.py",
+			"args": ["--skip-run-client"],
+			"cwd": "${workspaceFolder}/automation",
+			"console": "integratedTerminal"
+		}
+	]
+}
