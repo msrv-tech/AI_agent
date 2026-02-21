@@ -9,6 +9,7 @@ set "SCRIPT_DIR=%~dp0"
 set "LOGS_DIR=%SCRIPT_DIR%logs"
 set "JAR=%SCRIPT_DIR%bsl-language-server-0.28.4-exec.jar"
 set "XML_DIR=%SCRIPT_DIR%..\xml"
+set "CONFIG=%SCRIPT_DIR%..\.bsl-language-server.json"
 
 if not exist "%LOGS_DIR%" mkdir "%LOGS_DIR%"
 
@@ -27,7 +28,11 @@ if not exist "%XML_DIR%" (
 echo Анализ BSL: %XML_DIR%
 echo.
 
-java %JAVA_OPTS% -jar "%JAR%" --analyze --srcDir "%XML_DIR%" --reporter json -o "%LOGS_DIR%" -q
+if exist "%CONFIG%" (
+    java %JAVA_OPTS% -jar "%JAR%" --analyze --srcDir "%XML_DIR%" --configuration "%CONFIG%" --reporter json -o "%LOGS_DIR%" -q
+) else (
+    java %JAVA_OPTS% -jar "%JAR%" --analyze --srcDir "%XML_DIR%" --reporter json -o "%LOGS_DIR%" -q
+)
 
 python "%SCRIPT_DIR%bsl_report_summary.py"
 set "SUMMARY=%LOGS_DIR%\bsl-summary.txt"
