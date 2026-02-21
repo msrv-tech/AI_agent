@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ConfigDumpInfo xmlns="http://v8.1c.ru/8.3/xcf/dumpinfo" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" format="Hierarchical" version="2.21">
 	<ConfigVersions>
 		<Metadata name="Catalog.ИИА_Диалоги" id="d9f505c8-06e8-4aa7-b342-265e8c4a6cdf" configVersion="7abb86e6ce828270fef89050cc133243bae70067">
@@ -19,7 +19,6 @@
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.Сообщения.Attribute.Автор" id="b10e16b7-0078-43ce-ba74-ee83d13072d1"/>
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.Сообщения.Attribute.СтатусDSL" id="b1bbd242-d201-42e1-aef5-2f66e45f1105"/>
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.План.Attribute.Выполнена" id="b1c9ff92-717d-4d76-a9ac-957e6d04ae62"/>
-			<Metadata name="Catalog.ИИА_Диалоги.Attribute.ОркестраторВключен" id="c5cdf4db-bbc8-457a-abd2-76a47fafecc0"/>
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.Сообщения.Attribute.ТипСообщения" id="cba79378-d0eb-4969-9688-4613de394601"/>
 			<Metadata name="Catalog.ИИА_Диалоги.Attribute.Активный" id="db5cf1bd-544b-49f9-a9e2-095c1c6df7d7"/>
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.Сообщения.Attribute.Статус" id="ed07208c-53e8-40ea-9bba-3260396d7f20"/>
@@ -97,6 +96,7 @@
 		</Metadata>
 		<Metadata name="InformationRegister.ИИА_ДанныеДиалогов" id="cff8ed60-6870-463c-b9e0-7b1118e71043" configVersion="39ff55302914d543e136eeecc9ae3aaa089f08c3">
 			<Metadata name="InformationRegister.ИИА_ДанныеДиалогов.Resource.ХранилищеЗначения" id="a541756b-64ac-493c-839b-9290b83da04f"/>
+			<Metadata name="InformationRegister.ИИА_ДанныеДиалогов.Resource.ОркестраторВключен" id="b2d3e4f5-6a7b-4c8d-9e0f-1a2b3c4d5e6f"/>
 			<Metadata name="InformationRegister.ИИА_ДанныеДиалогов.Dimension.Диалог" id="a7606f99-c8ce-4870-8939-db6e1dda7405"/>
 		</Metadata>
 		<Metadata name="InformationRegister.ИИА_Логи" id="0357947f-2ffe-4da6-b06f-27cd35c60913" configVersion="fe4ce083eef1d3a907ca3d71c69c18e06cdba610">
