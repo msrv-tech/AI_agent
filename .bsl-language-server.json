@@ -1,5 +1,9 @@
 {
+  "$schema": "https://1c-syntax.github.io/bsl-language-server/configuration/schema.json",
+  "language": "ru",
+  "configurationRoot": "xml",
   "diagnostics": {
+    "computeTrigger": "onSave",
     "parameters": {
       "CommonModuleInvalidType": false
     }

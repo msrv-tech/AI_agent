@@ -40,6 +40,9 @@ def main():
         "",
     ]
 
+    # Файл со справкой по запросам — текст для ИИ, не исполняемый код; ложные срабатывания исключаем
+    SKIP_PATHS = ("ИИА_СправкаЗапросы1С",)
+
     counts = {"Error": 0, "Warning": 0, "Information": 0, "Hint": 0}
     for fileinfo in data.get("fileinfos", []):
         path = fileinfo.get("path", "")
@@ -49,7 +52,11 @@ def main():
         if not diags:
             continue
 
-        relevant = [d for d in diags if d.get("severity") not in ("Information", "Hint")]
+        # Только ошибки; замечания в саммари не включаем
+        relevant = [d for d in diags if d.get("severity") == "Error"]
+        # Пропускаем файлы со справкой (текст для ИИ)
+        if any(skip in path for skip in SKIP_PATHS):
+            continue
         if not relevant:
             continue
         short = short_path(path)
@@ -66,11 +73,10 @@ def main():
             counts[sev] = counts.get(sev, 0) + 1
         lines.append("")
 
-    total = sum(counts.values())
+    total = counts.get("Error", 0)
     lines.append("─" * 50)
-    for sev in ("Error", "Warning",):
-        if counts.get(sev):
-            lines.append(f"{SEVERITY_LABEL[sev]}: {counts[sev]}")
+    if total:
+        lines.append(f"Ошибка: {total}")
     lines.append(f"Всего: {total}")
 
     out_path = logs_dir / SUMMARY_FILENAME
