@@ -96,11 +96,6 @@
 					<ContextMenu name="КодКонтекстноеМеню" id="20"/>
 					<ExtendedTooltip name="КодРасширеннаяПодсказка" id="21"/>
 				</LabelField>
-				<LabelField name="Имя" id="22">
-					<DataPath>Список.Имя</DataPath>
-					<ContextMenu name="ИмяКонтекстноеМеню" id="23"/>
-					<ExtendedTooltip name="ИмяРасширеннаяПодсказка" id="24"/>
-				</LabelField>
 				<LabelField name="ТипДиалога" id="25">
 					<DataPath>Список.ТипДиалога</DataPath>
 					<ContextMenu name="ТипДиалогаКонтекстноеМеню" id="26"/>
@@ -146,7 +141,6 @@
 	Диалоги.Ссылка КАК Ссылка,
 	Диалоги.Code КАК Code,
 	Диалоги.Description КАК Description,
-	Диалоги.Имя КАК Имя,
 	Диалоги.ТипДиалога КАК ТипДиалога,
 	ЕСТЬNULL(Данные.ОркестраторВключен, Ложь) КАК ОркестраторВключен
 ИЗ

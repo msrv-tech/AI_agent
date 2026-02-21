@@ -3,7 +3,6 @@
 	<ConfigVersions>
 		<Metadata name="Catalog.ИИА_Диалоги" id="d9f505c8-06e8-4aa7-b342-265e8c4a6cdf" configVersion="7abb86e6ce828270fef89050cc133243bae70067">
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.План" id="083548f0-60ca-44f4-aa9e-d8dece41a48e"/>
-			<Metadata name="Catalog.ИИА_Диалоги.Attribute.Имя" id="0e3bd93f-22d5-4870-9758-e557bf79a8ae"/>
 			<Metadata name="Catalog.ИИА_Диалоги.Attribute.ДатаСоздания" id="1409178b-921d-4834-a284-c64f488241ab"/>
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.План.Attribute.Задача" id="2714da14-cdf4-4648-a6ea-ea509b16ae8c"/>
 			<Metadata name="Catalog.ИИА_Диалоги.Attribute.ТипДиалога" id="2b63728c-4126-4236-ad2b-2630a56152a8"/>
@@ -20,7 +19,6 @@
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.Сообщения.Attribute.СтатусDSL" id="b1bbd242-d201-42e1-aef5-2f66e45f1105"/>
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.План.Attribute.Выполнена" id="b1c9ff92-717d-4d76-a9ac-957e6d04ae62"/>
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.Сообщения.Attribute.ТипСообщения" id="cba79378-d0eb-4969-9688-4613de394601"/>
-			<Metadata name="Catalog.ИИА_Диалоги.Attribute.Активный" id="db5cf1bd-544b-49f9-a9e2-095c1c6df7d7"/>
 			<Metadata name="Catalog.ИИА_Диалоги.TabularSection.Сообщения.Attribute.Статус" id="ed07208c-53e8-40ea-9bba-3260396d7f20"/>
 		</Metadata>
 		<Metadata name="Catalog.ИИА_Диалоги.Form.ФормаСписка" id="13f74d53-c6d7-460e-9d89-3bd5da9d32d4" configVersion="9013a6d29ac6a57c0f053d8ced4d1f56bbad2651"/>
