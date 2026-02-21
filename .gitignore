@@ -39,3 +39,6 @@ automation/vanessa/logs/
 # Логи сборки и запуска
 automation/logs/
 
+# BSL Language Server (скачивается отдельно)
+automation/bsl-language-server-*-exec.jar
+
