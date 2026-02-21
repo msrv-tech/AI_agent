@@ -260,10 +260,24 @@
 				КонецЦикла;
 			КонецЕсли;
 			
-			// 2) Нормализуем object_name "Справочник.Контрагенты" -> object_type/object_name
+			// 2) Нормализуем objectName (camelCase) -> object_name
+			Если ШагНорм.Свойство("objectName") И НЕ ШагНорм.Свойство("object_name") Тогда
+				ШагНорм.Вставить("object_name", ШагНорм.objectName);
+			КонецЕсли;
+			
+			// 3) Нормализуем fields -> data для CreateReference/CreateDocument (LLM часто использует fields, код ожидает data)
 			Если ШагНорм.Свойство("action") Тогда
 				Действие = Строка(ШагНорм.action);
-				Если (ВРег(Действие) = "CHECKOBJECTEXISTS" ИЛИ ВРег(Действие) = "GETOBJECTFIELDS") И ШагНорм.Свойство("object_name") Тогда
+				Если (ВРег(Действие) = "CREATEREFERENCE" ИЛИ ВРег(Действие) = "CREATEDOCUMENT") И ШагНорм.Свойство("fields") И ТипЗнч(ШагНорм.fields) = Тип("Структура") И НЕ ШагНорм.Свойство("data") Тогда
+					ШагНорм.Вставить("data", ШагНорм.fields);
+				КонецЕсли;
+			КонецЕсли;
+			
+			// 4) Нормализуем object_name "Справочник.Контрагенты" -> object_type/object_name
+			Если ШагНорм.Свойство("action") Тогда
+				Действие = Строка(ШагНорм.action);
+				ДействияСОбъектом = "CHECKOBJECTEXISTS,GETOBJECTFIELDS,CREATEREFERENCE,CREATEDOCUMENT,FINDREFERENCEBYNAME,FINDREFERENCEBYGUID";
+				Если СтрНайти(ДействияСОбъектом, ВРег(Действие)) > 0 И ШагНорм.Свойство("object_name") Тогда
 					ИмяОбъекта = Строка(ШагНорм.object_name);
 					Если СтрНайти(ИмяОбъекта, ".") > 0 Тогда
 						Части = СтрРазделить(ИмяОбъекта, ".");
