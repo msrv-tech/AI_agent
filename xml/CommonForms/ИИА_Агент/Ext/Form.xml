@@ -49,18 +49,6 @@
 							<CommandName>Form.Command.НовыйДиалог</CommandName>
 							<ExtendedTooltip name="НовыйДиалогРасширеннаяПодсказка" id="77"/>
 						</Button>
-						<Button name="КомандаВверх" id="91">
-							<Type>UsualButton</Type>
-							<Representation>Picture</Representation>
-							<CommandName>Form.Command.КомандаВверх</CommandName>
-							<ExtendedTooltip name="КомандаВверхРасширеннаяПодсказка" id="92"/>
-						</Button>
-						<Button name="КомандаВниз" id="93">
-							<Type>UsualButton</Type>
-							<Representation>Picture</Representation>
-							<CommandName>Form.Command.КомандаВниз</CommandName>
-							<ExtendedTooltip name="КомандаВнизРасширеннаяПодсказка" id="94"/>
-						</Button>
 						<Button name="Настройка" id="118">
 							<Type>UsualButton</Type>
 							<CommandName>Form.Command.Настройка</CommandName>
@@ -604,32 +592,6 @@
 				</v8:item>
 			</Title>
 			<Action>НовыйДиалог</Action>
-		</Command>
-		<Command name="КомандаВверх" id="4">
-			<Title>
-				<v8:item>
-					<v8:lang>ru</v8:lang>
-					<v8:content>Вверх</v8:content>
-				</v8:item>
-			</Title>
-			<Picture>
-				<xr:Ref>StdPicture.MoveUp</xr:Ref>
-				<xr:LoadTransparent>true</xr:LoadTransparent>
-			</Picture>
-			<Action>КомандаВверх</Action>
-		</Command>
-		<Command name="КомандаВниз" id="5">
-			<Title>
-				<v8:item>
-					<v8:lang>ru</v8:lang>
-					<v8:content>Вниз</v8:content>
-				</v8:item>
-			</Title>
-			<Picture>
-				<xr:Ref>StdPicture.MoveDown</xr:Ref>
-				<xr:LoadTransparent>true</xr:LoadTransparent>
-			</Picture>
-			<Action>КомандаВниз</Action>
 		</Command>
 		<Command name="Настройка" id="6">
 			<Title>
