@@ -218,6 +218,21 @@
 									<ContextMenu name="СообщенияСтатусDSLКонтекстноеМеню" id="67"/>
 									<ExtendedTooltip name="СообщенияСтатусDSLРасширеннаяПодсказка" id="68"/>
 								</InputField>
+								<InputField name="СообщенияУИД" id="178">
+									<DataPath>Объект.Сообщения.УИД</DataPath>
+									<EditMode>EnterOnInput</EditMode>
+									<AutoEditMode>true</AutoEditMode>
+									<ExtendedEditMultipleValues>true</ExtendedEditMultipleValues>
+									<ContextMenu name="СообщенияУИДКонтекстноеМеню" id="179"/>
+									<ExtendedTooltip name="СообщенияУИДРасширеннаяПодсказка" id="180"/>
+								</InputField>
+								<CheckBoxField name="СообщенияСкрытоеСлужебное" id="181">
+									<DataPath>Объект.Сообщения.СкрытоеСлужебное</DataPath>
+									<EditMode>EnterOnInput</EditMode>
+									<AutoEditMode>true</AutoEditMode>
+									<ContextMenu name="СообщенияСкрытоеСлужебноеКонтекстноеМеню" id="182"/>
+									<ExtendedTooltip name="СообщенияСкрытоеСлужебноеРасширеннаяПодсказка" id="183"/>
+								</CheckBoxField>
 							</ChildItems>
 						</Table>
 					</ChildItems>
