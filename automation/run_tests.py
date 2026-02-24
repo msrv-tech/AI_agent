@@ -9,6 +9,7 @@
     python run_tests.py                    # бесплатные тесты (по умолчанию)
     python run_tests.py --dry-run          # тесты холостого хода (mock, без ИИ)
     python run_tests.py --with-ai          # все тесты, включая с вызовом ИИ
+    python run_tests.py --ai-only          # только боевые тесты с ИИ
     python run_tests.py --test ТестRunQuery # один тест
     python run_tests.py --skip-update      # пропустить обновление БД
     python run_tests.py --connection "File=\"D:\\base\";"
@@ -84,6 +85,11 @@ def main():
         help="Включить тесты с реальным вызовом ИИ (медленные)",
     )
     parser.add_argument(
+        "--ai-only",
+        action="store_true",
+        help="Только боевые тесты с ИИ (без бесплатных)",
+    )
+    parser.add_argument(
         "--dry-run", "-d",
         action="store_true",
         help="Тесты холостого хода (mock-ответы, без вызова ИИ)",
@@ -143,9 +149,11 @@ def main():
         success = _print_result(args.test, result, verbose=True)
         return 0 if success else 1
     else:
-        # Набор тестов: по умолчанию бесплатные, --dry-run холостой ход, --with-ai все
+        # Набор тестов: по умолчанию бесплатные, --dry-run холостой ход, --with-ai все, --ai-only только ИИ
         if args.dry_run:
             proc_name = "ЗапуститьТестыХолостойХод"
+        elif args.ai_only:
+            proc_name = "ЗапуститьТестыСИИ"
         elif args.with_ai:
             proc_name = "ЗапуститьВсеТесты"
         else:
@@ -162,6 +170,8 @@ def main():
 
         if args.dry_run:
             print("--- Тесты холостого хода (mock) ---")
+        elif args.ai_only:
+            print("--- Боевые тесты с ИИ ---")
         elif args.with_ai:
             print("--- Тесты (включая с вызовом ИИ) ---")
         else:
