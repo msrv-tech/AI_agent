@@ -3,7 +3,8 @@
 Запуск тестов ИИА через COM.
 
 Запуск (из каталога automation):
-    python run_tests.py                    # все тесты
+    python run_tests.py                    # бесплатные тесты (по умолчанию)
+    python run_tests.py --with-ai          # все тесты, включая с вызовом ИИ
     python run_tests.py --test ТестRunQuery # один тест
     python run_tests.py --connection "File=\"D:\\base\";"
 """
@@ -71,6 +72,11 @@ def main():
         action="store_true",
         help="Подробный вывод деталей",
     )
+    parser.add_argument(
+        "--with-ai",
+        action="store_true",
+        help="Включить тесты с реальным вызовом ИИ (медленные)",
+    )
     args = parser.parse_args()
 
     connection_string = get_connection_string(args.connection)
@@ -98,16 +104,22 @@ def main():
         success = _print_result(args.test, result, verbose=True)
         return 0 if success else 1
     else:
-        # Все тесты
+        # Набор тестов: по умолчанию бесплатные, с --with-ai все
+        proc_name = "ЗапуститьВсеТесты" if args.with_ai else "ЗапуститьБесплатныеТесты"
         try:
             results = call_procedure(
                 conn,
                 "ИИА_Тесты",
-                "ЗапуститьВсеТесты",
+                proc_name,
             )
         except Exception as e:
-            print(f"Ошибка вызова ИИА_Тесты.ЗапуститьВсеТесты: {e}", file=sys.stderr)
+            print(f"Ошибка вызова ИИА_Тесты.{proc_name}: {e}", file=sys.stderr)
             return 1
+
+        if args.with_ai:
+            print("--- Тесты (включая с вызовом ИИ) ---")
+        else:
+            print("--- Бесплатные тесты ---")
 
         if results is None:
             print("Ошибка: процедура вернула пустой результат", file=sys.stderr)
