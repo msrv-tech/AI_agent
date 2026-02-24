@@ -298,6 +298,7 @@
 	"СХЕМЫ (СТРОГО):" + Символы.ПС +
 	"- CheckObjectExists: {""action"":""CheckObjectExists"",""object_type"":""Справочник"",""object_name"":""Контрагенты""}" + Символы.ПС +
 	"- GetObjectFields: {""action"":""GetObjectFields"",""object_type"":""Справочник"",""object_name"":""Контрагенты""}" + Символы.ПС +
+	"- FindReferenceByGUID: guid — строка UUID (""xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx""), НЕ текст результата" + Символы.ПС +
 	"- RunQuery: {""action"":""RunQuery"",""query"":""ВЫБРАТЬ ...""}" + Символы.ПС +
 	"- ShowInfo: {""action"":""ShowInfo"",""message"":""...""}" + Символы.ПС +
 	"" + Символы.ПС +
@@ -509,7 +510,7 @@
 	"- ВАЖНО ПО ДАТАМ В ЗАПРОСАХ: Функции ГОД(), МЕСЯЦ(), ДЕНЬ() в 1С работают ТОЛЬКО с полями БД. Нельзя писать ГОД(&Параметр) - это вызовет ошибку. Для фильтра по периоду используй: 'Дата МЕЖДУ &НачалоПериода И &КонецПериода'." + Символы.ПС +
 	"Действия (action) и ключевые параметры:" + Символы.ПС +
 	"- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};" + Символы.ПС +
-	"- CreateReference{object_type,object_name}; FindReferenceByGUID{object_type,object_name,guid}; SelectObject{reference}; SetField{field_name,value}; Write{posting_mode?}; Delete{};" + Символы.ПС +
+	"- CreateReference{object_type,object_name,name?}; FindReferenceByGUID{object_type,object_name,guid} — guid ТОЛЬКО строка UUID (например ""a1b2c3d4-e5f6-7890-abcd-ef1234567890""), НЕ текст результата и НЕ #(Var:...); SelectObject{reference} или {object_type,object_name,name}; SetField{field_name,value}; Write{posting_mode?}; Delete{};" + Символы.ПС +
 	"- ForEach{collection,steps}; SaveToStorage{key,data}.";
 	
 	Возврат СистемныйПромпт;
