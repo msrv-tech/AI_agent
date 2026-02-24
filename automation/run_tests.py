@@ -2,15 +2,21 @@
 """
 Запуск тестов ИИА через COM.
 
+Перед тестами выполняется обновление БД (xml → конфигурация → UpdateDBCfg).
+Флаг --skip-update пропускает обновление.
+
 Запуск (из каталога automation):
     python run_tests.py                    # бесплатные тесты (по умолчанию)
+    python run_tests.py --dry-run          # тесты холостого хода (mock, без ИИ)
     python run_tests.py --with-ai          # все тесты, включая с вызовом ИИ
     python run_tests.py --test ТестRunQuery # один тест
+    python run_tests.py --skip-update      # пропустить обновление БД
     python run_tests.py --connection "File=\"D:\\base\";"
 """
 
 import sys
 import os
+import subprocess
 
 # Поддержка запуска из каталога automation
 _script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -77,9 +83,42 @@ def main():
         action="store_true",
         help="Включить тесты с реальным вызовом ИИ (медленные)",
     )
+    parser.add_argument(
+        "--dry-run", "-d",
+        action="store_true",
+        help="Тесты холостого хода (mock-ответы, без вызова ИИ)",
+    )
+    parser.add_argument(
+        "--skip-update",
+        action="store_true",
+        help="Пропустить обновление БД перед тестами",
+    )
     args = parser.parse_args()
 
     connection_string = get_connection_string(args.connection)
+    if args.connection:
+        os.environ["1C_CONNECTION_STRING"] = connection_string
+
+    # Предварительное обновление БД (xml → конфигурация → UpdateDBCfg)
+    if not args.skip_update:
+        update_script = os.path.join(_script_dir, "update_1c.py")
+        try:
+            result = subprocess.run(
+                [sys.executable, update_script, "--skip-run-client"],
+                cwd=_script_dir,
+                timeout=120,
+                env={**os.environ, "1C_CONNECTION_STRING": connection_string},
+            )
+            if result.returncode != 0:
+                print("Ошибка: обновление БД завершилось с ошибкой", file=sys.stderr)
+                return 1
+        except subprocess.TimeoutExpired:
+            print("Ошибка: превышено время ожидания обновления БД", file=sys.stderr)
+            return 1
+        except Exception as e:
+            print(f"Ошибка при обновлении БД: {e}", file=sys.stderr)
+            return 1
+
     conn = connect_to_1c(connection_string)
     if not conn:
         print("Ошибка: не удалось подключиться к 1С", file=sys.stderr)
@@ -104,8 +143,13 @@ def main():
         success = _print_result(args.test, result, verbose=True)
         return 0 if success else 1
     else:
-        # Набор тестов: по умолчанию бесплатные, с --with-ai все
-        proc_name = "ЗапуститьВсеТесты" if args.with_ai else "ЗапуститьБесплатныеТесты"
+        # Набор тестов: по умолчанию бесплатные, --dry-run холостой ход, --with-ai все
+        if args.dry_run:
+            proc_name = "ЗапуститьТестыХолостойХод"
+        elif args.with_ai:
+            proc_name = "ЗапуститьВсеТесты"
+        else:
+            proc_name = "ЗапуститьБесплатныеТесты"
         try:
             results = call_procedure(
                 conn,
@@ -116,7 +160,9 @@ def main():
             print(f"Ошибка вызова ИИА_Тесты.{proc_name}: {e}", file=sys.stderr)
             return 1
 
-        if args.with_ai:
+        if args.dry_run:
+            print("--- Тесты холостого хода (mock) ---")
+        elif args.with_ai:
             print("--- Тесты (включая с вызовом ИИ) ---")
         else:
             print("--- Бесплатные тесты ---")
