@@ -203,7 +203,7 @@
 	
 	Промпт = "Ты - опытный аналитик 1С. Твоя задача - составить план действий для выполнения запроса пользователя." + Символы.ПС +
 	"План должен состоять из последовательных шагов, каждый из которых можно выполнить через DSL агента." + Символы.ПС +
-	"Поддерживаемые действия: GetMetadata, GetObjectFields, CheckObjectExists, RunQuery, ShowInfo, CreateReference, SelectObject, SetField, Write, Delete." + Символы.ПС +
+	"Поддерживаемые действия: GetMetadata, GetObjectFields, CheckObjectExists, RunQuery, ShowInfo, CreateReference, CreateDocument, SelectObject, SetField, Write, Delete." + Символы.ПС +
 	"Если RAG подсказка уже содержит найденные объекты с полями — сразу RunQuery->ShowInfo. Иначе — начни с CheckObjectExists или GetMetadata." + Символы.ПС +
 	"Ответ должен быть ТОЛЬКО в формате JSON массива строк.";
 	
@@ -395,7 +395,7 @@
 	
 	Промпт = Промпт + "Задача: " + ТекстЗадачи + Символы.ПС +
 	"Требования:" + Символы.ПС +
-	"- ЗАДАЧА «СОЗДАТЬ» (создай, создай контрагента, добавь и т.п.): Минимальный план — CreateReference{object_name,name} + Write + ShowInfo. НЕ включай SelectObject (объект уже выбран после CreateReference), НЕ включай SetField Наименование (CreateReference с name уже задаёт его), НЕ включай RunQuery для проверки (достаточно ShowInfo)." + Символы.ПС +
+	"- ЗАДАЧА «СОЗДАТЬ» (создай, создай контрагента, добавь и т.п.): для справочников (контрагент, номенклатура, склад) — CreateReference{object_name,name}; для документов (поступление, реализация, накладная, черновик) — CreateDocument{object_name,data}. Затем Write + ShowInfo. НЕ включай SelectObject (объект уже выбран после CreateReference/CreateDocument), НЕ включай SetField Наименование (CreateReference с name уже задаёт его), НЕ включай RunQuery для проверки (достаточно ShowInfo)." + Символы.ПС +
 	"- ОСОБОЕ ПРАВИЛО RAG: Если в блоке 'ПОДСКАЗКА ПО МЕТАДАННЫМ (RAG)' уже найдены подходящие объекты (особенно с полями в формате '(Поля: ...)') — объект УЖЕ подтверждён и поля УЖЕ известны. НЕ включай в план CheckObjectExists и GetObjectFields. Сразу переходи к RunQuery -> ShowInfo." + Символы.ПС +
 	"- Если RAG не нашёл объекты или полей нет — используй цепочку: CheckObjectExists -> GetObjectFields -> RunQuery -> ShowInfo." + Символы.ПС +
 	"- НЕ описывай действия пользователя в интерфейсе (клики, кнопки, формы, меню, отчёты)." + Символы.ПС +
@@ -497,7 +497,7 @@
 	
 	Промпт = Промпт + Символы.ПС +
 	"Ограничения для DSL:" + Символы.ПС +
-	"- steps[].action ТОЛЬКО из поддерживаемых действий: RunQuery, ShowInfo, GetMetadata, GetObjectFields, CheckObjectExists, CreateReference, FindReferenceByGUID, SelectObject, SetField, Write, Delete, ForEach, SaveToStorage." + Символы.ПС +
+	"- steps[].action ТОЛЬКО из поддерживаемых действий: RunQuery, ShowInfo, GetMetadata, GetObjectFields, CheckObjectExists, CreateReference, CreateDocument, FindReferenceByGUID, SelectObject, SetField, Write, Delete, ForEach, SaveToStorage." + Символы.ПС +
 	"- ЗАПРЕЩЕНЫ любые UI/браузерные действия (click, open_form и т.п.)." + Символы.ПС +
 	"- Все обязательные поля должны быть на верхнем уровне шага (без вложенных params/args)." + Символы.ПС +
 	"- ПОДСТАНОВКА ОБЪЕКТА: Если следующий шаг - RunQuery для объекта X, но X не существует (CheckObjectExists или GetMetadata), а в RAG или GetMetadata есть подходящий документ Y (например РасходнаяНакладная для «реализация») — ВЫПОЛНИ RunQuery для Y, НЕ ShowInfo «Данные не найдены»." + Символы.ПС +
@@ -508,6 +508,7 @@
 	"- CheckObjectExists: {""action"":""CheckObjectExists"",""object_type"":""Справочник"",""object_name"":""Контрагенты""}" + Символы.ПС +
 	"- GetObjectFields: {""action"":""GetObjectFields"",""object_type"":""Справочник"",""object_name"":""Контрагенты""}" + Символы.ПС +
 	"- FindReferenceByGUID: guid — строка UUID (""xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx""), НЕ текст результата" + Символы.ПС +
+	"- CreateDocument: {""action"":""CreateDocument"",""object_name"":""ПриходТовараМП"",""data"":{""Контрагент"":""#(FindReferenceByName)""}}" + Символы.ПС +
 	"- RunQuery: {""action"":""RunQuery"",""query"":""ВЫБРАТЬ ...""}" + Символы.ПС +
 	"- ShowInfo: {""action"":""ShowInfo"",""message"":""...""}" + Символы.ПС +
 	"" + Символы.ПС +
@@ -719,7 +720,7 @@
 	"- ВАЖНО ПО ДАТАМ В ЗАПРОСАХ: Функции ГОД(), МЕСЯЦ(), ДЕНЬ() в 1С работают ТОЛЬКО с полями БД. Нельзя писать ГОД(&Параметр) - это вызовет ошибку. Для фильтра по периоду используй: 'Дата МЕЖДУ &НачалоПериода И &КонецПериода'." + Символы.ПС +
 	"Действия (action) и ключевые параметры:" + Символы.ПС +
 	"- RunQuery{query,parameters?}; ShowInfo{message}; GetMetadata{metadata_type?}; GetObjectFields{object_type,object_name}; CheckObjectExists{object_type,object_name};" + Символы.ПС +
-	"- CreateReference{object_type,object_name,name?}; FindReferenceByGUID{object_type,object_name,guid} — guid ТОЛЬКО строка UUID (например ""a1b2c3d4-e5f6-7890-abcd-ef1234567890""), НЕ текст результата и НЕ #(Var:...); SelectObject{reference} или {object_type,object_name,name}; SetField{field_name,value}; Write{posting_mode?}; Delete{};" + Символы.ПС +
+	"- CreateReference{object_type,object_name,name?}; CreateDocument{object_name,data?}; FindReferenceByGUID{object_type,object_name,guid} — guid ТОЛЬКО строка UUID (например ""a1b2c3d4-e5f6-7890-abcd-ef1234567890""), НЕ текст результата и НЕ #(Var:...); SelectObject{reference} или {object_type,object_name,name}; SetField{field_name,value}; Write{posting_mode?}; Delete{};" + Символы.ПС +
 	"- ForEach{collection,steps}; SaveToStorage{key,data}.";
 	
 	Возврат СистемныйПромпт;
