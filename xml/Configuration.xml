@@ -91,6 +91,7 @@
 			<CommonModule>ИИА_RAG_Настройки</CommonModule>
 			<CommonModule>ИИА_RAG_Индексатор</CommonModule>
 			<CommonModule>ИИА_RAG_Поиск</CommonModule>
+			<CommonModule>ИИА_ЯдроМетаданных</CommonModule>
 			<CommonModule>ИИА_GitsellСервер</CommonModule>
 			<CommonModule>ИИА_ДиалогCOM</CommonModule>
 			<CommonModule>ИИА_Тесты</CommonModule>
