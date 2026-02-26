@@ -3,11 +3,13 @@
 RAG-поиск через COM.
 
 Вызывает ИИА_RAG_Поиск.ВыполнитьПоискПоТексту(ЗапросТекст, TopK) и выводит результаты.
+С флагом --fields вызывает ВыполнитьПоискПоТекстуСПолями и выводит поля (реквизиты/измерения/ресурсы) для анализа RAG.
 
 Запуск (из каталога automation):
     python rag_search.py остатки склад
     python rag_search.py "запасы склад" "реализация товары"
     python rag_search.py --top 5 реализация
+    python rag_search.py --fields "продажи реализация категории динамика"
     python rag_search.py -c "File=\"D:\\base\";" номенклатура контрагенты
 """
 
@@ -24,9 +26,11 @@ from com_1c.com_connector import setup_console_encoding
 from com_1c.config import get_connection_string
 
 
-def search_rag(conn, query: str, top_k: int = 10) -> list:
-    """Выполняет RAG-поиск и возвращает список результатов."""
-    json_str = call_procedure(conn, "ИИА_RAG_Поиск", "ВыполнитьПоискПоТексту", query, top_k)
+def search_rag(conn, query: str, top_k: int = 10, with_fields: bool = False) -> list:
+    """Выполняет RAG-поиск и возвращает список результатов.
+    Если with_fields=True, для каждого результата получает поля (attrs для Document/Catalog, reg для регистров)."""
+    proc = "ВыполнитьПоискПоТекстуСПолями" if with_fields else "ВыполнитьПоискПоТексту"
+    json_str = call_procedure(conn, "ИИА_RAG_Поиск", proc, query, top_k)
     if json_str is None or not isinstance(json_str, str):
         return []
     try:
@@ -59,6 +63,11 @@ def main():
         default=10,
         help="Количество результатов (по умолчанию 10)",
     )
+    parser.add_argument(
+        "--fields", "-f",
+        action="store_true",
+        help="Выводить поля (реквизиты/измерения/ресурсы) для каждого результата — для анализа RAG",
+    )
     args = parser.parse_args()
 
     connection_string = get_connection_string(args.connection)
@@ -74,7 +83,7 @@ def main():
 
     for query in queries:
         print(f"\n--- Запрос: «{query}» ---")
-        results = search_rag(conn, query, args.top)
+        results = search_rag(conn, query, args.top, with_fields=args.fields)
         if not results:
             print("  Результатов нет.")
             continue
@@ -87,6 +96,14 @@ def main():
             synonym = r.get("Синоним", "")
             path = r.get("Путь", "")
             print(f"  {rank}. [{score:.1f}] {typ}.{name} ({synonym}) — {path}")
+            if args.fields:
+                fields = r.get("Поля", "")
+                if fields:
+                    # Ограничиваем вывод полей для читаемости
+                    fields_preview = fields[:400] + ("..." if len(fields) > 400 else "")
+                    print(f"      Поля: {fields_preview}")
+                else:
+                    print("      Поля: (нет)")
 
     print()
     return 0
