@@ -57,9 +57,9 @@ README_EXAMPLES = [
     },
     {
         "id": "create_receipt",
-        "text": "Создай черновик поступления товаров от поставщика 'Мир Мебели' на основании счета №123.",
+        "text": "Создай черновик приходной накладной от поставщика 'Мир Мебели' на основании счета №123.",
         "type": "Agent",
-        "description": "Создание черновика поступления",
+        "description": "Создание черновика приходной накладной",
     },
     {
         "id": "sales_analysis",
@@ -257,9 +257,6 @@ def main():
         status = "OK" if success else "FAIL"
         print(f"  Результат: {status} | Диалог: {ref_str}")
 
-        if not success:
-            all_success = False
-
         if analysis["has_error"] and analysis["error_lines"]:
             print(f"  Ошибки в логе: {len(analysis['error_lines'])}")
             if args.verbose:
@@ -297,6 +294,7 @@ def main():
 
     # Сохранение отчёта
     success_count = sum(1 for r in results if r["success"])
+    all_success = all(r["success"] and not r.get("has_error", False) for r in results)
     report = {
         "timestamp": timestamp,
         "log_dir": run_log_dir,
