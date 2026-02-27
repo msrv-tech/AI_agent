@@ -4,6 +4,7 @@
   "configurationRoot": "xml",
   "diagnostics": {
     "computeTrigger": "onSave",
+    "minimumLSPDiagnosticLevel": "Error",
     "parameters": {
       "CommonModuleInvalidType": false
     }
