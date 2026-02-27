@@ -207,8 +207,8 @@ END_PROPOSAL
         return f"[ERROR] {e}"
 
 
-def _print_git_status():
-    """Выводит git status после применения правок."""
+def _get_git_status() -> str:
+    """Возвращает git status --short для отправки в Telegram."""
     try:
         r = subprocess.run(
             ["git", "status", "--short"],
@@ -220,12 +220,20 @@ def _print_git_status():
             timeout=10,
         )
         if r.returncode == 0 and r.stdout.strip():
-            print("Изменённые файлы (git status):")
-            print(r.stdout.strip())
-        elif r.returncode == 0:
-            print("(git: изменений нет)")
+            return r.stdout.strip()
+        return ""
     except Exception:
-        pass
+        return ""
+
+
+def _print_git_status():
+    """Выводит git status после применения правок."""
+    s = _get_git_status()
+    if s:
+        print("Изменённые файлы (git status):")
+        print(s)
+    else:
+        print("(git: изменений нет)")
 
 
 def run_cursor_apply_from_analysis(analysis_path: str, comment: str = ""):
@@ -363,8 +371,50 @@ def cmd_run(args):
             print(f"Ошибка применения: {msg}", file=sys.stderr)
             send_telegram_notification(f"<b>Ошибка применения правок</b>\n\n<pre>{msg[:500]}</pre>")
             return 1
-        print("Правки применены (не запушены). Запуск тестов отключён — проверьте git status.")
-        return 0
+
+        # Результат изменений в Telegram
+        git_status = _get_git_status()
+        tg_msg = "<b>Правки применены</b>\n\n"
+        if git_status:
+            tg_msg += f"Изменённые файлы:\n<pre>{git_status[:1500]}</pre>\n\n"
+        send_telegram_notification(tg_msg)
+
+        # Обновление БД и запуск тестов после правок
+        if not getattr(args, "skip_update", False):
+            print("Обновление расширения и БД...")
+            run_update_1c()
+        print("Запуск тестов после правок...")
+        rc, new_run_id, new_report_path = run_tests(examples_arg)
+        if new_report_path:
+            new_report = load_report(new_report_path)
+            new_failed, new_passed = get_failed_and_passed(new_report)
+            passed_ids.update(new_passed)
+            run_tokens = new_report.get("total_tokens", 0)
+            run_cost = new_report.get("cost_rub", 0)
+            total_tokens += run_tokens
+            total_cost_rub += run_cost
+            state["passed_ids"] = sorted(passed_ids)
+            state["total_tokens"] = total_tokens
+            state["total_cost_rub"] = round(total_cost_rub, 2)
+            state["last_run_id"] = new_run_id
+            save_cycle_state(state)
+            passed_count = len(new_report.get("results", [])) - len(new_failed)
+            total_count = len(new_report.get("results", []))
+            all_ok = not new_failed
+            send_telegram_notification(
+                f"<b>Результат тестов после правок</b>\n\n"
+                f"Пройдено: {passed_count}/{total_count}\n"
+                f"Токены: {run_tokens:,} | Стоимость: ~{run_cost} ₽\n"
+                f"Каталог: <code>{new_report_path}</code>\n"
+                f"{'✅ Все пройдены' if all_ok else '❌ Есть провалы: ' + ', '.join(new_failed)}"
+            )
+            if all_ok:
+                send_telegram_notification(
+                    f"<b>Все тесты пройдены</b>\n\nТокены за цикл: {total_tokens:,} | Стоимость: ~{total_cost_rub} ₽"
+                )
+                print("Все тесты пройдены.")
+                return 0
+        continue  # Повтор цикла (анализ провалов и т.д.)
 
 
 def cmd_run_tests_only(args):
@@ -460,7 +510,34 @@ def cmd_run_from(args):
     if not ok:
         print(f"Ошибка: {msg}", file=sys.stderr)
         return 1
-    print("Правки применены. Запуск тестов отключён — проверьте git status.")
+
+    git_status = _get_git_status()
+    tg_msg = "<b>Правки применены</b>\n\n"
+    if git_status:
+        tg_msg += f"Изменённые файлы:\n<pre>{git_status[:1500]}</pre>\n\n"
+    send_telegram_notification(tg_msg)
+
+    if not getattr(args, "skip_update", False):
+        print("Обновление расширения и БД...")
+        run_update_1c()
+    print("Запуск тестов после правок...")
+    rc, new_run_id, new_report_path = run_tests()
+    if new_report_path:
+        new_report = load_report(new_report_path)
+        nf, np = get_failed_and_passed(new_report)
+        passed_count = len(np)
+        total_count = len(new_report.get("results", []))
+        send_telegram_notification(
+            f"<b>Результат тестов после правок</b>\n\n"
+            f"Пройдено: {passed_count}/{total_count}\n"
+            f"Токены: {new_report.get('total_tokens', 0):,} | Стоимость: ~{new_report.get('cost_rub', 0)} ₽\n"
+            f"Каталог: <code>{new_report_path}</code>\n"
+            f"{'✅ Все пройдены' if not nf else '❌ Есть провалы: ' + ', '.join(nf)}"
+        )
+        if not nf:
+            print("Все тесты пройдены.")
+            return 0
+    print("Есть провалы. Запустите --run-from", new_run_id or run_id)
     return 0
 
 
@@ -514,8 +591,32 @@ def cmd_apply(args):
     if not ok:
         print(f"Ошибка: {msg}", file=sys.stderr)
         return 1
-    print("Правки применены. Запуск тестов отключён — проверьте git status.")
-    return 0
+
+    git_status = _get_git_status()
+    tg_msg = "<b>Правки применены</b>\n\n"
+    if git_status:
+        tg_msg += f"Изменённые файлы:\n<pre>{git_status[:1500]}</pre>\n\n"
+    send_telegram_notification(tg_msg)
+
+    if not getattr(args, "skip_update", False):
+        print("Обновление расширения и БД...")
+        run_update_1c()
+    print("Запуск тестов после правок...")
+    rc, new_run_id, new_report_path = run_tests()
+    if new_report_path:
+        new_report = load_report(new_report_path)
+        nf, np = get_failed_and_passed(new_report)
+        passed_count = len(np)
+        total_count = len(new_report.get("results", []))
+        send_telegram_notification(
+            f"<b>Результат тестов после правок</b>\n\n"
+            f"Пройдено: {passed_count}/{total_count}\n"
+            f"Токены: {new_report.get('total_tokens', 0):,} | Стоимость: ~{new_report.get('cost_rub', 0)} ₽\n"
+            f"Каталог: <code>{new_report_path}</code>\n"
+            f"{'✅ Все пройдены' if not nf else '❌ Есть провалы: ' + ', '.join(nf)}"
+        )
+        return 0 if not nf else 1
+    return 1
 
 
 def main():
