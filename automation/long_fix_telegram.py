@@ -8,14 +8,13 @@ CLI цикл: тест → анализ → согласование в Telegram
     python long_fix_telegram.py --run-from examples_20260227_045200  # от существующего прогона
     python long_fix_telegram.py --run-tests-only   # только тесты
     python long_fix_telegram.py --analyze examples_20250227_143000
-    python long_fix_telegram.py --apply examples_20250227_143000 --approve 1,3
+    python long_fix_telegram.py --apply examples_20250227_143000
 
 Правки не коммитятся и не пушятся — остаются для ручного просмотра.
 """
 
 import sys
 import os
-import re
 import json
 import subprocess
 import shutil
@@ -38,7 +37,7 @@ from test_examples import (
     GITSELL_RUB_PER_TOKEN,
     send_telegram_notification,
 )
-from telegram_approval import send_proposals, wait_for_approval, send_message
+from telegram_approval import send_raw_analysis, wait_for_approval, send_message
 
 # Таймаут для Cursor CLI (может зависать после завершения)
 CURSOR_ANALYZE_TIMEOUT = 900  # 15 мин
@@ -208,90 +207,6 @@ END_PROPOSAL
         return f"[ERROR] {e}"
 
 
-def parse_proposals(text):
-    """Парсит вывод Cursor в список предложений."""
-    proposals = []
-    # Строгий формат PROPOSAL
-    pattern = re.compile(
-        r"PROPOSAL\s+(\d+)\s*[\r\n]+"
-        r"FILE:\s*(.+?)[\r\n]+"
-        r"DESCRIPTION:\s*(.+?)[\r\n]+"
-        r"PATCH:\s*[\r\n]*<<<<<<[\r\n]+(.*?)>>>>>>\s*[\r\n]*"
-        r"END_PROPOSAL",
-        re.DOTALL | re.IGNORECASE
-    )
-    for m in pattern.finditer(text):
-        proposals.append({
-            "index": int(m.group(1)),
-            "file": m.group(2).strip(),
-            "description": m.group(3).strip()[:200],
-            "patch": m.group(4).strip(),
-        })
-    # Упрощённый парсинг, если формат немного другой
-    if not proposals:
-        parts = re.split(r"PROPOSAL\s+\d+", text, flags=re.I)
-        for i, part in enumerate(parts[1:], 1):
-            file_m = re.search(r"FILE:\s*(.+?)(?:\r?\n|$)", part)
-            desc_m = re.search(r"DESCRIPTION:\s*(.+?)(?:\r?\n|$)", part)
-            patch_m = re.search(r"<<<<<<\s*\r?\n(.*?)>>>>>>", part, re.DOTALL)
-            if file_m:
-                proposals.append({
-                    "index": i,
-                    "file": file_m.group(1).strip(),
-                    "description": (desc_m.group(1) if desc_m else "").strip()[:200],
-                    "patch": (patch_m.group(1) if patch_m else "").strip(),
-                })
-    # Fallback: извлечение из блоков ```diff
-    if not proposals:
-        for m in re.finditer(r"```(?:diff)?\s*\n(.*?)```", text, re.DOTALL):
-            patch = m.group(1).strip()
-            if patch and ("---" in patch or "+++" in patch or "@@" in patch):
-                file_m = re.search(r"(?:---|\+\+\+)\s+[ab]/(.+?)(?:\s|$)", patch)
-                path = file_m.group(1).strip() if file_m else "xml/CommonModules/ИИА_DSL/Ext/Module.bsl"
-                if not path.startswith("xml/"):
-                    path = f"xml/{path}" if not path.startswith("/") else path
-                proposals.append({
-                    "index": len(proposals) + 1,
-                    "file": path,
-                    "description": "Извлечено из блока diff",
-                    "patch": patch,
-                })
-    # Fallback: извлечение из markdown-анализа (таблица "Корневые причины", "Баг BSL")
-    if not proposals:
-        proposals = _parse_proposals_from_analysis(text)
-    return proposals
-
-
-def _parse_proposals_from_analysis(text: str):
-    """Извлекает предложения из markdown-анализа (таблица с Баг BSL, рекомендации)."""
-    proposals = []
-    # Таблица: | # | Проблема | Тесты | Тип | ... | 1 | ... | **Баг BSL** |
-    # Ищем строки таблицы с **Баг BSL**
-    bsl_file = "xml/CommonModules/ИИА_DSL/Ext/Module.bsl"
-    for m in re.finditer(r"\|\s*(\d+)\s*\|\s*([^|]+)\|\s*[^|]+\|\s*\*\*Баг BSL\*\*", text):
-        idx, problem = int(m.group(1)), m.group(2).strip()
-        problem = re.sub(r"`([^`]+)`", r"\1", problem)[:200]
-        if problem and not any(p["description"] == problem for p in proposals):
-            proposals.append({
-                "index": len(proposals) + 1,
-                "file": bsl_file,
-                "description": problem,
-                "patch": "",
-            })
-    # Рекомендации: "- В модуле `ИИА_DSL` -- после CreateDocument..."
-    if not proposals:
-        for m in re.finditer(r"[-*]\s+В модуле\s+`?ИИА_DSL`?\s*[—\-]\s*(.+?)(?:\n|$)", text):
-            desc = m.group(1).strip()[:200]
-            if desc and len(proposals) < 5:
-                proposals.append({
-                    "index": len(proposals) + 1,
-                    "file": bsl_file,
-                    "description": desc,
-                    "patch": "",
-                })
-    return proposals
-
-
 def _print_git_status():
     """Выводит git status после применения правок."""
     try:
@@ -313,62 +228,29 @@ def _print_git_status():
         pass
 
 
-def run_cursor_apply(proposals, approved_indices, proposals_path, comment: str = "", analysis_path: str = ""):
-    """Применяет одобренные предложения через Cursor CLI."""
-    if not approved_indices:
-        approved_indices = list(range(1, len(proposals) + 1))
-    selected = [p for p in proposals if p["index"] in approved_indices]
-    if not selected:
-        return False, "Нет предложений для применения"
-    has_patches = all(p.get("patch") for p in selected)
-    if has_patches:
-        prompt = f"""Примени следующие правки из файла {proposals_path}.
-Номера одобренных предложений: {approved_indices}
-Не коммить и не пушить — оставь изменения в рабочей директории для ручного просмотра.
-"""
-    else:
-        # Предложения без patch — реализовать по описанию
-        file_path = selected[0]["file"]
-        tasks = "\n".join(f"{i+1}. {p['description']}" for i, p in enumerate(selected))
-        prompt = f"""ЗАДАЧА: Исправь баги в файле {file_path}. НЕ спрашивай — сразу открой файл и внеси изменения.
+def run_cursor_apply_from_analysis(analysis_path: str, comment: str = ""):
+    """Применяет правки по сырому анализу: агент читает файл и правит Module.bsl."""
+    if not analysis_path or not os.path.isfile(analysis_path):
+        return False, "Файл анализа не найден"
+    bsl_file = "xml/CommonModules/ИИА_DSL/Ext/Module.bsl"
+    prompt = f"""ЗАДАЧА: Прочитай анализ в файле {analysis_path} и исправь баги в {bsl_file} согласно рекомендациям.
 
-Исправления (сделай все):
-{tasks}
-
-Открой {file_path}, отредактируй, сохрани. Не коммить и не пушить."""
-        if analysis_path and os.path.isfile(analysis_path):
-            prompt += f"\nКонтекст: {analysis_path}"
+НЕ спрашивай — сразу открой {bsl_file}, внеси изменения, сохрани.
+Не коммить и не пушить."""
     if comment:
-        prompt += f"\nКомментарий пользователя (учесть при применении): {comment}"
-    # standalone agent корректно принимает --workspace, -p и т.д.; cursor agent передаёт в Electron
+        prompt += f"\nКомментарий пользователя (учесть): {comment}"
     agent_path, kind = _find_agent_cmd(prefer_cursor=False)
     if not agent_path:
         return False, "Cursor Agent CLI не найден. Запустите: python check_cursor_cli.py"
-    cfg = os.path.join(_root, ".cursor")
-    print(f"Применение через: {'cursor agent' if kind == 'cursor_agent' else 'agent'}")
-    if os.path.isfile(os.path.join(cfg, "sandbox.json")):
-        print("  .cursor/sandbox.json (type: insecure_none)")
-    if os.path.isfile(os.path.join(cfg, "cli.json")):
-        print("  .cursor/cli.json (Write xml/**)")
     base = ["--trust", "-f", "--workspace", _root, "-p", prompt,
             "--model", "Composer 1.5", "--mode", "agent", "--sandbox", "disabled"]
-    if kind == "agent":
-        cmd = [agent_path] + base
-    else:
-        cmd = [agent_path, "agent"] + base
+    cmd = [agent_path] + base if kind == "agent" else [agent_path, "agent"] + base
     try:
-        result = subprocess.run(
-            cmd,
-            cwd=_root,
-            timeout=CURSOR_APPLY_TIMEOUT,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
-        ok = result.returncode == 0
-        if ok:
+        result = subprocess.run(cmd, cwd=_root, timeout=CURSOR_APPLY_TIMEOUT,
+                               text=True, encoding="utf-8", errors="replace")
+        if result.returncode == 0:
             _print_git_status()
-        return ok, ""
+        return result.returncode == 0, ""
     except Exception as e:
         return False, str(e)
 
@@ -435,30 +317,24 @@ def cmd_run(args):
         log_dir = os.path.dirname(report_path)
         print("Анализ логов через Cursor CLI...")
         output = run_cursor_analyze(run_id, report_path, log_dir)
-        proposals = parse_proposals(output)
-        proposals_path = os.path.join(log_dir, f"proposals_{run_id}.json")
         analysis_path = os.path.join(log_dir, f"analysis_{run_id}.md")
-        with open(proposals_path, "w", encoding="utf-8") as f:
-            json.dump({"proposals": proposals, "raw_output": output[:5000]}, f, ensure_ascii=False, indent=2)
         with open(analysis_path, "w", encoding="utf-8") as f:
             f.write(output)
         print(f"Анализ сохранён: {analysis_path}")
 
-        if not proposals:
-            print("Предложения не получены. Raw output:", output[:500])
+        if not output.strip():
+            print("Анализ пуст.")
             send_telegram_notification(
-                f"<b>Анализ не дал предложений</b>\n\n"
-                f"Run: {run_id}\nПровалы: {', '.join(failed)}\n"
-                f"Анализ сохранён: <code>{analysis_path}</code>\n"
+                f"<b>Анализ пуст</b>\n\nRun: {run_id}\nПровалы: {', '.join(failed)}\n"
                 f"Проверьте логи: {log_dir}"
             )
             return 1
 
-        # Отправка в Telegram (если не --no-approval)
+        # Отправка сырого анализа в Telegram (если не --no-approval)
         if not getattr(args, "no_approval", False):
-            send_proposals(
+            send_raw_analysis(
                 run_id=run_id,
-                proposals=proposals,
+                raw_output=output,
                 total_tokens=total_tokens,
                 cost_rub=round(total_cost_rub, 2),
                 failed_ids=failed,
@@ -473,22 +349,16 @@ def cmd_run(args):
                 send_telegram_notification("Таймаут ожидания одобрения.")
                 print("Таймаут ожидания одобрения.")
                 return 1
-            approved_indices = approved if action == "approve_partial" else []
-            if action == "approve_all":
-                approved_indices = [p["index"] for p in proposals]
             if comment:
                 print(f"Комментарий: {comment}")
-            send_telegram_notification(
-                f"<b>Ответ получен</b>: одобрено {len(approved_indices)} из {len(proposals)}. Применение правок..."
-            )
+            send_telegram_notification("<b>Ответ получен</b>: одобрено. Применение правок...")
         else:
-            approved_indices = [p["index"] for p in proposals]
             comment = ""
             print("--no-approval: применяем все без ожидания в Telegram")
 
-        # Применение
+        # Применение (сырой анализ → агент читает файл и правит)
         print("Применение правок через Cursor CLI...")
-        ok, msg = run_cursor_apply(proposals, approved_indices, proposals_path, comment, analysis_path)
+        ok, msg = run_cursor_apply_from_analysis(analysis_path, comment)
         if not ok:
             print(f"Ошибка применения: {msg}", file=sys.stderr)
             send_telegram_notification(f"<b>Ошибка применения правок</b>\n\n<pre>{msg[:500]}</pre>")
@@ -550,30 +420,24 @@ def cmd_run_from(args):
         print("Есть провалы. Запустите --run-from", new_run_id or run_id)
         return 0
 
-    proposals_path = os.path.join(log_dir, f"proposals_{run_id}.json")
     analysis_path = os.path.join(log_dir, f"analysis_{run_id}.md")
-    proposals = []
-    if os.path.isfile(proposals_path):
-        with open(proposals_path, "r", encoding="utf-8") as f:
-            proposals = json.load(f).get("proposals", [])
-    if not proposals:
+    if not os.path.isfile(analysis_path):
         print("Анализ через Cursor CLI...")
         output = run_cursor_analyze(run_id, report_path, log_dir)
-        proposals = parse_proposals(output)
-        with open(proposals_path, "w", encoding="utf-8") as f:
-            json.dump({"proposals": proposals, "raw_output": output[:5000]}, f, ensure_ascii=False, indent=2)
         with open(analysis_path, "w", encoding="utf-8") as f:
             f.write(output)
         print(f"Анализ сохранён: {analysis_path}")
     else:
-        print(f"Используем существующие предложения: {proposals_path}")
+        with open(analysis_path, "r", encoding="utf-8") as f:
+            output = f.read()
+        print(f"Используем существующий анализ: {analysis_path}")
 
-    if not proposals:
-        print("Предложения не получены.", file=sys.stderr)
+    if not output.strip():
+        print("Анализ пуст.", file=sys.stderr)
         return 1
 
     if not getattr(args, "no_approval", False):
-        send_proposals(run_id=run_id, proposals=proposals, total_tokens=total_tokens, cost_rub=round(total_cost_rub, 2), failed_ids=failed)
+        send_raw_analysis(run_id=run_id, raw_output=output, total_tokens=total_tokens, cost_rub=round(total_cost_rub, 2), failed_ids=failed)
         print("Ожидание одобрения в Telegram...")
         action, approved, comment = wait_for_approval(timeout_sec=APPROVAL_TIMEOUT)
         if action == "reject":
@@ -584,19 +448,15 @@ def cmd_run_from(args):
             send_telegram_notification("Таймаут ожидания одобрения.")
             print("Таймаут ожидания.")
             return 1
-        approved_indices = approved if action == "approve_partial" else [p["index"] for p in proposals]
         if comment:
             print(f"Комментарий: {comment}")
-        send_telegram_notification(
-            f"<b>Ответ получен</b>: одобрено {len(approved_indices)} из {len(proposals)}. Применение правок..."
-        )
+        send_telegram_notification("<b>Ответ получен</b>: одобрено. Применение правок...")
     else:
-        approved_indices = [p["index"] for p in proposals]
         comment = ""
         print("--no-approval: применяем все без ожидания в Telegram")
 
     print("Применение правок...")
-    ok, msg = run_cursor_apply(proposals, approved_indices, proposals_path, comment, analysis_path)
+    ok, msg = run_cursor_apply_from_analysis(analysis_path, comment)
     if not ok:
         print(f"Ошибка: {msg}", file=sys.stderr)
         return 1
@@ -626,38 +486,31 @@ def cmd_analyze(args):
         return 0
     print("Анализ через Cursor CLI...")
     output = run_cursor_analyze(run_id, report_path, log_dir)
-    proposals = parse_proposals(output)
-    out_path = os.path.join(log_dir, f"proposals_{run_id}.json")
     analysis_path = os.path.join(log_dir, f"analysis_{run_id}.md")
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump({"proposals": proposals, "raw_output": output[:5000]}, f, ensure_ascii=False, indent=2)
     with open(analysis_path, "w", encoding="utf-8") as f:
         f.write(output)
-    print(f"Предложений: {len(proposals)}, proposals: {out_path}, анализ: {analysis_path}")
+    print(f"Анализ сохранён: {analysis_path}")
     return 0
 
 
 def cmd_apply(args):
-    """Применить одобренные предложения и перезапустить тесты."""
+    """Применить правки по анализу (сырой анализ → агент правит Module.bsl)."""
     run_id = args.apply
-    approved = [int(x.strip()) for x in args.approve.split(",") if x.strip()]
-    proposals_path = os.path.join(_log_dir(), run_id, f"proposals_{run_id}.json")
-    if not os.path.isfile(proposals_path):
-        for p in Path(_log_dir()).glob(f"{run_id}/proposals_*.json"):
-            proposals_path = str(p)
+    analysis_path = None
+    report_path, log_dir = _find_report_for_run(run_id)
+    if log_dir:
+        for p in Path(log_dir).glob("analysis_*.md"):
+            analysis_path = str(p)
+            break
+    if not analysis_path or not os.path.isfile(analysis_path):
+        for p in Path(_log_dir()).glob(f"*{run_id}*/analysis_*.md"):
+            analysis_path = str(p)
             break
         else:
-            print(f"Proposals не найден для {run_id}. Сначала выполните --analyze.", file=sys.stderr)
+            print(f"Анализ не найден для {run_id}. Сначала выполните --analyze.", file=sys.stderr)
             return 1
-    with open(proposals_path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    proposals = data.get("proposals", [])
-    if not proposals:
-        print("Нет предложений для применения.", file=sys.stderr)
-        return 1
-    log_dir = os.path.dirname(proposals_path)
-    analysis_path = os.path.join(log_dir, f"analysis_{run_id}.md")
-    ok, msg = run_cursor_apply(proposals, approved, proposals_path, analysis_path=analysis_path)
+    comment = (args.approve or "").strip()  # --approve используется как комментарий
+    ok, msg = run_cursor_apply_from_analysis(analysis_path, comment)
     if not ok:
         print(f"Ошибка: {msg}", file=sys.stderr)
         return 1
@@ -673,8 +526,8 @@ def main():
     parser.add_argument("--run-from", metavar="RUN_ID", help="Цикл от существующего прогона (анализ - TG - правки - тесты)")
     parser.add_argument("--run-tests-only", action="store_true", help="Только запуск тестов")
     parser.add_argument("--analyze", metavar="RUN_ID", help="Анализ готового прогона (например examples_20250227_143000)")
-    parser.add_argument("--apply", metavar="RUN_ID", help="Применить одобренные предложения")
-    parser.add_argument("--approve", help="Номера предложений через запятую: 1,3 (с --apply)")
+    parser.add_argument("--apply", metavar="RUN_ID", help="Применить правки по анализу")
+    parser.add_argument("--approve", help="Комментарий для агента (с --apply)")
     parser.add_argument("--no-approval", action="store_true", help="Без ожидания в Telegram — сразу применить все")
     parser.add_argument("--skip-update", action="store_true", help="Пропустить обновление БД перед тестами")
     args = parser.parse_args()
@@ -687,9 +540,6 @@ def main():
     if args.analyze:
         return cmd_analyze(args)
     if args.apply:
-        if not args.approve:
-            print("С --apply укажите --approve 1,2,3", file=sys.stderr)
-            return 1
         return cmd_apply(args)
     parser.print_help()
     return 1

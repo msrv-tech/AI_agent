@@ -80,6 +80,54 @@ def send_message(text: str, reply_markup: dict = None) -> bool:
         return False
 
 
+def send_raw_analysis(
+    run_id: str,
+    raw_output: str,
+    total_tokens: int = 0,
+    cost_rub: float = 0,
+    failed_ids: list = None,
+) -> bool:
+    """
+    Отправляет сырой анализ в Telegram (без парсинга).
+
+    raw_output: полный вывод агента. Разбивается на части по 4000 символов (лимит Telegram 4096).
+    """
+    token, chat_id = _get_token_chat()
+    if not token or not chat_id:
+        return False
+
+    header = (
+        f"<b>Анализ провалов</b>\n"
+        f"Run: <code>{run_id}</code>\n"
+    )
+    if failed_ids:
+        header += f"Провалившиеся: {', '.join(failed_ids)}\n"
+    if total_tokens or cost_rub:
+        header += f"Токены: {total_tokens:,} | Стоимость: ~{cost_rub} ₽\n"
+    header += "\nОтветьте: «принять», «отклонить» или комментарий.\n\n"
+
+    # Сырой вывод — escape для HTML, разбить по 3800 символов (лимит 4096 с header)
+    import html
+    raw_escaped = html.escape(raw_output.strip())
+    chunk_size = 3800
+    chunks = [raw_escaped[i:i + chunk_size] for i in range(0, len(raw_escaped), chunk_size)]
+
+    keyboard = {
+        "inline_keyboard": [
+            [
+                {"text": "Принять все", "callback_data": "approve_all"},
+                {"text": "Отклонить", "callback_data": "reject"},
+            ],
+        ]
+    }
+
+    ok = send_message(header + chunks[0], reply_markup=keyboard)
+    for chunk in chunks[1:]:
+        if ok:
+            ok = send_message(f"<pre>{chunk}</pre>")
+    return ok
+
+
 def send_proposals(
     run_id: str,
     proposals: list,
@@ -116,7 +164,6 @@ def send_proposals(
 
     text = "\n".join(lines)
 
-    # Inline-кнопки
     keyboard = {
         "inline_keyboard": [
             [
