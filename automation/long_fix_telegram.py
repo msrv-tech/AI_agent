@@ -180,7 +180,7 @@ unified diff
 END_PROPOSAL
 
 Начни сразу с PROPOSAL 1. Минимум 1 предложение на каждый провалившийся тест."""
-    agent_path, kind = _find_agent_cmd()
+    agent_path, kind = _find_agent_cmd(prefer_cursor=False)
     if not agent_path:
         return "[ERROR] Cursor Agent CLI не найден. Запустите: python check_cursor_cli.py"
     if kind == "agent":
