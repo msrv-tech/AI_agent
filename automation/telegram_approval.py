@@ -176,9 +176,9 @@ def send_proposals(
     return send_message(text, reply_markup=keyboard)
 
 
-def get_updates(token: str, offset: int = None) -> dict:
+def get_updates(token: str, offset: int = None, timeout: int = 25) -> dict:
     """Получает обновления от Telegram (getUpdates). timeout=25 — long polling."""
-    data = {"timeout": 25}
+    data = {"timeout": timeout}
     if offset is not None:
         data["offset"] = offset
     try:
@@ -251,12 +251,20 @@ def wait_for_approval(
     if not token or not chat_id:
         return "timeout", [], ""
 
-    offset = None
     deadline = time.time() + timeout_sec
     debug = os.environ.get("TELEGRAM_DEBUG", "").strip().lower() in ("1", "true", "yes")
 
     # Webhook блокирует getUpdates — удаляем при старте
     _delete_webhook(token)
+
+    # Сброс очереди: игнорируем все сообщения, пришедшие до начала ожидания
+    offset = None
+    try:
+        flush = get_updates(token, offset=None, timeout=0)
+        for u in flush.get("result", []):
+            offset = u["update_id"] + 1
+    except Exception:
+        pass
 
     while time.time() < deadline:
         try:
