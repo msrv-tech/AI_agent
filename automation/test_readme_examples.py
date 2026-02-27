@@ -69,6 +69,17 @@ README_EXAMPLES = [
     },
 ]
 
+# Тариф Gitsell: 400 руб / 1 800 000 токенов
+GITSELL_RUB_PER_TOKEN = 400 / 1_800_000
+
+# Слова подтверждения в резюме (регистронезависимо)
+SUMMARY_CONFIRM_WORDS = (
+    "выполнен", "успешно", "создан", "найден", "выполнена", "сформирован",
+    "получен", "завершен", "завершён"
+)
+SUMMARY_MARKER = "=== РЕЗЮМЕ ВЫПОЛНЕННОЙ РАБОТЫ ==="
+SUMMARY_NOT_FORMED = "Резюме не сформировано"
+
 
 def _get(obj, name, default=None):
     try:
@@ -130,6 +141,7 @@ def analyze_log(log_text: str) -> dict:
         "ai_calls": 0,
         "plan_completed": False,
         "summary_present": False,
+        "summary_confirmed": False,
     }
 
     if not log_text:
@@ -161,6 +173,23 @@ def analyze_log(log_text: str) -> dict:
     # Дополнительный поиск RunQuery, GetMetadata и т.д.
     dsl_actions = re.findall(r"(RunQuery|GetMetadata|GetObjectFields|FindReferenceByName|CreateDocument|CreateReference)", log_text, re.I)
     analysis["dsl_actions_found"] = list(set(dsl_actions))
+
+    # Резюме: проверка маркера и слов подтверждения
+    if SUMMARY_MARKER in log_text:
+        analysis["summary_present"] = True
+        # Извлекаем текст резюме после маркера
+        idx = log_text.find(SUMMARY_MARKER)
+        summary_text = log_text[idx + len(SUMMARY_MARKER):].strip()
+        # Ограничиваем до следующего блока или 500 символов
+        if "\n\n" in summary_text:
+            summary_text = summary_text.split("\n\n")[0]
+        summary_text = summary_text[:500].lower()
+        if SUMMARY_NOT_FORMED.lower() in summary_text:
+            analysis["summary_confirmed"] = False
+        else:
+            analysis["summary_confirmed"] = any(
+                w in summary_text for w in SUMMARY_CONFIRM_WORDS
+            )
 
     return analysis
 
@@ -197,6 +226,11 @@ def main():
         default=None,
         help="Запустить только один пример по id (orders_client, stock_low, create_receipt, sales_analysis)",
     )
+    parser.add_argument(
+        "--examples",
+        default=None,
+        help="Запустить только указанные примеры (id через запятую: orders_client,stock_low)",
+    )
     args = parser.parse_args()
 
     connection_string = get_connection_string(args.connection)
@@ -212,6 +246,12 @@ def main():
         examples = [e for e in examples if e["id"] == args.example]
         if not examples:
             print(f"Ошибка: пример '{args.example}' не найден", file=sys.stderr)
+            return 1
+    elif args.examples:
+        ids = [s.strip() for s in args.examples.split(",") if s.strip()]
+        examples = [e for e in examples if e["id"] in ids]
+        if not examples:
+            print(f"Ошибка: примеры '{args.examples}' не найдены", file=sys.stderr)
             return 1
 
     print("=" * 70)
@@ -242,6 +282,8 @@ def main():
             results.append({
                 "id": ex["id"],
                 "success": False,
+                "passed": False,
+                "usage_tokens": 0,
                 "error": str(e),
                 "log_file": log_path,
             })
@@ -251,10 +293,12 @@ def main():
         success = _get(result, "Успех", False)
         log_text = _get(result, "Лог") or ""
         ref_str = str(_get(result, "СсылкаДиалога") or "")
+        usage_tokens = int(_get(result, "UsageTokens") or 0)
 
         analysis = analyze_log(log_text)
+        passed = success and analysis["summary_present"] and analysis["summary_confirmed"]
 
-        status = "OK" if success else "FAIL"
+        status = "OK" if passed else "FAIL"
         print(f"  Результат: {status} | Диалог: {ref_str}")
 
         if analysis["has_error"] and analysis["error_lines"]:
@@ -283,24 +327,34 @@ def main():
             "text": ex["text"],
             "type": ex["type"],
             "success": success,
+            "passed": passed,
+            "usage_tokens": usage_tokens,
             "dialog_ref": ref_str,
             "log_file": log_path,
             "has_error": analysis["has_error"],
             "error_count": len(analysis["error_lines"]),
+            "summary_present": analysis["summary_present"],
+            "summary_confirmed": analysis["summary_confirmed"],
             "dsl_actions": analysis["dsl_actions_found"],
             "ai_calls": analysis["ai_calls"],
             "plan_completed": analysis["plan_completed"],
         })
 
     # Сохранение отчёта
-    success_count = sum(1 for r in results if r["success"])
-    all_success = all(r["success"] and not r.get("has_error", False) for r in results)
+    passed_count = sum(1 for r in results if r.get("passed", False))
+    total_tokens = sum(r.get("usage_tokens", 0) for r in results)
+    cost_rub = round(total_tokens * GITSELL_RUB_PER_TOKEN, 2)
+    all_success = all(r.get("passed", False) for r in results)
     report = {
         "timestamp": timestamp,
+        "run_id": run_prefix,
         "log_dir": run_log_dir,
         "total": len(results),
-        "success_count": success_count,
+        "passed_count": passed_count,
+        "success_count": passed_count,  # для обратной совместимости
         "all_success": all_success,
+        "total_tokens": total_tokens,
+        "cost_rub": cost_rub,
         "log_files": [r.get("log_file", "") for r in results if r.get("log_file")],
         "results": results,
     }
@@ -312,20 +366,22 @@ def main():
     print("\n" + "=" * 70)
     print("ИТОГ")
     print("=" * 70)
-    print(f"Успешно: {success_count}/{len(results)}")
+    print(f"Пройдено: {passed_count}/{len(results)}")
+    print(f"Токены: {total_tokens:,} | Стоимость: ~{cost_rub} ₽")
     print(f"Каталог логов: {run_log_dir}")
     print(f"Файлы: {len([r for r in results if r.get('log_file')])} шт.")
 
     if not all_success:
         print("\nПровалившиеся примеры:")
         for r in results:
-            if not r["success"]:
-                print(f"  - {r['id']}: {r.get('error', 'Успех=False')}")
+            if not r.get("passed", False):
+                print(f"  - {r['id']}: {r.get('error', 'нет резюме/подтверждения')}")
 
     # Уведомление в Telegram
     tg_ok = send_telegram_notification(
         f"<b>Тесты README завершены</b>\n\n"
-        f"Успешно: {success_count}/{len(results)}\n"
+        f"Пройдено: {passed_count}/{len(results)}\n"
+        f"Токены: {total_tokens:,} | Стоимость: ~{cost_rub} ₽\n"
         f"Каталог: <code>{run_log_dir}</code>\n"
         f"{'✅ Все пройдены' if all_success else '❌ Есть провалы'}"
     )
