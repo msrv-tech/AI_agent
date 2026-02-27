@@ -52,6 +52,25 @@ def _cycle_state_path():
     return os.path.join(_log_dir(), "cycle_state.json")
 
 
+def _find_agent_cmd():
+    """Возвращает (путь к agent, "agent") или (путь к cursor, "cursor_agent")."""
+    path = shutil.which("agent")
+    if path:
+        return path, "agent"
+    local = os.environ.get("LOCALAPPDATA", "")
+    for name in ("agent.exe", "agent.cmd", "cursor-agent.exe"):
+        p = os.path.join(local, "cursor-agent", name)
+        if os.path.isfile(p):
+            return p, "agent"
+    path = shutil.which("cursor")
+    if path:
+        return path, "cursor_agent"
+    p = os.path.join(local, "Programs", "cursor", "resources", "app", "bin", "cursor.cmd")
+    if os.path.isfile(p):
+        return p, "cursor_agent"
+    return None, None
+
+
 def load_cycle_state():
     p = Path(_cycle_state_path())
     if not p.exists():
@@ -126,14 +145,15 @@ PROPOSAL 2
 ...
 END_PROPOSAL
 """
-    cmd = [
-        "cursor", "agent", "-p", prompt,
-        "--model", "Composer 1.5",
-        "--mode", "ask",
-        "--output-format", "text",
-        "--trust",
-        "--workspace", _root,
-    ]
+    agent_path, kind = _find_agent_cmd()
+    if not agent_path:
+        return "[ERROR] Cursor Agent CLI не найден. Запустите: python check_cursor_cli.py"
+    if kind == "agent":
+        cmd = [agent_path, "--trust", "-f", "--workspace", _root, "-p", prompt,
+               "--model", "Composer 1.5", "--mode", "ask", "--output-format", "text"]
+    else:
+        cmd = [agent_path, "agent", "--trust", "-f", "--workspace", _root, "-p", prompt,
+               "--model", "Composer 1.5", "--mode", "ask", "--output-format", "text"]
     try:
         result = subprocess.run(
             cmd,
@@ -141,8 +161,10 @@ END_PROPOSAL
             capture_output=True,
             timeout=CURSOR_ANALYZE_TIMEOUT,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
-        return result.stdout or result.stderr or ""
+        return (result.stdout or "") + "\n" + (result.stderr or "")
     except subprocess.TimeoutExpired:
         return "[TIMEOUT] Cursor CLI превысил время ожидания"
     except FileNotFoundError:
@@ -199,12 +221,13 @@ def run_cursor_apply(proposals, approved_indices, proposals_path, comment: str =
 """
     if comment:
         prompt += f"\nКомментарий пользователя (учесть при применении): {comment}"
-    cmd = [
-        "cursor", "agent", "-p", prompt,
-        "--model", "Composer 1.5",
-        "--trust",
-        "--workspace", _root,
-    ]
+    agent_path, kind = _find_agent_cmd()
+    if not agent_path:
+        return False, "Cursor Agent CLI не найден. Запустите: python check_cursor_cli.py"
+    if kind == "agent":
+        cmd = [agent_path, "--trust", "--workspace", _root, "-p", prompt, "--model", "Composer 1.5"]
+    else:
+        cmd = [agent_path, "agent", "--trust", "--workspace", _root, "-p", prompt, "--model", "Composer 1.5"]
     try:
         result = subprocess.run(
             cmd,
