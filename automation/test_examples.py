@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Тестирование примеров из README через COM.
+Тестирование примеров через COM.
 
-Создаёт диалоги для каждого примера запроса из README, выполняет агента
+Создаёт диалоги для каждого примера запроса, выполняет агента
 синхронно через ИИА_ДиалогCOM. Сохраняет лог каждого диалога в отдельный
 текстовый файл. По окончании отправляет уведомление в Telegram.
 
 Запуск (из каталога automation):
-    python test_readme_examples.py
-    python test_readme_examples.py --connection "File=\"D:\\base\";"
-    python test_readme_examples.py --log-dir ./logs --verbose
+    python test_examples.py
+    python test_examples.py --connection "File=\"D:\\base\";"
+    python test_examples.py --log-dir ./logs --verbose
 
 Секреты Telegram в .env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 """
@@ -41,7 +41,7 @@ except ImportError:
     pass
 
 
-# Примеры из README (раздел "Что можно спросить?")
+# Примеры запросов (раздел "Что можно спросить?")
 README_EXAMPLES = [
     {
         "id": "orders_client",
@@ -199,7 +199,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Тестирование примеров из README через COM"
+        description="Тестирование примеров через COM"
     )
     parser.add_argument(
         "--connection", "-c",
@@ -236,7 +236,7 @@ def main():
     connection_string = get_connection_string(args.connection)
     log_dir = args.log_dir or os.path.join(_script_dir, "logs")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_prefix = f"readme_{timestamp}"
+    run_prefix = f"examples_{timestamp}"
     run_log_dir = os.path.join(log_dir, run_prefix)
     Path(run_log_dir).mkdir(parents=True, exist_ok=True)
     report_file = os.path.join(run_log_dir, "report.json")
@@ -255,7 +255,7 @@ def main():
             return 1
 
     print("=" * 70)
-    print("Тестирование примеров из README (через COM)")
+    print("Тестирование примеров (через COM)")
     print("=" * 70)
 
     conn = connect_to_1c(connection_string)
@@ -379,7 +379,7 @@ def main():
 
     # Уведомление в Telegram
     tg_ok = send_telegram_notification(
-        f"<b>Тесты README завершены</b>\n\n"
+        f"<b>Тесты примеров завершены</b>\n\n"
         f"Пройдено: {passed_count}/{len(results)}\n"
         f"Токены: {total_tokens:,} | Стоимость: ~{cost_rub} ₽\n"
         f"Каталог: <code>{run_log_dir}</code>\n"

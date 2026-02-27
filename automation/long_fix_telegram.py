@@ -3,11 +3,12 @@
 CLI цикл: тест → анализ → согласование в Telegram → правки → повтор.
 
 Запуск (из каталога automation или корня проекта):
-    python test_fix_cycle.py --run              # полный цикл (тесты - анализ - TG - правки)
-    python test_fix_cycle.py --run-from readme_20260227_045200  # от существующего прогона
-    python test_fix_cycle.py --run-tests-only   # только тесты
-    python test_fix_cycle.py --analyze readme_20250227_143000
-    python test_fix_cycle.py --apply readme_20250227_143000 --approve 1,3
+    python long_fix_telegram.py --run              # полный цикл (обновление БД - тесты - анализ - TG - правки)
+    python long_fix_telegram.py --run --skip-update # без обновления БД
+    python long_fix_telegram.py --run-from examples_20260227_045200  # от существующего прогона
+    python long_fix_telegram.py --run-tests-only   # только тесты
+    python long_fix_telegram.py --analyze examples_20250227_143000
+    python long_fix_telegram.py --apply examples_20250227_143000 --approve 1,3
 
 Правки не коммитятся и не пушятся — остаются для ручного просмотра.
 """
@@ -32,7 +33,7 @@ except ImportError:
     pass
 
 from com_1c.com_connector import setup_console_encoding
-from test_readme_examples import (
+from test_examples import (
     README_EXAMPLES,
     GITSELL_RUB_PER_TOKEN,
     send_telegram_notification,
@@ -94,9 +95,24 @@ def save_cycle_state(state):
         json.dump(state, f, ensure_ascii=False, indent=2)
 
 
+def run_update_1c():
+    """Обновляет расширение и БД (xml → конфигурация → UpdateDBCfg). Возвращает True при успехе."""
+    update_script = os.path.join(_script_dir, "update_1c.py")
+    try:
+        r = subprocess.run(
+            [sys.executable, update_script, "--skip-run-client"],
+            cwd=_script_dir,
+            timeout=180,
+            env={**os.environ},
+        )
+        return r.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
+        return False
+
+
 def run_tests(examples_arg=None):
-    """Запускает test_readme_examples.py. Возвращает (returncode, run_id, report_path)."""
-    cmd = [sys.executable, os.path.join(_script_dir, "test_readme_examples.py")]
+    """Запускает test_examples.py. Возвращает (returncode, run_id, report_path)."""
+    cmd = [sys.executable, os.path.join(_script_dir, "test_examples.py")]
     if examples_arg:
         cmd.extend(["--examples", examples_arg])
     env = {**os.environ, "PYTHONPATH": _script_dir}
@@ -108,7 +124,7 @@ def run_tests(examples_arg=None):
     )
     # Ищем последний report.json
     log_dir = Path(_log_dir())
-    reports = sorted(log_dir.glob("readme_*/report.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    reports = sorted(log_dir.glob("*/report.json"), key=lambda p: p.stat().st_mtime, reverse=True)
     run_id = reports[0].parent.name if reports else None
     report_path = str(reports[0]) if reports else None
     return result.returncode, run_id, report_path
@@ -379,6 +395,14 @@ def cmd_run(args):
             examples_arg = ",".join(to_run)
             print(f"Запуск только провалившихся: {examples_arg}")
 
+        if not getattr(args, "skip_update", False):
+            print("Обновление расширения и БД...")
+            if not run_update_1c():
+                print("Ошибка обновления БД. Запустите: python update_1c.py --skip-run-client", file=sys.stderr)
+                return 1
+        else:
+            print("--skip-update: пропуск обновления БД")
+
         print("Запуск тестов...")
         rc, run_id, report_path = run_tests(examples_arg)
         if report_path is None:
@@ -497,7 +521,7 @@ def cmd_run_from(args):
     run_id = args.run_from
     report_path, log_dir = _find_report_for_run(run_id)
     if not report_path:
-        print(f"Report не найден для {run_id}. Укажите run_id, например readme_20260227_045200", file=sys.stderr)
+        print(f"Report не найден для {run_id}. Укажите run_id, например examples_20260227_045200", file=sys.stderr)
         return 1
     run_id = os.path.basename(log_dir)
     report = load_report(report_path)
@@ -648,10 +672,11 @@ def main():
     parser.add_argument("--run", "-r", action="store_true", help="Полный цикл (тесты - анализ - TG - правки - повтор)")
     parser.add_argument("--run-from", metavar="RUN_ID", help="Цикл от существующего прогона (анализ - TG - правки - тесты)")
     parser.add_argument("--run-tests-only", action="store_true", help="Только запуск тестов")
-    parser.add_argument("--analyze", metavar="RUN_ID", help="Анализ готового прогона (например readme_20250227_143000)")
+    parser.add_argument("--analyze", metavar="RUN_ID", help="Анализ готового прогона (например examples_20250227_143000)")
     parser.add_argument("--apply", metavar="RUN_ID", help="Применить одобренные предложения")
     parser.add_argument("--approve", help="Номера предложений через запятую: 1,3 (с --apply)")
     parser.add_argument("--no-approval", action="store_true", help="Без ожидания в Telegram — сразу применить все")
+    parser.add_argument("--skip-update", action="store_true", help="Пропустить обновление БД перед тестами")
     args = parser.parse_args()
     if args.run:
         return cmd_run(args)
