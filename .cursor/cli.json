@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Write(xml/**)",
+      "Write(test_agent_output.txt)",
+      "Shell(git)"
+    ],
+    "deny": []
+  }
+}

@@ -53,22 +53,27 @@ def _cycle_state_path():
     return os.path.join(_log_dir(), "cycle_state.json")
 
 
-def _find_agent_cmd():
-    """Возвращает (путь к agent, "agent") или (путь к cursor, "cursor_agent")."""
-    path = shutil.which("agent")
-    if path:
-        return path, "agent"
+def _find_agent_cmd(prefer_cursor: bool = True):
+    """
+    Возвращает (путь, "agent"|"cursor_agent").
+    prefer_cursor=True — сначала cursor agent (полный IDE-агент), иначе standalone agent.
+    """
     local = os.environ.get("LOCALAPPDATA", "")
-    for name in ("agent.exe", "agent.cmd", "cursor-agent.exe"):
-        p = os.path.join(local, "cursor-agent", name)
-        if os.path.isfile(p):
-            return p, "agent"
-    path = shutil.which("cursor")
-    if path:
-        return path, "cursor_agent"
-    p = os.path.join(local, "Programs", "cursor", "resources", "app", "bin", "cursor.cmd")
-    if os.path.isfile(p):
-        return p, "cursor_agent"
+    cursor_cmd = os.path.join(local, "Programs", "cursor", "resources", "app", "bin", "cursor.cmd")
+    cursor_path = shutil.which("cursor") or (cursor_cmd if os.path.isfile(cursor_cmd) else None)
+    agent_path = shutil.which("agent")
+    if not agent_path:
+        for name in ("agent.exe", "agent.cmd", "cursor-agent.exe"):
+            p = os.path.join(local, "cursor-agent", name)
+            if os.path.isfile(p):
+                agent_path = p
+                break
+    if prefer_cursor and cursor_path:
+        return cursor_path, "cursor_agent"
+    if agent_path:
+        return agent_path, "agent"
+    if cursor_path:
+        return cursor_path, "cursor_agent"
     return None, None
 
 
@@ -307,40 +312,47 @@ def run_cursor_apply(proposals, approved_indices, proposals_path, comment: str =
 """
     else:
         # Предложения без patch — реализовать по описанию
-        items = "\n".join(f"- {p['file']}: {p['description']}" for p in selected)
-        prompt = f"""Реализуй следующие исправления BSL-кода. ВНЕСИ ИЗМЕНЕНИЯ В ФАЙЛЫ И СОХРАНИ ИХ.
+        file_path = selected[0]["file"]
+        tasks = "\n".join(f"{i+1}. {p['description']}" for i, p in enumerate(selected))
+        prompt = f"""ЗАДАЧА: Исправь баги в файле {file_path}. НЕ спрашивай — сразу открой файл и внеси изменения.
 
-{items}
-"""
+Исправления (сделай все):
+{tasks}
+
+Открой {file_path}, отредактируй, сохрани. Не коммить и не пушить."""
         if analysis_path and os.path.isfile(analysis_path):
             prompt += f"\nКонтекст: {analysis_path}"
-        prompt += "\nНе коммить и не пушить."
     if comment:
         prompt += f"\nКомментарий пользователя (учесть при применении): {comment}"
-    agent_path, kind = _find_agent_cmd()
+    # standalone agent корректно принимает --workspace, -p и т.д.; cursor agent передаёт в Electron
+    agent_path, kind = _find_agent_cmd(prefer_cursor=False)
     if not agent_path:
         return False, "Cursor Agent CLI не найден. Запустите: python check_cursor_cli.py"
+    cfg = os.path.join(_root, ".cursor")
+    print(f"Применение через: {'cursor agent' if kind == 'cursor_agent' else 'agent'}")
+    if os.path.isfile(os.path.join(cfg, "sandbox.json")):
+        print("  .cursor/sandbox.json (type: insecure_none)")
+    if os.path.isfile(os.path.join(cfg, "cli.json")):
+        print("  .cursor/cli.json (Write xml/**)")
+    base = ["--trust", "-f", "--workspace", _root, "-p", prompt,
+            "--model", "Composer 1.5", "--mode", "agent", "--sandbox", "disabled"]
     if kind == "agent":
-        cmd = [agent_path, "--trust", "-f", "--workspace", _root, "-p", prompt,
-               "--model", "Composer 1.5", "--mode", "agent"]
+        cmd = [agent_path] + base
     else:
-        cmd = [agent_path, "agent", "--trust", "-f", "--workspace", _root, "-p", prompt,
-               "--model", "Composer 1.5", "--mode", "agent"]
+        cmd = [agent_path, "agent"] + base
     try:
         result = subprocess.run(
             cmd,
             cwd=_root,
-            capture_output=True,
             timeout=CURSOR_APPLY_TIMEOUT,
             text=True,
             encoding="utf-8",
             errors="replace",
         )
         ok = result.returncode == 0
-        msg = result.stdout or result.stderr or ""
         if ok:
             _print_git_status()
-        return ok, msg
+        return ok, ""
     except Exception as e:
         return False, str(e)
 
@@ -418,32 +430,37 @@ def cmd_run(args):
             )
             return 1
 
-        # Отправка в Telegram
-        send_proposals(
-            run_id=run_id,
-            proposals=proposals,
-            total_tokens=total_tokens,
-            cost_rub=round(total_cost_rub, 2),
-            failed_ids=failed,
-        )
-        print("Ожидание одобрения в Telegram (ответьте или нажмите кнопку)...")
-        action, approved, comment = wait_for_approval(timeout_sec=APPROVAL_TIMEOUT)
-        if action == "reject":
-            send_telegram_notification("Ответ получен: <b>отклонено</b>.")
-            print("Правки отклонены.")
-            return 1
-        if action == "timeout":
-            send_telegram_notification("Таймаут ожидания одобрения.")
-            print("Таймаут ожидания одобрения.")
-            return 1
-        approved_indices = approved if action == "approve_partial" else []
-        if action == "approve_all":
+        # Отправка в Telegram (если не --no-approval)
+        if not getattr(args, "no_approval", False):
+            send_proposals(
+                run_id=run_id,
+                proposals=proposals,
+                total_tokens=total_tokens,
+                cost_rub=round(total_cost_rub, 2),
+                failed_ids=failed,
+            )
+            print("Ожидание одобрения в Telegram (ответьте или нажмите кнопку)...")
+            action, approved, comment = wait_for_approval(timeout_sec=APPROVAL_TIMEOUT)
+            if action == "reject":
+                send_telegram_notification("Ответ получен: <b>отклонено</b>.")
+                print("Правки отклонены.")
+                return 1
+            if action == "timeout":
+                send_telegram_notification("Таймаут ожидания одобрения.")
+                print("Таймаут ожидания одобрения.")
+                return 1
+            approved_indices = approved if action == "approve_partial" else []
+            if action == "approve_all":
+                approved_indices = [p["index"] for p in proposals]
+            if comment:
+                print(f"Комментарий: {comment}")
+            send_telegram_notification(
+                f"<b>Ответ получен</b>: одобрено {len(approved_indices)} из {len(proposals)}. Применение правок..."
+            )
+        else:
             approved_indices = [p["index"] for p in proposals]
-        if comment:
-            print(f"Комментарий: {comment}")
-        send_telegram_notification(
-            f"<b>Ответ получен</b>: одобрено {len(approved_indices)} из {len(proposals)}. Применение правок..."
-        )
+            comment = ""
+            print("--no-approval: применяем все без ожидания в Telegram")
 
         # Применение
         print("Применение правок через Cursor CLI...")
@@ -452,7 +469,8 @@ def cmd_run(args):
             print(f"Ошибка применения: {msg}", file=sys.stderr)
             send_telegram_notification(f"<b>Ошибка применения правок</b>\n\n<pre>{msg[:500]}</pre>")
             return 1
-        print("Правки применены (не запушены). Повторный запуск тестов...")
+        print("Правки применены (не запушены). Запуск тестов отключён — проверьте git status.")
+        return 0
 
 
 def cmd_run_tests_only(args):
@@ -530,32 +548,36 @@ def cmd_run_from(args):
         print("Предложения не получены.", file=sys.stderr)
         return 1
 
-    send_proposals(run_id=run_id, proposals=proposals, total_tokens=total_tokens, cost_rub=round(total_cost_rub, 2), failed_ids=failed)
-    print("Ожидание одобрения в Telegram...")
-    action, approved, comment = wait_for_approval(timeout_sec=APPROVAL_TIMEOUT)
-    if action == "reject":
-        send_telegram_notification("Ответ получен: <b>отклонено</b>.")
-        print("Правки отклонены.")
-        return 1
-    if action == "timeout":
-        send_telegram_notification("Таймаут ожидания одобрения.")
-        print("Таймаут ожидания.")
-        return 1
-    approved_indices = approved if action == "approve_partial" else [p["index"] for p in proposals]
-    if comment:
-        print(f"Комментарий: {comment}")
-    send_telegram_notification(
-        f"<b>Ответ получен</b>: одобрено {len(approved_indices)} из {len(proposals)}. Применение правок..."
-    )
+    if not getattr(args, "no_approval", False):
+        send_proposals(run_id=run_id, proposals=proposals, total_tokens=total_tokens, cost_rub=round(total_cost_rub, 2), failed_ids=failed)
+        print("Ожидание одобрения в Telegram...")
+        action, approved, comment = wait_for_approval(timeout_sec=APPROVAL_TIMEOUT)
+        if action == "reject":
+            send_telegram_notification("Ответ получен: <b>отклонено</b>.")
+            print("Правки отклонены.")
+            return 1
+        if action == "timeout":
+            send_telegram_notification("Таймаут ожидания одобрения.")
+            print("Таймаут ожидания.")
+            return 1
+        approved_indices = approved if action == "approve_partial" else [p["index"] for p in proposals]
+        if comment:
+            print(f"Комментарий: {comment}")
+        send_telegram_notification(
+            f"<b>Ответ получен</b>: одобрено {len(approved_indices)} из {len(proposals)}. Применение правок..."
+        )
+    else:
+        approved_indices = [p["index"] for p in proposals]
+        comment = ""
+        print("--no-approval: применяем все без ожидания в Telegram")
 
     print("Применение правок...")
     ok, msg = run_cursor_apply(proposals, approved_indices, proposals_path, comment, analysis_path)
     if not ok:
         print(f"Ошибка: {msg}", file=sys.stderr)
         return 1
-    print("Правки применены. Запуск тестов...")
-    rc, new_run_id, _ = run_tests()
-    return rc
+    print("Правки применены. Запуск тестов отключён — проверьте git status.")
+    return 0
 
 
 def cmd_analyze(args):
@@ -615,9 +637,8 @@ def cmd_apply(args):
     if not ok:
         print(f"Ошибка: {msg}", file=sys.stderr)
         return 1
-    print("Правки применены. Запуск тестов...")
-    rc, _, _ = run_tests()
-    return rc
+    print("Правки применены. Запуск тестов отключён — проверьте git status.")
+    return 0
 
 
 def main():
@@ -630,6 +651,7 @@ def main():
     parser.add_argument("--analyze", metavar="RUN_ID", help="Анализ готового прогона (например readme_20250227_143000)")
     parser.add_argument("--apply", metavar="RUN_ID", help="Применить одобренные предложения")
     parser.add_argument("--approve", help="Номера предложений через запятую: 1,3 (с --apply)")
+    parser.add_argument("--no-approval", action="store_true", help="Без ожидания в Telegram — сразу применить все")
     args = parser.parse_args()
     if args.run:
         return cmd_run(args)
