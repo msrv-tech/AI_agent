@@ -3,8 +3,9 @@
 CLI цикл: тест → анализ → согласование в Telegram → правки → повтор.
 
 Запуск (из каталога automation или корня проекта):
-    python test_fix_cycle.py --run              # полный цикл
-    python test_fix_cycle.py --run-tests-only  # только тесты
+    python test_fix_cycle.py --run              # полный цикл (тесты - анализ - TG - правки)
+    python test_fix_cycle.py --run-from readme_20260227_045200  # от существующего прогона
+    python test_fix_cycle.py --run-tests-only   # только тесты
     python test_fix_cycle.py --analyze readme_20250227_143000
     python test_fix_cycle.py --apply readme_20250227_143000 --approve 1,3
 
@@ -129,22 +130,35 @@ def run_cursor_analyze(run_id, report_path, log_dir):
     prompt = f"""Проанализируй логи тестов в каталоге {log_dir}.
 Файл report.json: {report_path}
 Тест провален, если в логе нет блока "=== РЕЗЮМЕ ВЫПОЛНЕННОЙ РАБОТЫ ===" или в тексте резюме нет слов подтверждения (выполнен, успешно, создан, найден и т.п.).
-Предложи правки BSL-кода в xml/ для исправления ошибок.
-Выведи предложения в формате:
+
+КРИТИЧЕСКИ ВАЖНО: Выведи ТОЛЬКО предложения правок в указанном формате. Без markdown, без таблиц, без вступления.
+Каждое предложение — конкретная правка BSL-кода с unified diff.
+
+Формат (соблюдай точно):
 
 PROPOSAL 1
 FILE: xml/CommonModules/ИИА_DSL/Ext/Module.bsl
-DESCRIPTION: описание правки
+DESCRIPTION: краткое описание правки
 PATCH:
 <<<<<<
-unified diff здесь
+--- a/Module.bsl
++++ b/Module.bsl
+@@ -100,7 +100,7 @@
+- старая строка
++ новая строка
 >>>>>>
 END_PROPOSAL
 
 PROPOSAL 2
-...
+FILE: путь/к/файлу.bsl
+DESCRIPTION: описание
+PATCH:
+<<<<<<
+unified diff
+>>>>>>
 END_PROPOSAL
-"""
+
+Начни сразу с PROPOSAL 1. Минимум 1 предложение на каждый провалившийся тест."""
     agent_path, kind = _find_agent_cmd()
     if not agent_path:
         return "[ERROR] Cursor Agent CLI не найден. Запустите: python check_cursor_cli.py"
@@ -176,11 +190,12 @@ END_PROPOSAL
 def parse_proposals(text):
     """Парсит вывод Cursor в список предложений."""
     proposals = []
+    # Строгий формат PROPOSAL
     pattern = re.compile(
-        r"PROPOSAL\s+(\d+)\s*\n"
-        r"FILE:\s*(.+?)\n"
-        r"DESCRIPTION:\s*(.+?)\n"
-        r"PATCH:\s*\n<<<<<<\n(.*?)>>>>>>\s*\n"
+        r"PROPOSAL\s+(\d+)\s*[\r\n]+"
+        r"FILE:\s*(.+?)[\r\n]+"
+        r"DESCRIPTION:\s*(.+?)[\r\n]+"
+        r"PATCH:\s*[\r\n]*<<<<<<[\r\n]+(.*?)>>>>>>\s*[\r\n]*"
         r"END_PROPOSAL",
         re.DOTALL | re.IGNORECASE
     )
@@ -195,9 +210,9 @@ def parse_proposals(text):
     if not proposals:
         parts = re.split(r"PROPOSAL\s+\d+", text, flags=re.I)
         for i, part in enumerate(parts[1:], 1):
-            file_m = re.search(r"FILE:\s*(.+?)(?:\n|$)", part)
-            desc_m = re.search(r"DESCRIPTION:\s*(.+?)(?:\n|$)", part)
-            patch_m = re.search(r"<<<<<<\n(.*?)>>>>>", part, re.DOTALL)
+            file_m = re.search(r"FILE:\s*(.+?)(?:\r?\n|$)", part)
+            desc_m = re.search(r"DESCRIPTION:\s*(.+?)(?:\r?\n|$)", part)
+            patch_m = re.search(r"<<<<<<\s*\r?\n(.*?)>>>>>>", part, re.DOTALL)
             if file_m:
                 proposals.append({
                     "index": i,
@@ -205,29 +220,112 @@ def parse_proposals(text):
                     "description": (desc_m.group(1) if desc_m else "").strip()[:200],
                     "patch": (patch_m.group(1) if patch_m else "").strip(),
                 })
+    # Fallback: извлечение из блоков ```diff
+    if not proposals:
+        for m in re.finditer(r"```(?:diff)?\s*\n(.*?)```", text, re.DOTALL):
+            patch = m.group(1).strip()
+            if patch and ("---" in patch or "+++" in patch or "@@" in patch):
+                file_m = re.search(r"(?:---|\+\+\+)\s+[ab]/(.+?)(?:\s|$)", patch)
+                path = file_m.group(1).strip() if file_m else "xml/CommonModules/ИИА_DSL/Ext/Module.bsl"
+                if not path.startswith("xml/"):
+                    path = f"xml/{path}" if not path.startswith("/") else path
+                proposals.append({
+                    "index": len(proposals) + 1,
+                    "file": path,
+                    "description": "Извлечено из блока diff",
+                    "patch": patch,
+                })
+    # Fallback: извлечение из markdown-анализа (таблица "Корневые причины", "Баг BSL")
+    if not proposals:
+        proposals = _parse_proposals_from_analysis(text)
     return proposals
 
 
-def run_cursor_apply(proposals, approved_indices, proposals_path, comment: str = ""):
+def _parse_proposals_from_analysis(text: str):
+    """Извлекает предложения из markdown-анализа (таблица с Баг BSL, рекомендации)."""
+    proposals = []
+    # Таблица: | # | Проблема | Тесты | Тип | ... | 1 | ... | **Баг BSL** |
+    # Ищем строки таблицы с **Баг BSL**
+    bsl_file = "xml/CommonModules/ИИА_DSL/Ext/Module.bsl"
+    for m in re.finditer(r"\|\s*(\d+)\s*\|\s*([^|]+)\|\s*[^|]+\|\s*\*\*Баг BSL\*\*", text):
+        idx, problem = int(m.group(1)), m.group(2).strip()
+        problem = re.sub(r"`([^`]+)`", r"\1", problem)[:200]
+        if problem and not any(p["description"] == problem for p in proposals):
+            proposals.append({
+                "index": len(proposals) + 1,
+                "file": bsl_file,
+                "description": problem,
+                "patch": "",
+            })
+    # Рекомендации: "- В модуле `ИИА_DSL` -- после CreateDocument..."
+    if not proposals:
+        for m in re.finditer(r"[-*]\s+В модуле\s+`?ИИА_DSL`?\s*[—\-]\s*(.+?)(?:\n|$)", text):
+            desc = m.group(1).strip()[:200]
+            if desc and len(proposals) < 5:
+                proposals.append({
+                    "index": len(proposals) + 1,
+                    "file": bsl_file,
+                    "description": desc,
+                    "patch": "",
+                })
+    return proposals
+
+
+def _print_git_status():
+    """Выводит git status после применения правок."""
+    try:
+        r = subprocess.run(
+            ["git", "status", "--short"],
+            cwd=_root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+        )
+        if r.returncode == 0 and r.stdout.strip():
+            print("Изменённые файлы (git status):")
+            print(r.stdout.strip())
+        elif r.returncode == 0:
+            print("(git: изменений нет)")
+    except Exception:
+        pass
+
+
+def run_cursor_apply(proposals, approved_indices, proposals_path, comment: str = "", analysis_path: str = ""):
     """Применяет одобренные предложения через Cursor CLI."""
     if not approved_indices:
         approved_indices = list(range(1, len(proposals) + 1))
     selected = [p for p in proposals if p["index"] in approved_indices]
     if not selected:
         return False, "Нет предложений для применения"
-    prompt = f"""Примени следующие правки из файла {proposals_path}.
+    has_patches = all(p.get("patch") for p in selected)
+    if has_patches:
+        prompt = f"""Примени следующие правки из файла {proposals_path}.
 Номера одобренных предложений: {approved_indices}
 Не коммить и не пушить — оставь изменения в рабочей директории для ручного просмотра.
 """
+    else:
+        # Предложения без patch — реализовать по описанию
+        items = "\n".join(f"- {p['file']}: {p['description']}" for p in selected)
+        prompt = f"""Реализуй следующие исправления BSL-кода. ВНЕСИ ИЗМЕНЕНИЯ В ФАЙЛЫ И СОХРАНИ ИХ.
+
+{items}
+"""
+        if analysis_path and os.path.isfile(analysis_path):
+            prompt += f"\nКонтекст: {analysis_path}"
+        prompt += "\nНе коммить и не пушить."
     if comment:
         prompt += f"\nКомментарий пользователя (учесть при применении): {comment}"
     agent_path, kind = _find_agent_cmd()
     if not agent_path:
         return False, "Cursor Agent CLI не найден. Запустите: python check_cursor_cli.py"
     if kind == "agent":
-        cmd = [agent_path, "--trust", "--workspace", _root, "-p", prompt, "--model", "Composer 1.5"]
+        cmd = [agent_path, "--trust", "-f", "--workspace", _root, "-p", prompt,
+               "--model", "Composer 1.5", "--mode", "agent"]
     else:
-        cmd = [agent_path, "agent", "--trust", "--workspace", _root, "-p", prompt, "--model", "Composer 1.5"]
+        cmd = [agent_path, "agent", "--trust", "-f", "--workspace", _root, "-p", prompt,
+               "--model", "Composer 1.5", "--mode", "agent"]
     try:
         result = subprocess.run(
             cmd,
@@ -235,8 +333,14 @@ def run_cursor_apply(proposals, approved_indices, proposals_path, comment: str =
             capture_output=True,
             timeout=CURSOR_APPLY_TIMEOUT,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
-        return result.returncode == 0, result.stdout or result.stderr or ""
+        ok = result.returncode == 0
+        msg = result.stdout or result.stderr or ""
+        if ok:
+            _print_git_status()
+        return ok, msg
     except Exception as e:
         return False, str(e)
 
@@ -297,14 +401,19 @@ def cmd_run(args):
         output = run_cursor_analyze(run_id, report_path, log_dir)
         proposals = parse_proposals(output)
         proposals_path = os.path.join(log_dir, f"proposals_{run_id}.json")
+        analysis_path = os.path.join(log_dir, f"analysis_{run_id}.md")
         with open(proposals_path, "w", encoding="utf-8") as f:
             json.dump({"proposals": proposals, "raw_output": output[:5000]}, f, ensure_ascii=False, indent=2)
+        with open(analysis_path, "w", encoding="utf-8") as f:
+            f.write(output)
+        print(f"Анализ сохранён: {analysis_path}")
 
         if not proposals:
             print("Предложения не получены. Raw output:", output[:500])
             send_telegram_notification(
                 f"<b>Анализ не дал предложений</b>\n\n"
                 f"Run: {run_id}\nПровалы: {', '.join(failed)}\n"
+                f"Анализ сохранён: <code>{analysis_path}</code>\n"
                 f"Проверьте логи: {log_dir}"
             )
             return 1
@@ -320,9 +429,11 @@ def cmd_run(args):
         print("Ожидание одобрения в Telegram (ответьте или нажмите кнопку)...")
         action, approved, comment = wait_for_approval(timeout_sec=APPROVAL_TIMEOUT)
         if action == "reject":
+            send_telegram_notification("Ответ получен: <b>отклонено</b>.")
             print("Правки отклонены.")
             return 1
         if action == "timeout":
+            send_telegram_notification("Таймаут ожидания одобрения.")
             print("Таймаут ожидания одобрения.")
             return 1
         approved_indices = approved if action == "approve_partial" else []
@@ -330,10 +441,13 @@ def cmd_run(args):
             approved_indices = [p["index"] for p in proposals]
         if comment:
             print(f"Комментарий: {comment}")
+        send_telegram_notification(
+            f"<b>Ответ получен</b>: одобрено {len(approved_indices)} из {len(proposals)}. Применение правок..."
+        )
 
         # Применение
         print("Применение правок через Cursor CLI...")
-        ok, msg = run_cursor_apply(proposals, approved_indices, proposals_path, comment)
+        ok, msg = run_cursor_apply(proposals, approved_indices, proposals_path, comment, analysis_path)
         if not ok:
             print(f"Ошибка применения: {msg}", file=sys.stderr)
             send_telegram_notification(f"<b>Ошибка применения правок</b>\n\n<pre>{msg[:500]}</pre>")
@@ -345,6 +459,102 @@ def cmd_run_tests_only(args):
     """Только запуск тестов."""
     rc, run_id, report_path = run_tests()
     print(f"Run ID: {run_id}, Report: {report_path}")
+    return rc
+
+
+def _find_report_for_run(run_id: str):
+    """Находит (report_path, log_dir) для run_id или (None, None)."""
+    report_path = os.path.join(_log_dir(), run_id, "report.json")
+    if os.path.isfile(report_path):
+        return report_path, os.path.dirname(report_path)
+    for p in Path(_log_dir()).glob(f"*{run_id}*/report.json"):
+        return str(p), str(p.parent)
+    for p in Path(_log_dir()).glob(f"{run_id}/report.json"):
+        return str(p), str(p.parent)
+    return None, None
+
+
+def cmd_run_from(args):
+    """Полный цикл от существующего прогона: анализ (если нужно) → TG → правки → тесты."""
+    run_id = args.run_from
+    report_path, log_dir = _find_report_for_run(run_id)
+    if not report_path:
+        print(f"Report не найден для {run_id}. Укажите run_id, например readme_20260227_045200", file=sys.stderr)
+        return 1
+    run_id = os.path.basename(log_dir)
+    report = load_report(report_path)
+    failed, passed_list = get_failed_and_passed(report)
+    state = load_cycle_state()
+    passed_ids = set(state.get("passed_ids", []))
+    passed_ids.update(passed_list)
+    total_tokens = state.get("total_tokens", 0) + report.get("total_tokens", 0)
+    total_cost_rub = state.get("total_cost_rub", 0) + report.get("cost_rub", 0)
+    all_ids = {e["id"] for e in README_EXAMPLES}
+    state["passed_ids"] = sorted(passed_ids)
+    state["total_tokens"] = total_tokens
+    state["total_cost_rub"] = round(total_cost_rub, 2)
+    state["last_run_id"] = run_id
+    save_cycle_state(state)
+
+    if not failed:
+        print("Все тесты в этом прогоне пройдены. Запуск тестов для проверки...")
+        rc, new_run_id, new_report_path = run_tests()
+        if new_report_path:
+            new_report = load_report(new_report_path)
+            nf, _ = get_failed_and_passed(new_report)
+            if not nf:
+                print("Все тесты пройдены.")
+                return 0
+        print("Есть провалы. Запустите --run-from", new_run_id or run_id)
+        return 0
+
+    proposals_path = os.path.join(log_dir, f"proposals_{run_id}.json")
+    analysis_path = os.path.join(log_dir, f"analysis_{run_id}.md")
+    proposals = []
+    if os.path.isfile(proposals_path):
+        with open(proposals_path, "r", encoding="utf-8") as f:
+            proposals = json.load(f).get("proposals", [])
+    if not proposals:
+        print("Анализ через Cursor CLI...")
+        output = run_cursor_analyze(run_id, report_path, log_dir)
+        proposals = parse_proposals(output)
+        with open(proposals_path, "w", encoding="utf-8") as f:
+            json.dump({"proposals": proposals, "raw_output": output[:5000]}, f, ensure_ascii=False, indent=2)
+        with open(analysis_path, "w", encoding="utf-8") as f:
+            f.write(output)
+        print(f"Анализ сохранён: {analysis_path}")
+    else:
+        print(f"Используем существующие предложения: {proposals_path}")
+
+    if not proposals:
+        print("Предложения не получены.", file=sys.stderr)
+        return 1
+
+    send_proposals(run_id=run_id, proposals=proposals, total_tokens=total_tokens, cost_rub=round(total_cost_rub, 2), failed_ids=failed)
+    print("Ожидание одобрения в Telegram...")
+    action, approved, comment = wait_for_approval(timeout_sec=APPROVAL_TIMEOUT)
+    if action == "reject":
+        send_telegram_notification("Ответ получен: <b>отклонено</b>.")
+        print("Правки отклонены.")
+        return 1
+    if action == "timeout":
+        send_telegram_notification("Таймаут ожидания одобрения.")
+        print("Таймаут ожидания.")
+        return 1
+    approved_indices = approved if action == "approve_partial" else [p["index"] for p in proposals]
+    if comment:
+        print(f"Комментарий: {comment}")
+    send_telegram_notification(
+        f"<b>Ответ получен</b>: одобрено {len(approved_indices)} из {len(proposals)}. Применение правок..."
+    )
+
+    print("Применение правок...")
+    ok, msg = run_cursor_apply(proposals, approved_indices, proposals_path, comment, analysis_path)
+    if not ok:
+        print(f"Ошибка: {msg}", file=sys.stderr)
+        return 1
+    print("Правки применены. Запуск тестов...")
+    rc, new_run_id, _ = run_tests()
     return rc
 
 
@@ -372,9 +582,12 @@ def cmd_analyze(args):
     output = run_cursor_analyze(run_id, report_path, log_dir)
     proposals = parse_proposals(output)
     out_path = os.path.join(log_dir, f"proposals_{run_id}.json")
+    analysis_path = os.path.join(log_dir, f"analysis_{run_id}.md")
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump({"proposals": proposals, "raw_output": output[:5000]}, f, ensure_ascii=False, indent=2)
-    print(f"Предложений: {len(proposals)}, сохранено в {out_path}")
+    with open(analysis_path, "w", encoding="utf-8") as f:
+        f.write(output)
+    print(f"Предложений: {len(proposals)}, proposals: {out_path}, анализ: {analysis_path}")
     return 0
 
 
@@ -396,7 +609,9 @@ def cmd_apply(args):
     if not proposals:
         print("Нет предложений для применения.", file=sys.stderr)
         return 1
-    ok, msg = run_cursor_apply(proposals, approved, proposals_path)
+    log_dir = os.path.dirname(proposals_path)
+    analysis_path = os.path.join(log_dir, f"analysis_{run_id}.md")
+    ok, msg = run_cursor_apply(proposals, approved, proposals_path, analysis_path=analysis_path)
     if not ok:
         print(f"Ошибка: {msg}", file=sys.stderr)
         return 1
@@ -410,6 +625,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="CLI цикл: тест - анализ - согласование - правки")
     parser.add_argument("--run", "-r", action="store_true", help="Полный цикл (тесты - анализ - TG - правки - повтор)")
+    parser.add_argument("--run-from", metavar="RUN_ID", help="Цикл от существующего прогона (анализ - TG - правки - тесты)")
     parser.add_argument("--run-tests-only", action="store_true", help="Только запуск тестов")
     parser.add_argument("--analyze", metavar="RUN_ID", help="Анализ готового прогона (например readme_20250227_143000)")
     parser.add_argument("--apply", metavar="RUN_ID", help="Применить одобренные предложения")
@@ -417,6 +633,8 @@ def main():
     args = parser.parse_args()
     if args.run:
         return cmd_run(args)
+    if args.run_from:
+        return cmd_run_from(args)
     if args.run_tests_only:
         return cmd_run_tests_only(args)
     if args.analyze:

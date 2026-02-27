@@ -37,8 +37,27 @@ def _api_request(token: str, method: str, data: dict = None) -> dict:
     else:
         req = urllib.request.Request(url, method="GET")
     req.add_header("Content-Type", "application/x-www-form-urlencoded")
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with urllib.request.urlopen(req, timeout=35) as resp:
         return json.loads(resp.read().decode("utf-8"))
+
+
+def _delete_webhook(token: str) -> bool:
+    """Удаляет webhook — getUpdates не работает, пока webhook активен."""
+    try:
+        _api_request(token, "deleteWebhook", {})
+        return True
+    except Exception:
+        return False
+
+
+def _chat_matches(update_chat_id, expected_chat_id: str) -> bool:
+    """Сравнивает chat_id (int/str)."""
+    if update_chat_id is None:
+        return False
+    try:
+        return int(update_chat_id) == int(expected_chat_id)
+    except (TypeError, ValueError):
+        return str(update_chat_id) == str(expected_chat_id)
 
 
 def send_message(text: str, reply_markup: dict = None) -> bool:
@@ -93,8 +112,7 @@ def send_proposals(
         lines.append(f"<b>{i}.</b> {f}")
         lines.append(f"   {desc}")
     lines.append("")
-    lines.append("Ответьте числом (например 1,3) для частичного одобрения.")
-    lines.append("Можно добавить комментарий: <code>1,3 — не менять в п.2 поле X</code>")
+    lines.append("Ответьте свободным текстом: «принять», «отклонить», «1,3» или любой комментарий.")
 
     text = "\n".join(lines)
 
@@ -112,11 +130,27 @@ def send_proposals(
 
 
 def get_updates(token: str, offset: int = None) -> dict:
-    """Получает обновления от Telegram (getUpdates)."""
-    data = {"timeout": 5}
+    """Получает обновления от Telegram (getUpdates). timeout=25 — long polling."""
+    data = {"timeout": 25}
     if offset is not None:
         data["offset"] = offset
-    return _api_request(token, "getUpdates", data if data else None)
+    try:
+        return _api_request(token, "getUpdates", data)
+    except urllib.error.HTTPError as e:
+        if e.code == 409:
+            _delete_webhook(token)
+            raise RuntimeError(
+                "getUpdates конфликтует с webhook. Webhook удалён. Запустите скрипт снова."
+            ) from e
+        raise
+
+
+def _answer_callback(token: str, callback_query_id: str):
+    """Подтверждает нажатие inline-кнопки."""
+    try:
+        _api_request(token, "answerCallbackQuery", {"callback_query_id": callback_query_id})
+    except Exception:
+        pass
 
 
 def _parse_partial_approval(text: str) -> tuple:
@@ -153,7 +187,7 @@ def _parse_partial_approval(text: str) -> tuple:
 
 def wait_for_approval(
     timeout_sec: int = 86400,
-    poll_interval: int = 10,
+    poll_interval: int = 5,
 ) -> tuple:
     """
     Ожидает ответ пользователя в Telegram (callback или текст).
@@ -164,7 +198,7 @@ def wait_for_approval(
     - comment: строка комментария пользователя (для approve_partial), иначе ""
 
     timeout_sec: макс. время ожидания (по умолчанию 24 ч)
-    poll_interval: интервал опроса в секундах
+    poll_interval: пауза между запросами (с). Long polling 25 с — при нажатии ответ приходит сразу
     """
     token, chat_id = _get_token_chat()
     if not token or not chat_id:
@@ -172,6 +206,10 @@ def wait_for_approval(
 
     offset = None
     deadline = time.time() + timeout_sec
+    debug = os.environ.get("TELEGRAM_DEBUG", "").strip().lower() in ("1", "true", "yes")
+
+    # Webhook блокирует getUpdates — удаляем при старте
+    _delete_webhook(token)
 
     while time.time() < deadline:
         try:
@@ -180,11 +218,22 @@ def wait_for_approval(
                 time.sleep(poll_interval)
                 continue
             updates = resp.get("result", [])
+            if debug and updates:
+                print(f"[TG] Получено обновлений: {len(updates)}", flush=True)
             for u in updates:
                 offset = u["update_id"] + 1
                 # Callback от inline-кнопки
                 if "callback_query" in u:
                     cb = u["callback_query"]
+                    msg = cb.get("message") or {}
+                    chat_id_from = msg.get("chat", {}).get("id") if isinstance(msg, dict) else None
+                    if chat_id_from is not None and not _chat_matches(chat_id_from, chat_id):
+                        if debug:
+                            print(f"[TG] Пропуск callback: chat {chat_id_from} != {chat_id}", flush=True)
+                        continue
+                    if debug:
+                        print(f"[TG] Callback: {cb.get('data')}", flush=True)
+                    _answer_callback(token, cb.get("id", ""))
                     data = cb.get("data", "")
                     if data == "approve_all":
                         return "approve_all", [], ""
@@ -193,20 +242,30 @@ def wait_for_approval(
                     continue
                 # Текстовое сообщение
                 if "message" in u:
-                    text = (u["message"].get("text") or "").strip()
+                    msg = u["message"]
+                    if not _chat_matches(msg.get("chat", {}).get("id"), chat_id):
+                        if debug:
+                            print(f"[TG] Пропуск message: chat != {chat_id}", flush=True)
+                        continue
+                    text = (msg.get("text") or "").strip()
                     if not text:
                         continue
                     text_lower = text.lower()
                     if text_lower in ("reject", "отклонить", "нет"):
                         return "reject", [], ""
-                    if text_lower in ("approve_all", "все", "принять все"):
+                    if text_lower in ("approve_all", "все", "принять все", "принять", "ок", "ok", "да", "yes"):
                         return "approve_all", [], ""
-                    # Парсим "1,3" или "1,3 — комментарий"
+                    # Парсим "1,3" или "1,3 — комментарий" для частичного одобрения
                     indices, comment = _parse_partial_approval(text)
                     if indices:
                         return "approve_partial", indices, comment
-        except Exception:
-            pass
+                    # Любой другой текст — одобрить все с комментарием
+                    return "approve_all", [], text
+        except RuntimeError:
+            raise
+        except Exception as e:
+            if debug:
+                print(f"[TG] Ошибка: {e}", flush=True)
         time.sleep(poll_interval)
 
     return "timeout", [], ""
