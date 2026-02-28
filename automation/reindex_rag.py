@@ -58,6 +58,21 @@ def send_telegram_notification(message: str) -> bool:
         return False
 
 
+def send_telegram_with_status(message: str, disabled: bool = False) -> None:
+    """Отправляет уведомление и печатает понятный статус в консоль."""
+    if disabled:
+        print("Уведомление в Telegram отключено (--no-telegram)")
+        return
+
+    tg_ok = send_telegram_notification(message)
+    if tg_ok:
+        print("Уведомление отправлено в Telegram")
+    elif os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_CHAT_ID"):
+        print("Не удалось отправить уведомление в Telegram")
+    else:
+        print("Telegram не настроен (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID в .env)")
+
+
 def main():
     setup_console_encoding()
 
@@ -87,8 +102,7 @@ def main():
             "<b>RAG: переиндексация — ошибка</b>\n\n"
             "Не удалось подключиться к базе 1С."
         )
-        if not args.no_telegram:
-            send_telegram_notification(msg)
+        send_telegram_with_status(msg, args.no_telegram)
         return 1
 
     print("Запуск переиндексации RAG...")
@@ -103,8 +117,7 @@ def main():
             f"Время: {elapsed:.1f} с\n"
             f"Ошибка: <code>{err_text[:300]}</code>"
         )
-        if not args.no_telegram:
-            send_telegram_notification(msg)
+        send_telegram_with_status(msg, args.no_telegram)
         return 1
 
     elapsed = (datetime.now() - started_at).total_seconds()
@@ -115,16 +128,7 @@ def main():
         f"Время: {elapsed:.1f} с\n"
         f"Дата: {started_at.strftime('%Y-%m-%d %H:%M')}"
     )
-    if not args.no_telegram:
-        tg_ok = send_telegram_notification(msg)
-        if tg_ok:
-            print("Уведомление отправлено в Telegram")
-        elif os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("TELEGRAM_CHAT_ID"):
-            print("Не удалось отправить уведомление в Telegram")
-        else:
-            print("Telegram не настроен (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID в .env)")
-    else:
-        print("Уведомление в Telegram отключено (--no-telegram)")
+    send_telegram_with_status(msg, args.no_telegram)
 
     return 0
 
