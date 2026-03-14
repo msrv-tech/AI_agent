@@ -88,6 +88,7 @@
 			<CommonModule>ИИА_RAG_Настройки</CommonModule>
 			<CommonModule>ИИА_RAG_Индексатор</CommonModule>
 			<CommonModule>ИИА_RAG_Поиск</CommonModule>
+			<CommonModule>ИИА_RAG_Эмбеддинги</CommonModule>
 			<CommonModule>ИИА_ЯдроМетаданных</CommonModule>
 			<CommonModule>ИИА_GitsellСервер</CommonModule>
 			<CommonModule>ИИА_ДиалогCOM</CommonModule>
@@ -111,6 +112,7 @@
 			<InformationRegister>ИИА_СтатусИндексаRAG</InformationRegister>
 			<InformationRegister>ИИА_Логи</InformationRegister>
 			<InformationRegister>ИИА_ДанныеДиалогов</InformationRegister>
+			<InformationRegister>ИИА_ЭмбеддингиЧанков</InformationRegister>
 		</ChildObjects>
 	</Configuration>
 </MetaDataObject>

@@ -106,6 +106,31 @@ README_EXAMPLES = [
         "type": "Запрос1С",
         "description": "Разрешение неоднозначного объекта",
     },
+    # Кейс 11: Агент-консультант менеджера по продажам (ERP 2)
+    {
+        "id": "case11_pricing",
+        "text": "Покажи текущую цену на Парацетамол по всем видам цен.",
+        "type": "Запрос1С",
+        "description": "Кейс 11: Цены номенклатуры по видам цен",
+    },
+    {
+        "id": "case11_sales_history",
+        "text": "Покажи историю продаж клиенту ФармаПлюс за последние 3 месяца с расчетом маржинальности.",
+        "type": "Запрос1С",
+        "description": "Кейс 11: История продаж + маржинальность",
+    },
+    {
+        "id": "case11_receivables",
+        "text": "Какая дебиторская задолженность у клиента ФармаПлюс? Есть ли просроченные платежи?",
+        "type": "Запрос1С",
+        "description": "Кейс 11: Дебиторская задолженность и просрочка",
+    },
+    {
+        "id": "case11_multi_source",
+        "text": "Сводка по клиенту ФармаПлюс: текущие цены на его товары, продажи за квартал, задолженность.",
+        "type": "Agent",
+        "description": "Кейс 11: Мульти-источник (цены + продажи + долг)",
+    },
 ]
 
 # Тариф Gitsell: 990 руб / 1 800 000 токенов
@@ -138,6 +163,11 @@ TOKEN_BUDGETS_BY_EXAMPLE = {
     "duplicate_prevention": {"target": 2600, "soft_limit": 8000, "hard_limit": 12000},
     "capability_readonly_guard": {"target": 1400, "soft_limit": 5000, "hard_limit": 8000},
     "ambiguous_object_resolution": {"target": 2400, "soft_limit": 25000, "hard_limit": 40000},
+    # Кейс 11
+    "case11_pricing": {"target": 2000, "soft_limit": 8000, "hard_limit": 12000},
+    "case11_sales_history": {"target": 3500, "soft_limit": 15000, "hard_limit": 25000},
+    "case11_receivables": {"target": 2500, "soft_limit": 10000, "hard_limit": 18000},
+    "case11_multi_source": {"target": 5000, "soft_limit": 25000, "hard_limit": 40000},
 }
 
 EXAMPLE_GROUPS = {
@@ -145,6 +175,7 @@ EXAMPLE_GROUPS = {
     "recovery": ["field_not_found_recovery", "nested_fields_query"],
     "write": ["create_receipt", "duplicate_prevention"],
     "safety": ["capability_readonly_guard", "empty_data_not_failure"],
+    "case11": ["case11_pricing", "case11_sales_history", "case11_receivables", "case11_multi_source"],
 }
 
 # Сценарные правила для pass/score
@@ -247,6 +278,47 @@ SCENARIO_RULES_BY_ID = {
         "required_actions_all": [],
         "forbidden_actions": [],
         "max_errors": 36,
+        "require_recovery": False,
+        "require_zero_rows": False,
+    },
+    # Кейс 11: Агент-консультант менеджера по продажам
+    "case11_pricing": {
+        "expect_success": True,
+        "allow_empty_result": False,
+        "required_actions_any": ["RunQuery"],
+        "required_actions_all": [],
+        "forbidden_actions": [],
+        "max_errors": 24,
+        "require_recovery": False,
+        "require_zero_rows": False,
+    },
+    "case11_sales_history": {
+        "expect_success": True,
+        "allow_empty_result": True,
+        "required_actions_any": ["RunQuery"],
+        "required_actions_all": [],
+        "forbidden_actions": [],
+        "max_errors": 36,
+        "require_recovery": False,
+        "require_zero_rows": False,
+    },
+    "case11_receivables": {
+        "expect_success": True,
+        "allow_empty_result": True,
+        "required_actions_any": ["RunQuery"],
+        "required_actions_all": [],
+        "forbidden_actions": [],
+        "max_errors": 30,
+        "require_recovery": False,
+        "require_zero_rows": False,
+    },
+    "case11_multi_source": {
+        "expect_success": True,
+        "allow_empty_result": True,
+        "required_actions_any": ["RunQuery"],
+        "required_actions_all": ["ShowInfo"],
+        "forbidden_actions": [],
+        "max_errors": 50,
         "require_recovery": False,
         "require_zero_rows": False,
     },
