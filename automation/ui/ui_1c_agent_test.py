@@ -19,6 +19,7 @@ import ctypes
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -29,6 +30,8 @@ from typing import Optional
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AUTOMATION_ROOT = REPO_ROOT / "automation"
 HOST_PREPARED_QUERY1C_MARKER = "__HOST_PREPARED_QUERY1C__"
+DEFAULT_CONNECTION_STRING = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";'
+DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
 for _path in (REPO_ROOT, AUTOMATION_ROOT):
     _path_str = str(_path)
     if _path_str not in sys.path:
@@ -52,6 +55,45 @@ except ModuleNotFoundError:
     call_procedure = _module.call_procedure
     connect_to_1c = _module.connect_to_1c
     get_enum_value = _module.get_enum_value
+
+
+def _parse_1c_connection_string(value: str) -> dict[str, str]:
+    result: dict[str, str] = {}
+    for key, raw in re.findall(r"([A-Za-zА-Яа-я0-9_]+)\s*=\s*(\"(?:[^\"]|\"\")*\"|[^;]*)\s*;?", value or ""):
+        item = raw.strip()
+        if item.startswith('"') and item.endswith('"'):
+            item = item[1:-1].replace('""', '"')
+        result[key.lower()] = item
+    return result
+
+
+def _enterprise_connection_args(base_path: str) -> list[str]:
+    parts = _parse_1c_connection_string(base_path)
+    if "srvr" in parts and "ref" in parts:
+        return ["/S", f"{parts['srvr']}\\{parts['ref']}"]
+    if "file" in parts:
+        return ["/F", parts["file"]]
+    return ["/F", base_path]
+
+
+def _com_connection_string(base_path: str, user: str, password: str) -> str:
+    parts = _parse_1c_connection_string(base_path)
+    if parts:
+        parts["usr"] = user
+        parts["pwd"] = password
+        ordered_keys = ["file", "srvr", "ref", "usr", "pwd"]
+        keys = [key for key in ordered_keys if key in parts] + [
+            key for key in parts if key not in ordered_keys
+        ]
+        names = {
+            "file": "File",
+            "srvr": "Srvr",
+            "ref": "Ref",
+            "usr": "Usr",
+            "pwd": "Pwd",
+        }
+        return "".join(f'{names.get(key, key)}="{parts[key]}";' for key in keys)
+    return f'File="{base_path}";Usr="{user}";Pwd="{password}";'
 
 
 def setup_console_encoding() -> None:
@@ -208,8 +250,7 @@ class OneCAgentUiTest:
             "ENTERPRISE",
             "/DisableStartupDialogs",
             "/DisableStartupMessages",
-            "/F",
-            self.config.base_path,
+            *_enterprise_connection_args(self.config.base_path),
             "/N",
             self.config.user,
         ]
@@ -244,9 +285,9 @@ class OneCAgentUiTest:
 
     def _startup_log_path(self) -> str:
         if self.config.log_file:
-            return str(Path(self.config.log_file).with_name("desktop_1c_startup.log"))
+            return str(Path(self.config.log_file).with_name("desktop_1c_startup.log").resolve())
         if self.config.screenshot_dir:
-            return str(Path(self.config.screenshot_dir).parent / "desktop_1c_startup.log")
+            return str((Path(self.config.screenshot_dir).parent / "desktop_1c_startup.log").resolve())
         return ""
 
     def _wait_for_top_window(self, process_ids: list[int]):
@@ -745,7 +786,7 @@ class OneCAgentUiTest:
             self.logger.info(f"Не удалось закрыть форму через window.close(): {exc}")
 
     def _prepare_query1c_dialog_via_com(self) -> None:
-        connection_string = f'File="{self.config.base_path}";Usr="{self.config.user}";Pwd="";'
+        connection_string = _com_connection_string(self.config.base_path, self.config.user, self.config.password)
         self.logger.info("Подготавливаем диалог 'Запрос 1С' через COM до открытия UI.")
         self.com_connection = connect_to_1c(connection_string)
         if not self.com_connection:
@@ -1852,8 +1893,8 @@ def parse_args() -> UiConfig:
     )
     parser.add_argument(
         "--base-path",
-        default=r"D:\bd\УНФ3013238",
-        help="Путь к файловой базе 1С",
+        default=DEFAULT_CONNECTION_STRING,
+        help="Путь к файловой базе 1С или строка Srvr/Ref",
     )
     parser.add_argument(
         "--user",
@@ -1962,7 +2003,7 @@ def parse_args() -> UiConfig:
     )
     parser.add_argument(
         "--web-url",
-        default="http://192.168.2.133/aiagent_ui/ru_RU/",
+        default=DEFAULT_WEB_URL,
         help="URL опубликованного web-client 1С",
     )
     parser.add_argument(
@@ -2096,15 +2137,14 @@ def run_desktop_diagnostics(config: UiConfig, logger: Logger) -> int:
         "ENTERPRISE",
         "/DisableStartupDialogs",
         "/DisableStartupMessages",
-        "/F",
-        config.base_path,
+        *_enterprise_connection_args(config.base_path),
         "/N",
         config.user,
     ]
     if config.password:
         cmd.extend(["/P", config.password])
     if config.log_file:
-        cmd.extend(["/Out", str(Path(config.log_file).with_name("desktop_1c_startup.log")), "-NoTruncate"])
+        cmd.extend(["/Out", str(Path(config.log_file).with_name("desktop_1c_startup.log").resolve()), "-NoTruncate"])
     logger.info(f"Desktop diagnostics, launch command: {cmd}")
     process = None
     try:

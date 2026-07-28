@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.14">
 	<Configuration uuid="6cbb4561-9519-4036-9398-d7bfc4581319">
 		<InternalInfo>
@@ -48,7 +48,7 @@
 					<v8:content>ИИ агент</v8:content>
 				</v8:item>
 			</Synonym>
-			<Comment/>
+			<Comment />
 			<ConfigurationExtensionPurpose>Customization</ConfigurationExtensionPurpose>
 			<KeepMappingToExtendedConfigurationObjectsByIDs>true</KeepMappingToExtendedConfigurationObjectsByIDs>
 			<NamePrefix>ИИА_</NamePrefix>
@@ -61,14 +61,14 @@
 			<DefaultRoles>
 				<xr:Item xsi:type="xr:MDObjectRef">Role.ИИА_ОсновнаяРоль</xr:Item>
 			</DefaultRoles>
-			<Vendor/>
+			<Vendor />
 			<Version>0.8.0</Version>
-			<DefaultStyle/>
-			<BriefInformation/>
-			<DetailedInformation/>
-			<Copyright/>
-			<VendorInformationAddress/>
-			<ConfigurationInformationAddress/>
+			<DefaultStyle />
+			<BriefInformation />
+			<DetailedInformation />
+			<Copyright />
+			<VendorInformationAddress />
+			<ConfigurationInformationAddress />
 		</Properties>
 		<ChildObjects>
 			<Subsystem>ИИА_Агент</Subsystem>
@@ -81,6 +81,7 @@
 			<CommonModule>ИИА_Метаданные</CommonModule>
 			<CommonModule>ИИА_Провайдеры</CommonModule>
 			<CommonModule>ИИА_Промты</CommonModule>
+			<CommonModule>ИИА_Skills</CommonModule>
 			<CommonModule>ИИА_Сервер</CommonModule>
 			<CommonModule>ИИА_СправкаЗапросы1С</CommonModule>
 			<CommonModule>ИИА_Оркестратор</CommonModule>
@@ -115,11 +116,13 @@
 			<CommonModule>ИИА_Тесты</CommonModule>
 			<CommonCommand>ИИА_Агент</CommonCommand>
 			<CommonCommand>ИИА_RAG</CommonCommand>
+			<CommonCommand>ИИА_Skills</CommonCommand>
 			<CommonForm>ИИА_Агент</CommonForm>
 			<CommonForm>ИИА_Запрос1С</CommonForm>
 			<CommonForm>ИИА_РегистрацияGitsell</CommonForm>
 			<CommonForm>ИИА_Настройки</CommonForm>
 			<CommonForm>ИИА_RAG</CommonForm>
+			<CommonForm>ИИА_Skills</CommonForm>
 			<Catalog>ИИА_Диалоги</Catalog>
 			<Catalog>ИИА_Настройки</Catalog>
 			<Enum>ИИА_АвторСообщения</Enum>
@@ -133,6 +136,7 @@
 			<InformationRegister>ИИА_СтатусИндексаRAG</InformationRegister>
 			<InformationRegister>ИИА_Логи</InformationRegister>
 			<InformationRegister>ИИА_ДанныеДиалогов</InformationRegister>
+			<InformationRegister>ИИА_Скилы</InformationRegister>
 		</ChildObjects>
 	</Configuration>
 </MetaDataObject>

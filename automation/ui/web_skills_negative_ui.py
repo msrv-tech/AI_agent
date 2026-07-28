@@ -1,0 +1,128 @@
+# -*- coding: utf-8 -*-
+"""Reusable negative UI checks for the AI Skills form."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+import urllib.parse
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+AUTOMATION_ROOT = REPO_ROOT / "automation"
+for _path in (REPO_ROOT, AUTOMATION_ROOT):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
+
+from automation.ui.web_agent_skill_e2e import click_label, close_font_dialog, replace_focused_text
+from automation.ui.web_query1c_test import BrowserQuery1CTest, Logger, WebUiConfig, setup_console_encoding
+
+
+DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
+DEFAULT_CONNECTION_STRING = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";'
+
+
+def focus_textarea(test: BrowserQuery1CTest, index: int) -> str:
+    script = r"""
+((index)=>{
+ const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>40&&r.height>15&&r.x>-1000&&r.y>-1000&&s.display!=='none'&&s.visibility!=='hidden'};
+ const items=Array.from(document.querySelectorAll('textarea')).filter(visible)
+  .sort((a,b)=>a.getBoundingClientRect().y-b.getBoundingClientRect().y);
+ if(index<0 || index>=items.length) return 'missing:' + items.length;
+ const e=items[index]; e.scrollIntoView({block:'center'}); e.focus(); e.click(); return 'focused:' + index + ':' + items.length;
+})(""" + str(index) + """)
+"""
+    return test._evaluate(script)
+
+
+def body_contains_any(body: str, needles: list[str]) -> bool:
+    lower = body.lower()
+    return any(needle.lower() in lower for needle in needles)
+
+
+def run(args: argparse.Namespace) -> dict:
+    artifact_dir = Path(args.artifact_dir)
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    config = WebUiConfig(
+        web_url=args.web_url,
+        chrome_exe=args.chrome_exe,
+        base_path=DEFAULT_CONNECTION_STRING,
+        user=args.user,
+        password=args.password,
+        query_text="",
+        query_params_json="",
+        expected_text="",
+        timeout_sec=args.timeout_sec,
+        log_file=str(artifact_dir / "web_skills_negative_ui.log"),
+        artifact_dir=str(artifact_dir),
+        headless=False,
+        skip_com_prepare=True,
+    )
+    test = BrowserQuery1CTest(config, Logger(config.log_file))
+    result: dict[str, object] = {}
+    try:
+        test._launch_browser()
+        test._open_initial_target()
+        result["fontDialogClosed"] = close_font_dialog()
+        command = urllib.parse.quote("CommonCommand.ИИА_Skills", safe=".")
+        skills_url = args.web_url.rstrip("/") + "/#e1cib/command/" + command
+        test._session_call("Page.navigate", {"url": skills_url})
+        test._wait_until_text_contains("Skills", args.timeout_sec)
+
+        result["emptyDescriptionFocus"] = focus_textarea(test, 0)
+        replace_focused_text(test, "")
+        result["emptyDescriptionClick"] = click_label(test, "Сгенерировать JSON")
+        time.sleep(2)
+        body = test._safe_body_text()
+        result["emptyDescriptionWarning"] = body_contains_any(body, ["Опишите задачу для генерации skill", "Опишите задачу"])
+
+        result["invalidJsonFocus"] = focus_textarea(test, 1)
+        replace_focused_text(test, "{ bad json")
+        result["invalidJsonClick"] = click_label(test, "Запустить тест")
+        time.sleep(2)
+        body = test._safe_body_text()
+        result["invalidJsonWarning"] = body_contains_any(body, ["Некорректный JSON skill", "Ошибка чтения JSON", "JSON"])
+
+        test._session_call("Page.navigate", {"url": skills_url})
+        test._wait_until_text_contains("Skills", args.timeout_sec)
+        time.sleep(1)
+        result["systemOverwriteClick"] = click_label(test, "Сохранить")
+        time.sleep(2)
+        body = test._safe_body_text()
+        result["systemOverwriteWarning"] = body_contains_any(body, ["Системный skill нельзя перезаписать", "нельзя перезаписать"])
+
+        (artifact_dir / "web_skills_negative_ui_body.txt").write_text(body, encoding="utf-8")
+        result["bodyHead"] = body[:1200]
+        required = ["emptyDescriptionWarning", "invalidJsonWarning", "systemOverwriteWarning"]
+        result["success"] = all(bool(result.get(key)) for key in required)
+        result["required"] = {key: bool(result.get(key)) for key in required}
+        return result
+    finally:
+        test._close()
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Negative UI checks for AI Skills form")
+    parser.add_argument("--web-url", default=DEFAULT_WEB_URL)
+    parser.add_argument("--chrome-exe", default=r"C:\Program Files\Google\Chrome\Application\chrome.exe")
+    parser.add_argument("--user", default="Администратор")
+    parser.add_argument("--password", default="")
+    parser.add_argument("--timeout-sec", type=int, default=60)
+    parser.add_argument("--artifact-dir", default=str(REPO_ROOT / "automation" / "logs" / "web_skills_artifacts"))
+    return parser.parse_args()
+
+
+def main() -> int:
+    setup_console_encoding()
+    args = parse_args()
+    result = run(args)
+    out = Path(args.artifact_dir) / "web_skills_negative_ui_result.json"
+    out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+    return 0 if result.get("success") else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

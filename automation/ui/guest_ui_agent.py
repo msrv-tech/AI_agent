@@ -148,7 +148,7 @@ class GuestUiAgent:
                 "-u",
                 str(REPO_ROOT / "automation" / "ui" / "web_query1c_test.py"),
                 "--web-url",
-                str(job.get("web_url", "http://localhost/aiagent_ui/ru_RU/")),
+                str(job.get("web_url", "http://192.168.2.127/fresh-unf")),
                 "--chrome-exe",
                 str(job.get("chrome_exe", r"C:\Program Files\Google\Chrome\Application\chrome.exe")),
                 "--base-path",

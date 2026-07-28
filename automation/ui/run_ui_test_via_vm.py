@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 import uuid
@@ -22,6 +23,38 @@ from com_1c import call_procedure, connect_to_1c, get_enum_value
 DEFAULT_HOST_JOBS_ROOT = REPO_ROOT / "automation" / "logs" / "vm_ui_jobs"
 DEFAULT_GUEST_JOBS_ROOT = r"\\DEV1\D\bsl\AI_agent\automation\logs\vm_ui_jobs"
 HOST_PREPARED_QUERY1C_MARKER = "__HOST_PREPARED_QUERY1C__"
+DEFAULT_CONNECTION_STRING = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";'
+DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
+
+
+def _parse_1c_connection_string(value: str) -> dict[str, str]:
+    result: dict[str, str] = {}
+    for key, raw in re.findall(r"([A-Za-zА-Яа-я0-9_]+)\s*=\s*(\"(?:[^\"]|\"\")*\"|[^;]*)\s*;?", value or ""):
+        item = raw.strip()
+        if item.startswith('"') and item.endswith('"'):
+            item = item[1:-1].replace('""', '"')
+        result[key.lower()] = item
+    return result
+
+
+def _com_connection_string(base_path: str, user: str, password: str) -> str:
+    parts = _parse_1c_connection_string(base_path)
+    if parts:
+        parts["usr"] = user
+        parts["pwd"] = password
+        ordered_keys = ["file", "srvr", "ref", "usr", "pwd"]
+        keys = [key for key in ordered_keys if key in parts] + [
+            key for key in parts if key not in ordered_keys
+        ]
+        names = {
+            "file": "File",
+            "srvr": "Srvr",
+            "ref": "Ref",
+            "usr": "Usr",
+            "pwd": "Pwd",
+        }
+        return "".join(f'{names.get(key, key)}="{parts[key]}";' for key in keys)
+    return f'File="{base_path}";Usr="{user}";Pwd="{password}";'
 
 
 def ensure_dir(path: Path) -> Path:
@@ -81,7 +114,7 @@ def wait_for_result(host_jobs_root: Path, job_id: str, timeout_sec: int) -> Path
 
 
 def prepare_query1c_dialog_on_host(args: argparse.Namespace) -> None:
-    connection_string = f'File="{args.base_path}";Usr="{args.user}";Pwd="{args.password}";'
+    connection_string = _com_connection_string(args.base_path, args.user, args.password)
     connection = connect_to_1c(connection_string)
     if not connection:
         raise RuntimeError("Не удалось открыть COM-подключение к 1С на хосте для подготовки Query1C.")
@@ -118,14 +151,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--approval-action", default="auto", choices=["auto", "approve", "without_confirmation"])
     parser.add_argument("--require-approval", action="store_true")
     parser.add_argument("--platform-exe", default=r"C:\Tools\1cv8\8.5.1.1150\bin\1cv8.exe")
-    parser.add_argument("--base-path", default=r"\\DEV1\AIBase$")
+    parser.add_argument("--base-path", default=DEFAULT_CONNECTION_STRING)
     parser.add_argument("--user", default="Администратор")
     parser.add_argument("--password", default="")
     parser.add_argument("--dialog-type", default="Агент")
     parser.add_argument("--test-case", default="standard", choices=["standard", "query1c_form", "web_query1c", "desktop_diag"])
     parser.add_argument("--query-text", default="ВЫБРАТЬ 2 КАК Новое")
     parser.add_argument("--query-params-json", default="")
-    parser.add_argument("--web-url", default="http://localhost/aiagent_ui/ru_RU/")
+    parser.add_argument("--web-url", default=DEFAULT_WEB_URL)
     parser.add_argument("--chrome-exe", default=r"C:\Program Files\Google\Chrome\Application\chrome.exe")
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--prepare-query1c-on-host", action="store_true")

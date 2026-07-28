@@ -108,7 +108,7 @@ graph TD
 
 Примеры:
 
-- `https://gitsell.ru/api/v1` + `deepseek-chat`
+- `https://gitsell.ru/api/v1` + `gpt-5.4-nano`
 - `https://api.openai.com/v1` + `gpt-4.1`
 - `http://localhost:1234/v1` + `qwen3-8b`
 

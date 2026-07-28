@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -52,6 +53,40 @@ for _path in (REPO_ROOT, AUTOMATION_ROOT):
         sys.path.insert(0, _path_str)
 
 from com_1c import call_procedure, connect_to_1c, get_enum_value
+
+
+DEFAULT_CONNECTION_STRING = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";'
+DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
+
+
+def _parse_1c_connection_string(value: str) -> dict[str, str]:
+    result: dict[str, str] = {}
+    for key, raw in re.findall(r"([A-Za-zА-Яа-я0-9_]+)\s*=\s*(\"(?:[^\"]|\"\")*\"|[^;]*)\s*;?", value or ""):
+        item = raw.strip()
+        if item.startswith('"') and item.endswith('"'):
+            item = item[1:-1].replace('""', '"')
+        result[key.lower()] = item
+    return result
+
+
+def _com_connection_string(base_path: str, user: str, password: str) -> str:
+    parts = _parse_1c_connection_string(base_path)
+    if parts:
+        parts["usr"] = user
+        parts["pwd"] = password
+        ordered_keys = ["file", "srvr", "ref", "usr", "pwd"]
+        keys = [key for key in ordered_keys if key in parts] + [
+            key for key in parts if key not in ordered_keys
+        ]
+        names = {
+            "file": "File",
+            "srvr": "Srvr",
+            "ref": "Ref",
+            "usr": "Usr",
+            "pwd": "Pwd",
+        }
+        return "".join(f'{names.get(key, key)}="{parts[key]}";' for key in keys)
+    return f'File="{base_path}";Usr="{user}";Pwd="{password}";'
 
 
 def setup_console_encoding() -> None:
@@ -146,7 +181,7 @@ class BrowserQuery1CTest:
             self._close()
 
     def _prepare_query1c_dialog_via_com(self) -> None:
-        connection_string = f'File="{self.config.base_path}";Usr="{self.config.user}";Pwd="{self.config.password}";'
+        connection_string = _com_connection_string(self.config.base_path, self.config.user, self.config.password)
         self.logger.info("Подготавливаем диалог Запрос1С через COM.")
         connection = connect_to_1c(connection_string)
         if not connection:
@@ -247,6 +282,10 @@ class BrowserQuery1CTest:
 
     def _login(self) -> None:
         self.logger.info("Выполняем вход в web-client.")
+        initial_text = self._safe_body_text()
+        if self.config.user and self.config.user in initial_text:
+            self.logger.info("web-client уже открыт под нужным пользователем.")
+            return
         self._wait_until_text_contains("Войти", 30)
         login_js = """
 (() => {
@@ -525,8 +564,26 @@ class BrowserQuery1CTest:
                 message = json.loads(self.websocket.recv())
             except WebSocketTimeoutException:
                 continue
+            if message.get("method") == "Page.javascriptDialogOpening":
+                self._accept_javascript_dialog()
+                continue
             if message.get("id") == expected_id:
                 return message
+
+    def _accept_javascript_dialog(self) -> None:
+        if self.websocket is None or not self.session_id:
+            return
+        self.message_id += 1
+        payload = {
+            "id": self.message_id,
+            "sessionId": self.session_id,
+            "method": "Page.handleJavaScriptDialog",
+            "params": {"accept": True},
+        }
+        try:
+            self.websocket.send(json.dumps(payload))
+        except Exception:
+            pass
 
     def _evaluate(self, expression: str) -> str:
         result = self._session_call(
@@ -601,12 +658,12 @@ class BrowserQuery1CTest:
 
 def parse_args() -> WebUiConfig:
     parser = argparse.ArgumentParser(description="Браузерный UI тест Query1C для web-client 1С")
-    parser.add_argument("--web-url", default="http://192.168.2.133/aiagent_ui/ru_RU/")
+    parser.add_argument("--web-url", default=DEFAULT_WEB_URL)
     parser.add_argument(
         "--chrome-exe",
         default=r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     )
-    parser.add_argument("--base-path", default=r"D:\bd\УНФ3013238")
+    parser.add_argument("--base-path", default=DEFAULT_CONNECTION_STRING)
     parser.add_argument("--user", default="Администратор")
     parser.add_argument("--password", default="")
     parser.add_argument("--query-text", default="ВЫБРАТЬ 2 КАК Новое")

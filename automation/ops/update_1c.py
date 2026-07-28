@@ -80,8 +80,13 @@ def main():
     os.environ["1C_CONNECTION_STRING"] = connection_string
     print(f"База: {connection_string[:70]}...")
 
-    # Извлекаем путь для /F (файловая база) — 1cv8 лучше работает с /F чем с /IBConnectionString
+    # Извлекаем параметры ИБ: 1cv8 надежнее работает с /F или /S,
+    # чем с /IBConnectionString на серверных базах с нестандартным портом.
     ib_path = None
+    server_name = None
+    server_ref = None
+    ib_user = ""
+    ib_pwd = ""
     if connection_string.strip().lower().startswith('file='):
         import re
         m = re.search(r'file\s*=\s*"([^"]+)"', connection_string, re.I)
@@ -91,6 +96,16 @@ def main():
         m3 = re.search(r'pwd\s*=\s*"?([^";]*)"?', connection_string, re.I)
         ib_user = m2.group(1) if m2 else ""
         ib_pwd = m3.group(1) if m3 else ""
+    else:
+        import re
+        m_server = re.search(r'srvr\s*=\s*"([^"]+)"', connection_string, re.I)
+        m_ref = re.search(r'ref\s*=\s*"([^"]+)"', connection_string, re.I)
+        m_user = re.search(r'usr\s*=\s*"([^"]*)"', connection_string, re.I)
+        m_pwd = re.search(r'pwd\s*=\s*"?([^";]*)"?', connection_string, re.I)
+        server_name = m_server.group(1).strip() if m_server else None
+        server_ref = m_ref.group(1).strip() if m_ref else None
+        ib_user = m_user.group(1) if m_user else ""
+        ib_pwd = m_pwd.group(1) if m_pwd else ""
 
     platform_exe = get_platform_85()
     if not os.path.isfile(platform_exe):
@@ -126,6 +141,17 @@ def main():
             "/DisableStartupDialogs",
             "/DisableStartupMessages",
             "/F", ib_path,
+        ]
+        if ib_user:
+            base_args.extend(["/N", ib_user])
+        if ib_pwd is not None and str(ib_pwd).strip():
+            base_args.extend(["/P", ib_pwd])
+    elif server_name and server_ref:
+        base_args = [
+            "DESIGNER",
+            "/DisableStartupDialogs",
+            "/DisableStartupMessages",
+            "/S", f"{server_name}\\{server_ref}",
         ]
         if ib_user:
             base_args.extend(["/N", ib_user])
@@ -181,6 +207,17 @@ def main():
         if not args.skip_run_client:
             if ib_path and os.path.isdir(ib_path):
                 ent_args = ["ENTERPRISE", "/DisableStartupDialogs", "/DisableStartupMessages", "/F", ib_path]
+                if ib_user:
+                    ent_args.extend(["/N", ib_user])
+                if ib_pwd is not None and str(ib_pwd).strip():
+                    ent_args.extend(["/P", ib_pwd])
+            elif server_name and server_ref:
+                ent_args = [
+                    "ENTERPRISE",
+                    "/DisableStartupDialogs",
+                    "/DisableStartupMessages",
+                    "/S", f"{server_name}\\{server_ref}",
+                ]
                 if ib_user:
                     ent_args.extend(["/N", ib_user])
                 if ib_pwd is not None and str(ib_pwd).strip():

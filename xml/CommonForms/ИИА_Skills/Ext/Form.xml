@@ -1,0 +1,688 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Form xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcssch="http://v8.1c.ru/8.1/data-composition-system/schema" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.14">
+	<Title>
+		<v8:item>
+			<v8:lang>ru</v8:lang>
+			<v8:content>Skills агента</v8:content>
+		</v8:item>
+	</Title>
+	<AutoTitle>false</AutoTitle>
+	<Width>110</Width>
+	<Height>36</Height>
+	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
+		<Autofill>false</Autofill>
+	</AutoCommandBar>
+	<Events>
+		<Event name="OnCreateAtServer">ПриСозданииНаСервере</Event>
+	</Events>
+	<ChildItems>
+		<UsualGroup name="ГруппаОсновная" id="1">
+			<Group>Horizontal</Group>
+			<Representation>None</Representation>
+			<ShowTitle>false</ShowTitle>
+			<ExtendedTooltip name="ГруппаОсновнаяРасширеннаяПодсказка" id="2"/>
+			<ChildItems>
+				<UsualGroup name="ГруппаСписок" id="3">
+					<Title>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Skills</v8:content>
+						</v8:item>
+					</Title>
+					<Group>Vertical</Group>
+					<ExtendedTooltip name="ГруппаСписокРасширеннаяПодсказка" id="4"/>
+					<ChildItems>
+						<Table name="Скилы" id="5">
+							<DataPath>Скилы</DataPath>
+							<HeightInTableRows>18</HeightInTableRows>
+							<CommandBarLocation>None</CommandBarLocation>
+							<ContextMenu name="СкилыКонтекстноеМеню" id="6"/>
+							<AutoCommandBar name="СкилыКоманднаяПанель" id="7"/>
+							<SearchStringAddition name="СкилыСтрокаПоиска" id="8"/>
+							<ViewStatusAddition name="СкилыСостояниеПросмотра" id="9"/>
+							<SearchControlAddition name="СкилыУправлениеПоиском" id="10"/>
+							<Events>
+								<Event name="OnActivateRow">СкилыПриАктивизацииСтроки</Event>
+							</Events>
+							<ChildItems>
+								<CheckBoxField name="СкилыАктивен" id="11">
+									<DataPath>Скилы.Активен</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Вкл.</v8:content>
+										</v8:item>
+									</Title>
+									<ContextMenu name="СкилыАктивенКонтекстноеМеню" id="12"/>
+									<ExtendedTooltip name="СкилыАктивенРасширеннаяПодсказка" id="13"/>
+								</CheckBoxField>
+								<InputField name="СкилыЗаголовок" id="14">
+									<DataPath>Скилы.Заголовок</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Название</v8:content>
+										</v8:item>
+									</Title>
+									<ReadOnly>true</ReadOnly>
+									<ContextMenu name="СкилыЗаголовокКонтекстноеМеню" id="15"/>
+									<ExtendedTooltip name="СкилыЗаголовокРасширеннаяПодсказка" id="16"/>
+								</InputField>
+								<InputField name="СкилыИмя" id="17">
+									<DataPath>Скилы.Имя</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Код</v8:content>
+										</v8:item>
+									</Title>
+									<ReadOnly>true</ReadOnly>
+									<ContextMenu name="СкилыИмяКонтекстноеМеню" id="18"/>
+									<ExtendedTooltip name="СкилыИмяРасширеннаяПодсказка" id="19"/>
+								</InputField>
+							</ChildItems>
+						</Table>
+						<UsualGroup name="ГруппаКнопкиСписка" id="20">
+							<Group>Horizontal</Group>
+							<Representation>None</Representation>
+							<ShowTitle>false</ShowTitle>
+							<ExtendedTooltip name="ГруппаКнопкиСпискаРасширеннаяПодсказка" id="21"/>
+							<ChildItems>
+								<Button name="Удалить" id="24">
+									<CommandName>Form.Command.Удалить</CommandName>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Удалить</v8:content>
+										</v8:item>
+									</Title>
+									<ExtendedTooltip name="УдалитьРасширеннаяПодсказка" id="25"/>
+								</Button>
+								<Button name="Обновить" id="26">
+									<CommandName>Form.Command.Обновить</CommandName>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Обновить</v8:content>
+										</v8:item>
+									</Title>
+									<ExtendedTooltip name="ОбновитьРасширеннаяПодсказка" id="27"/>
+								</Button>
+							</ChildItems>
+						</UsualGroup>
+					</ChildItems>
+				</UsualGroup>
+				<UsualGroup name="ГруппаКарточка" id="28">
+					<Title>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Карточка skill</v8:content>
+						</v8:item>
+					</Title>
+					<Group>Vertical</Group>
+					<ExtendedTooltip name="ГруппаКарточкаРасширеннаяПодсказка" id="29"/>
+					<ChildItems>
+						<UsualGroup name="ГруппаСозданиеПоОписанию" id="120">
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>JSON skill</v8:content>
+								</v8:item>
+							</Title>
+							<Group>Vertical</Group>
+							<Representation>StrongSeparation</Representation>
+							<ExtendedTooltip name="ГруппаСозданиеПоОписаниюРасширеннаяПодсказка" id="121"/>
+							<ChildItems>
+								<InputField name="ОписаниеЗадачи" id="130">
+									<DataPath>ОписаниеЗадачи</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Описание задачи</v8:content>
+										</v8:item>
+									</Title>
+									<MultiLine>true</MultiLine>
+									<Height>5</Height>
+									<ContextMenu name="ОписаниеЗадачиКонтекстноеМеню" id="131"/>
+									<ExtendedTooltip name="ОписаниеЗадачиРасширеннаяПодсказка" id="132"/>
+									<Events>
+										<Event name="OnChange">ОписаниеЗадачиПриИзменении</Event>
+									</Events>
+								</InputField>
+								<Button name="СгенерироватьJSON" id="133">
+									<CommandName>Form.Command.СгенерироватьJSON</CommandName>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Сгенерировать JSON</v8:content>
+										</v8:item>
+									</Title>
+									<ExtendedTooltip name="СгенерироватьJSONРасширеннаяПодсказка" id="134"/>
+								</Button>
+								<InputField name="SkillJSON" id="67">
+									<DataPath>SkillJSON</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>JSON</v8:content>
+										</v8:item>
+									</Title>
+									<MultiLine>true</MultiLine>
+									<Height>20</Height>
+									<ContextMenu name="SkillJSONКонтекстноеМеню" id="68"/>
+									<ExtendedTooltip name="SkillJSONРасширеннаяПодсказка" id="69"/>
+								</InputField>
+							</ChildItems>
+						</UsualGroup>
+						<InputField name="ТестовыйЗапрос" id="122">
+							<DataPath>ТестовыйЗапрос</DataPath>
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Тестовый запрос</v8:content>
+								</v8:item>
+							</Title>
+							<MultiLine>true</MultiLine>
+							<Height>3</Height>
+							<ContextMenu name="ТестовыйЗапросКонтекстноеМеню" id="123"/>
+							<ExtendedTooltip name="ТестовыйЗапросРасширеннаяПодсказка" id="124"/>
+						</InputField>
+						<InputField name="РезультатТеста" id="125">
+							<DataPath>РезультатТеста</DataPath>
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Результат теста</v8:content>
+								</v8:item>
+							</Title>
+							<ReadOnly>true</ReadOnly>
+							<MultiLine>true</MultiLine>
+							<Height>4</Height>
+							<ContextMenu name="РезультатТестаКонтекстноеМеню" id="126"/>
+							<ExtendedTooltip name="РезультатТестаРасширеннаяПодсказка" id="127"/>
+						</InputField>
+						<UsualGroup name="ГруппаЗаголовок" id="30">
+							<Group>Horizontal</Group>
+							<Representation>None</Representation>
+							<ShowTitle>false</ShowTitle>
+							<Visible>false</Visible>
+							<ExtendedTooltip name="ГруппаЗаголовокРасширеннаяПодсказка" id="31"/>
+							<ChildItems>
+								<CheckBoxField name="Активен" id="32">
+									<DataPath>Активен</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Активен</v8:content>
+										</v8:item>
+									</Title>
+									<ContextMenu name="АктивенКонтекстноеМеню" id="33"/>
+									<ExtendedTooltip name="АктивенРасширеннаяПодсказка" id="34"/>
+								</CheckBoxField>
+								<InputField name="Имя" id="35">
+									<DataPath>Имя</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Код</v8:content>
+										</v8:item>
+									</Title>
+									<AutoMarkIncomplete>true</AutoMarkIncomplete>
+									<ContextMenu name="ИмяКонтекстноеМеню" id="36"/>
+									<ExtendedTooltip name="ИмяРасширеннаяПодсказка" id="37"/>
+								</InputField>
+								<InputField name="Заголовок" id="38">
+									<DataPath>Заголовок</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Название</v8:content>
+										</v8:item>
+									</Title>
+									<AutoMarkIncomplete>true</AutoMarkIncomplete>
+									<ContextMenu name="ЗаголовокКонтекстноеМеню" id="39"/>
+									<ExtendedTooltip name="ЗаголовокРасширеннаяПодсказка" id="40"/>
+								</InputField>
+							</ChildItems>
+						</UsualGroup>
+						<InputField name="Описание" id="41">
+							<DataPath>Описание</DataPath>
+							<Visible>false</Visible>
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Описание</v8:content>
+								</v8:item>
+							</Title>
+							<MultiLine>true</MultiLine>
+							<Height>3</Height>
+							<ContextMenu name="ОписаниеКонтекстноеМеню" id="42"/>
+							<ExtendedTooltip name="ОписаниеРасширеннаяПодсказка" id="43"/>
+						</InputField>
+						<InputField name="Триггеры" id="44">
+							<DataPath>Триггеры</DataPath>
+							<Visible>false</Visible>
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Когда применять</v8:content>
+								</v8:item>
+							</Title>
+							<MultiLine>true</MultiLine>
+							<Height>3</Height>
+							<ContextMenu name="ТриггерыКонтекстноеМеню" id="45"/>
+							<ExtendedTooltip name="ТриггерыРасширеннаяПодсказка" id="46"/>
+						</InputField>
+						<UsualGroup name="ГруппаОбъект" id="47">
+							<Group>Horizontal</Group>
+							<Representation>None</Representation>
+							<ShowTitle>false</ShowTitle>
+							<Visible>false</Visible>
+							<ExtendedTooltip name="ГруппаОбъектРасширеннаяПодсказка" id="48"/>
+							<ChildItems>
+								<InputField name="ЦелевойОбъектТип" id="49">
+									<DataPath>ЦелевойОбъектТип</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Тип объекта</v8:content>
+										</v8:item>
+									</Title>
+									<ContextMenu name="ЦелевойОбъектТипКонтекстноеМеню" id="50"/>
+									<ExtendedTooltip name="ЦелевойОбъектТипРасширеннаяПодсказка" id="51"/>
+								</InputField>
+								<InputField name="ЦелевойОбъектИмя" id="52">
+									<DataPath>ЦелевойОбъектИмя</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Имя объекта</v8:content>
+										</v8:item>
+									</Title>
+									<ContextMenu name="ЦелевойОбъектИмяКонтекстноеМеню" id="53"/>
+									<ExtendedTooltip name="ЦелевойОбъектИмяРасширеннаяПодсказка" id="54"/>
+								</InputField>
+								<InputField name="Риск" id="55">
+									<DataPath>Риск</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Риск</v8:content>
+										</v8:item>
+									</Title>
+									<ContextMenu name="РискКонтекстноеМеню" id="56"/>
+									<ExtendedTooltip name="РискРасширеннаяПодсказка" id="57"/>
+								</InputField>
+								<InputField name="Enforcement" id="58">
+									<DataPath>Enforcement</DataPath>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Enforcement</v8:content>
+										</v8:item>
+									</Title>
+									<ContextMenu name="EnforcementКонтекстноеМеню" id="59"/>
+									<ExtendedTooltip name="EnforcementРасширеннаяПодсказка" id="60"/>
+								</InputField>
+							</ChildItems>
+						</UsualGroup>
+						<CheckBoxField name="ТребоватьПодтверждение" id="61">
+							<DataPath>ТребоватьПодтверждение</DataPath>
+							<Visible>false</Visible>
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Требовать подтверждение перед записью</v8:content>
+								</v8:item>
+							</Title>
+							<ContextMenu name="ТребоватьПодтверждениеКонтекстноеМеню" id="62"/>
+							<ExtendedTooltip name="ТребоватьПодтверждениеРасширеннаяПодсказка" id="63"/>
+						</CheckBoxField>
+						<InputField name="Инструкция" id="64">
+							<DataPath>Инструкция</DataPath>
+							<Visible>false</Visible>
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Инструкция агенту</v8:content>
+								</v8:item>
+							</Title>
+							<MultiLine>true</MultiLine>
+							<Height>6</Height>
+							<ContextMenu name="ИнструкцияКонтекстноеМеню" id="65"/>
+							<ExtendedTooltip name="ИнструкцияРасширеннаяПодсказка" id="66"/>
+						</InputField>
+						<InputField name="WorkflowJSON" id="70">
+							<DataPath>WorkflowJSON</DataPath>
+							<Visible>false</Visible>
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Workflow</v8:content>
+								</v8:item>
+							</Title>
+							<MultiLine>true</MultiLine>
+							<Height>4</Height>
+							<ContextMenu name="WorkflowJSONКонтекстноеМеню" id="71"/>
+							<ExtendedTooltip name="WorkflowJSONРасширеннаяПодсказка" id="72"/>
+						</InputField>
+						<InputField name="PolicyJSON" id="73">
+							<DataPath>PolicyJSON</DataPath>
+							<Visible>false</Visible>
+							<Title>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Policy</v8:content>
+								</v8:item>
+							</Title>
+							<MultiLine>true</MultiLine>
+							<Height>4</Height>
+							<ContextMenu name="PolicyJSONКонтекстноеМеню" id="74"/>
+							<ExtendedTooltip name="PolicyJSONРасширеннаяПодсказка" id="75"/>
+						</InputField>
+						<UsualGroup name="ГруппаКомандыКарточки" id="76">
+							<Group>Horizontal</Group>
+							<Representation>None</Representation>
+							<ShowTitle>false</ShowTitle>
+							<ExtendedTooltip name="ГруппаКомандыКарточкиРасширеннаяПодсказка" id="77"/>
+							<ChildItems>
+								<Button name="Сохранить" id="80">
+									<CommandName>Form.Command.Сохранить</CommandName>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Сохранить</v8:content>
+										</v8:item>
+									</Title>
+									<DefaultButton>true</DefaultButton>
+									<ExtendedTooltip name="СохранитьРасширеннаяПодсказка" id="81"/>
+								</Button>
+								<Button name="ЗапуститьТест" id="128">
+									<CommandName>Form.Command.ЗапуститьТест</CommandName>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Запустить тест</v8:content>
+										</v8:item>
+									</Title>
+									<ExtendedTooltip name="ЗапуститьТестРасширеннаяПодсказка" id="129"/>
+								</Button>
+							</ChildItems>
+						</UsualGroup>
+					</ChildItems>
+				</UsualGroup>
+			</ChildItems>
+		</UsualGroup>
+	</ChildItems>
+	<Attributes>
+		<Attribute name="Скилы" id="82">
+			<Type>
+				<v8:Type>v8:ValueTable</v8:Type>
+			</Type>
+			<Columns>
+				<Column name="Имя" id="83">
+					<Type>
+						<v8:Type>xs:string</v8:Type>
+						<v8:StringQualifiers>
+							<v8:Length>100</v8:Length>
+							<v8:AllowedLength>Variable</v8:AllowedLength>
+						</v8:StringQualifiers>
+					</Type>
+				</Column>
+				<Column name="Заголовок" id="84">
+					<Type>
+						<v8:Type>xs:string</v8:Type>
+						<v8:StringQualifiers>
+							<v8:Length>150</v8:Length>
+							<v8:AllowedLength>Variable</v8:AllowedLength>
+						</v8:StringQualifiers>
+					</Type>
+				</Column>
+				<Column name="Активен" id="85">
+					<Type>
+						<v8:Type>xs:boolean</v8:Type>
+					</Type>
+				</Column>
+				<Column name="Владелец" id="86">
+					<Type>
+						<v8:Type>xs:string</v8:Type>
+						<v8:StringQualifiers>
+							<v8:Length>100</v8:Length>
+							<v8:AllowedLength>Variable</v8:AllowedLength>
+						</v8:StringQualifiers>
+					</Type>
+				</Column>
+			</Columns>
+		</Attribute>
+		<Attribute name="Имя" id="87">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>100</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="Заголовок" id="88">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>150</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="Описание" id="89">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>300</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="Владелец" id="90">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>100</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ОбластьВидимости" id="91">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>30</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="Активен" id="92">
+			<Type>
+				<v8:Type>xs:boolean</v8:Type>
+			</Type>
+		</Attribute>
+		<Attribute name="Версия" id="93">
+			<Type>
+				<v8:Type>xs:decimal</v8:Type>
+				<v8:NumberQualifiers>
+					<v8:Digits>10</v8:Digits>
+					<v8:FractionDigits>0</v8:FractionDigits>
+					<v8:AllowedSign>Any</v8:AllowedSign>
+				</v8:NumberQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="Триггеры" id="94">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>1000</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ТипыДиалогов" id="95">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>200</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ЦелевойОбъектТип" id="96">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>50</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ЦелевойОбъектИмя" id="97">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>150</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="Инструкция" id="98">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="WorkflowJSON" id="99">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="PolicyJSON" id="100">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="Enforcement" id="101">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>20</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="Риск" id="102">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>20</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ТребоватьПодтверждение" id="103">
+			<Type>
+				<v8:Type>xs:boolean</v8:Type>
+			</Type>
+		</Attribute>
+		<Attribute name="SkillJSON" id="104">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ТестовыйЗапрос" id="109">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="РезультатТеста" id="110">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ОписаниеЗадачи" id="112">
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+	</Attributes>
+	<Commands>
+		<Command name="Удалить" id="106">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Удалить</v8:content>
+				</v8:item>
+			</Title>
+			<Action>УдалитьОбработка</Action>
+		</Command>
+		<Command name="Обновить" id="107">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Обновить</v8:content>
+				</v8:item>
+			</Title>
+			<Action>ОбновитьОбработка</Action>
+		</Command>
+		<Command name="Сохранить" id="108">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Сохранить</v8:content>
+				</v8:item>
+			</Title>
+			<Action>СохранитьОбработка</Action>
+			<Shortcut>Ctrl+Enter</Shortcut>
+		</Command>
+		<Command name="ЗапуститьТест" id="111">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Запустить тест</v8:content>
+				</v8:item>
+			</Title>
+			<Action>ЗапуститьТестОбработка</Action>
+		</Command>
+		<Command name="СгенерироватьJSON" id="113">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Сгенерировать JSON</v8:content>
+				</v8:item>
+			</Title>
+			<Action>СгенерироватьJSONОбработка</Action>
+		</Command>
+	</Commands>
+</Form>

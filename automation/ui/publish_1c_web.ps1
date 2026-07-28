@@ -1,8 +1,8 @@
 param(
     [string]$PlatformBin = "C:\Program Files\1cv8\8.5.1.1150\bin",
-    [string]$VirtualDir = "aiagent_ui",
-    [string]$PublishDir = "C:\inetpub\wwwroot\aiagent_ui",
-    [string]$ConnectionString = 'File="D:\bd\УНФ3013238";',
+    [string]$VirtualDir = "fresh-unf",
+    [string]$PublishDir = "C:\inetpub\wwwroot\fresh-unf",
+    [string]$ConnectionString = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";',
     [switch]$DeleteOnly
 )
 
