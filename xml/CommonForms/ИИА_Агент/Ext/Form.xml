@@ -133,11 +133,13 @@
 							<ToolTip>
 								<v8:item>
 									<v8:lang>ru</v8:lang>
-									<v8:content>Введите запрос</v8:content>
+									<v8:content>Опишите задачу для агента</v8:content>
 								</v8:item>
 							</ToolTip>
 							<ToolTipRepresentation>Balloon</ToolTipRepresentation>
 							<AutoMaxWidth>false</AutoMaxWidth>
+							<Height>5</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
 							<HorizontalStretch>true</HorizontalStretch>
 							<MultiLine>true</MultiLine>
 							<ContextMenu name="ТекущийТекстКонтекстноеМеню" id="42"/>
@@ -300,7 +302,7 @@
 							<Title formatted="false">
 								<v8:item>
 									<v8:lang/>
-									<v8:content>вап вап вап вап вап вап вап вап вап варар апыр 12323 4234 234 234 234 234 234 234 23 4234 234 23</v8:content>
+									<v8:content>Новый диалог. Опишите задачу: найти данные, подготовить документ, проверить остатки или выполнить цепочку действий в 1С.</v8:content>
 								</v8:item>
 							</Title>
 							<ContextMenu name="Декорация1КонтекстноеМеню" id="145"/>
@@ -312,7 +314,7 @@
 					<Title>
 						<v8:item>
 							<v8:lang/>
-							<v8:content>Группа план</v8:content>
+							<v8:content>Ход выполнения</v8:content>
 						</v8:item>
 					</Title>
 					<Width>40</Width>
@@ -320,8 +322,8 @@
 					<HorizontalStretch>false</HorizontalStretch>
 					<VerticalStretch>false</VerticalStretch>
 					<Group>Vertical</Group>
-					<Representation>None</Representation>
-					<ShowTitle>false</ShowTitle>
+					<Representation>WeakSeparation</Representation>
+					<ShowTitle>true</ShowTitle>
 					<ExtendedTooltip name="ГруппаПланРасширеннаяПодсказка" id="135"/>
 					<ChildItems>
 						<Table name="ПланЗадач" id="133">
@@ -332,10 +334,10 @@
 							<Height>12</Height>
 							<AutoMaxHeight>false</AutoMaxHeight>
 							<RowSelectionMode>Cell</RowSelectionMode>
-							<AutoInsertNewRow>true</AutoInsertNewRow>
+							<AutoInsertNewRow>false</AutoInsertNewRow>
 							<VerticalStretch>false</VerticalStretch>
-							<EnableStartDrag>true</EnableStartDrag>
-							<EnableDrag>true</EnableDrag>
+							<EnableStartDrag>false</EnableStartDrag>
+							<EnableDrag>false</EnableDrag>
 							<DataPath>ПланЗадач</DataPath>
 							<CommandSet>
 								<ExcludedCommand>Add</ExcludedCommand>
@@ -389,6 +391,7 @@
 							<ChildItems>
 								<InputField name="ПланЗадачЗадача" id="107">
 									<DataPath>ПланЗадач.Задача</DataPath>
+									<ReadOnly>true</ReadOnly>
 									<EditMode>EnterOnInput</EditMode>
 									<AutoEditMode>true</AutoEditMode>
 									<ContextMenu name="ПланЗадачЗадачаКонтекстноеМеню" id="108"/>
@@ -396,6 +399,7 @@
 								</InputField>
 								<CheckBoxField name="ПланЗадачВыполнена" id="110">
 									<DataPath>ПланЗадач.Выполнена</DataPath>
+									<ReadOnly>true</ReadOnly>
 									<EditMode>EnterOnInput</EditMode>
 									<AutoEditMode>true</AutoEditMode>
 									<ContextMenu name="ПланЗадачВыполненаКонтекстноеМеню" id="111"/>
@@ -403,6 +407,7 @@
 								</CheckBoxField>
 								<InputField name="ПланЗадачРезультат" id="113">
 									<DataPath>ПланЗадач.Результат</DataPath>
+									<ReadOnly>true</ReadOnly>
 									<EditMode>EnterOnInput</EditMode>
 									<AutoEditMode>true</AutoEditMode>
 									<ContextMenu name="ПланЗадачРезультатКонтекстноеМеню" id="114"/>
@@ -453,6 +458,7 @@
 							</ChildItems>
 						</UsualGroup>
 						<LabelDecoration name="ЗаголовокDecisionTimeline" id="320">
+							<Visible>false</Visible>
 							<Title formatted="false">
 								<v8:item>
 									<v8:lang/>
@@ -464,6 +470,7 @@
 						</LabelDecoration>
 						<InputField name="DecisionTimeline" id="323">
 							<DataPath>DecisionTimeline</DataPath>
+							<Visible>false</Visible>
 							<TitleLocation>None</TitleLocation>
 							<Height>10</Height>
 							<AutoMaxHeight>false</AutoMaxHeight>

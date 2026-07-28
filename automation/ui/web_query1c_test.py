@@ -20,6 +20,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -156,7 +157,7 @@ class BrowserQuery1CTest:
         self.websocket = None
         self.session_id = ""
         self.message_id = 0
-        self.debug_port = 9255
+        self.debug_port = 0
 
     def run(self) -> int:
         try:
@@ -210,6 +211,7 @@ class BrowserQuery1CTest:
 
     def _launch_browser(self) -> None:
         browser_exe = self._resolve_browser_exe()
+        self.debug_port = self._pick_free_port()
         self.user_data_dir = tempfile.mkdtemp(prefix="browser-query1c-")
         args = [
             browser_exe,
@@ -237,6 +239,11 @@ class BrowserQuery1CTest:
             env.pop(key, None)
         self.browser_process = subprocess.Popen(args, env=env)
         self.logger.info("Chrome запущен для web UI теста.")
+
+    def _pick_free_port(self) -> int:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.bind(("127.0.0.1", 0))
+            return int(sock.getsockname()[1])
 
     def _resolve_browser_exe(self) -> str:
         candidates = [
