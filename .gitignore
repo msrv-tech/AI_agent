@@ -43,6 +43,7 @@ automation/com_1c/logs/
 # Логи сборки и запуска
 automation/logs/
 temp/tau2-bench/
+temp/infostart-chrome-profile/
 vendor/tau2-bench/
 
 # BSL Language Server (скачивается отдельно)
