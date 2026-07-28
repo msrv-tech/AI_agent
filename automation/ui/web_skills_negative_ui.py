@@ -57,7 +57,7 @@ def run(args: argparse.Namespace) -> dict:
         timeout_sec=args.timeout_sec,
         log_file=str(artifact_dir / "web_skills_negative_ui.log"),
         artifact_dir=str(artifact_dir),
-        headless=False,
+        headless=not args.headed,
         skip_com_prepare=True,
     )
     test = BrowserQuery1CTest(config, Logger(config.log_file))
@@ -111,6 +111,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--password", default="")
     parser.add_argument("--timeout-sec", type=int, default=60)
     parser.add_argument("--artifact-dir", default=str(REPO_ROOT / "automation" / "logs" / "web_skills_artifacts"))
+    parser.add_argument("--headed", action="store_true", help="Show Chrome window for manual debugging. Headless is default.")
     return parser.parse_args()
 
 
