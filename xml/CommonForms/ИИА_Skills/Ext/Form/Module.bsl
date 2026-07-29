@@ -130,7 +130,9 @@
 	РезультатТеста = "matched: " + ?(Результат.matched, "true", "false") + Символы.ПС
 		+ "score: " + Строка(Результат.score) + Символы.ПС
 		+ "name: " + Результат.name + Символы.ПС
-		+ "title: " + Результат.title;
+		+ "title: " + Результат.title + Символы.ПС
+		+ "has_dsl_template: " + ?(Результат.has_dsl_template, "true", "false") + Символы.ПС
+		+ "dsl_template_mode: " + Результат.dsl_template_mode;
 	
 КонецПроцедуры
 

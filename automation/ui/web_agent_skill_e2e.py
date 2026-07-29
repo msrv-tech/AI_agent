@@ -67,6 +67,22 @@ def make_skill_json(skill_name: str, marker: str) -> str:
             "enforcement": "warn",
             "approval_required": True,
             "workflow": [],
+            "template_vars": {
+                "customer": {"type": "CatalogRef.Контрагенты", "required": True, "source": "user_prompt"},
+                "items": {"type": "array", "required": True, "source": "user_prompt"},
+                "target_object": {"type": "Document.ЗаказПокупателя", "required": True, "source": "skill"},
+            },
+            "dsl_template_mode": "validate",
+            "dsl_template": {
+                "dsl_version": 1,
+                "steps": [
+                    {"action": "GetMetadata", "object": "Document.ЗаказПокупателя", "save_as": "metadata"},
+                    {"action": "FindReferenceByName", "object": "Catalog.Контрагенты", "value": "$customer", "save_as": "customer_ref"},
+                    {"action": "CreateDocument", "object": "ЗаказПокупателя", "save_as": "document_ref"},
+                    {"action": "SetField", "target": "$document_ref", "field": "Контрагент", "value": "$customer_ref"},
+                    {"action": "ShowInfo", "value": "Предварительный результат подготовлен."},
+                ],
+            },
             "policy": {
                 "risk_level": "write",
                 "enforcement": "warn",
@@ -200,6 +216,9 @@ def inspect_dialog(bridge_url: str, marker: str, skill_name: str) -> dict:
         "РезультатВыполнения.Вставить(\"logHasSkillMarker\", Ложь);"
         "РезультатВыполнения.Вставить(\"logHasActiveSkills\", Ложь);"
         "РезультатВыполнения.Вставить(\"logHasTarget\", Ложь);"
+        "РезультатВыполнения.Вставить(\"logHasDslTemplate\", Ложь);"
+        "РезультатВыполнения.Вставить(\"logHasTemplateVars\", Ложь);"
+        "РезультатВыполнения.Вставить(\"logHasTemplateMode\", Ложь);"
         "РезультатВыполнения.Вставить(\"dslGetMetadata\", Ложь);"
         "Запрос = Новый Запрос(\"ВЫБРАТЬ ПЕРВЫЕ 30 Диалоги.Ссылка КАК Ссылка, Диалоги.ДатаСоздания КАК ДатаСоздания "
         "ИЗ Справочник.ИИА_Диалоги КАК Диалоги ГДЕ Диалоги.ТипДиалога = &ТипДиалога УПОРЯДОЧИТЬ ПО Диалоги.ДатаСоздания УБЫВ\");"
@@ -218,6 +237,9 @@ def inspect_dialog(bridge_url: str, marker: str, skill_name: str) -> dict:
         "РезультатВыполнения.logHasSkillMarker = СтрНайти(Лог, \"E2E_MARKER_NORMAL_AGENT_SKILL\") > 0;"
         "РезультатВыполнения.logHasActiveSkills = СтрНайти(Лог, \"АКТИВНЫЕ SKILLS\") > 0;"
         "РезультатВыполнения.logHasTarget = СтрНайти(Лог, \"target_object_name=ЗаказПокупателя\") > 0;"
+        "РезультатВыполнения.logHasDslTemplate = СтрНайти(Лог, \"DSL_TEMPLATE_JSON\") > 0;"
+        "РезультатВыполнения.logHasTemplateVars = СтрНайти(Лог, \"TEMPLATE_VARS_JSON\") > 0;"
+        "РезультатВыполнения.logHasTemplateMode = СтрНайти(Лог, \"DSL_TEMPLATE_MODE: validate\") > 0;"
         "РезультатВыполнения.dslGetMetadata = СтрНайти(Лог, \"GetMetadata\") > 0;"
         "Позиция = СтрНайти(Лог, " + bsl_string(skill_name) + ");"
         "Если Позиция > 0 Тогда РезультатВыполнения.Вставить(\"aroundSkillName\", Сред(Лог, Макс(1, Позиция - 120), 360)); КонецЕсли;"
@@ -270,7 +292,7 @@ def run(args: argparse.Namespace) -> dict:
         result["bodyHead"] = body_text[:1200]
         (artifact_dir / "web_agent_skill_e2e_body.txt").write_text(body_text, encoding="utf-8")
         result.update(inspect_dialog(args.bridge_url, marker, skill_name))
-        required = ["found", "logHasUserPrompt", "logHasSkillName", "logHasSkillMarker", "logHasActiveSkills", "logHasTarget", "dslGetMetadata"]
+        required = ["found", "logHasUserPrompt", "logHasSkillName", "logHasSkillMarker", "logHasActiveSkills", "logHasTarget", "logHasDslTemplate", "logHasTemplateVars", "logHasTemplateMode", "dslGetMetadata"]
         result["success"] = all(bool(result.get(key)) for key in required)
         result["required"] = {key: bool(result.get(key)) for key in required}
         return result

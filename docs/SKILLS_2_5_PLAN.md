@@ -456,6 +456,35 @@ Skill: Оформление заявки на оплату
     "Показать preview",
     "Записать после подтверждения"
   ],
+  "template_vars": {
+    "customer": {
+      "type": "CatalogRef.Контрагенты",
+      "required": true,
+      "source": "user_prompt"
+    },
+    "amount": {
+      "type": "number",
+      "required": true,
+      "source": "user_prompt"
+    },
+    "target_object": {
+      "type": "Document.ЗаявкаНаРасходованиеДенежныхСредств",
+      "required": true,
+      "source": "skill"
+    }
+  },
+  "dsl_template_mode": "validate",
+  "dsl_template": {
+    "dsl_version": 1,
+    "steps": [
+      {"action": "GetMetadata", "object": "Document.ЗаявкаНаРасходованиеДенежныхСредств", "save_as": "metadata"},
+      {"action": "FindReferenceByName", "object": "Catalog.Контрагенты", "value": "$customer", "save_as": "customer_ref"},
+      {"action": "CreateDocument", "object": "ЗаявкаНаРасходованиеДенежныхСредств", "save_as": "document_ref"},
+      {"action": "SetField", "target": "$document_ref", "field": "Контрагент", "value": "$customer_ref"},
+      {"action": "SetField", "target": "$document_ref", "field": "СуммаДокумента", "value": "$amount"},
+      {"action": "ShowInfo", "value": "Предварительный результат подготовлен. Запись только после подтверждения пользователя."}
+    ]
+  },
   "allowed_actions": ["GetMetadata", "GetObjectFields", "FindReferenceByName", "CreateDocument", "SetField", "Write", "RunQuery", "ShowInfo"],
   "forbidden_actions": ["PostDocument", "DeleteObject"],
   "required_checks": ["metadata_before_write", "approval_before_write"],
@@ -515,6 +544,9 @@ Skill: Оформление заявки на оплату
 - `Инструкция`
 - `WorkflowJSON`
 - `PolicyJSON`
+- `TemplateVarsJSON`
+- `DSLTemplateJSON`
+- `DSLTemplateMode`
 - `Enforcement`
 - `ДатаСоздания`
 - `ДатаИзменения`
@@ -524,6 +556,12 @@ Skill: Оформление заявки на оплату
 - системные skills из кода или поставки;
 - пользовательские skills из регистра;
 - отключенные или недоступные по правам skills отфильтровывать.
+
+`workflow` остается человекочитаемым сценарием для пользователя/разработчика, а `dsl_template` - машинным каркасом для агента. Режимы шаблона:
+
+- `hint` - использовать как подсказку, можно адаптировать свободно;
+- `validate` - использовать как проверяемый каркас, адаптируя значения и безопасные уточняющие шаги;
+- `strict` - строить DSL строго по шаблону, отклонения должны быть явно обоснованы и дополнительно проверены.
 
 ### Жизненный цикл пользовательского skill
 

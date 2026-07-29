@@ -37,6 +37,19 @@ def focus_textarea(test: BrowserQuery1CTest, index: int) -> str:
     return test._evaluate(script)
 
 
+def read_textarea(test: BrowserQuery1CTest, index: int) -> str:
+    script = r"""
+((index)=>{
+ const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>40&&r.height>15&&r.x>-1000&&r.y>-1000&&s.display!=='none'&&s.visibility!=='hidden'};
+ const items=Array.from(document.querySelectorAll('textarea')).filter(visible)
+  .sort((a,b)=>a.getBoundingClientRect().y-b.getBoundingClientRect().y);
+ if(index<0 || index>=items.length) return '';
+ return items[index].value || '';
+})(""" + str(index) + """)
+"""
+    return test._evaluate(script)
+
+
 def body_contains_any(body: str, needles: list[str]) -> bool:
     lower = body.lower()
     return any(needle.lower() in lower for needle in needles)
@@ -88,6 +101,28 @@ def run(args: argparse.Namespace) -> dict:
         test._session_call("Page.navigate", {"url": skills_url})
         test._wait_until_text_contains("Skills", args.timeout_sec)
         time.sleep(1)
+        result["generateTemplateFocus"] = focus_textarea(test, 0)
+        replace_focused_text(
+            test,
+            "Создать skill для документа ЗаказПокупателя: находить контрагента и номенклатуру, заполнять заказ клиента, не записывать без подтверждения.",
+        )
+        result["generateTemplateClick"] = click_label(test, "Сгенерировать JSON")
+        time.sleep(3)
+        generated_json = read_textarea(test, 1)
+        result["generatedHasTemplateVars"] = '"template_vars"' in generated_json
+        result["generatedHasDslTemplate"] = '"dsl_template"' in generated_json
+        result["generatedHasTemplateMode"] = '"dsl_template_mode"' in generated_json
+        result["generatedHasDocumentTarget"] = "ЗаказПокупателя" in generated_json
+        result["generatedTestFocus"] = focus_textarea(test, 2)
+        replace_focused_text(test, "Создай заказ клиента для Ромашка на Кабель 10 штук")
+        result["generatedTestClick"] = click_label(test, "Запустить тест")
+        time.sleep(2)
+        body = test._safe_body_text()
+        result["generatedTestShowsTemplate"] = body_contains_any(body, ["has_dsl_template: true", "dsl_template_mode: hint"])
+
+        test._session_call("Page.navigate", {"url": skills_url})
+        test._wait_until_text_contains("Skills", args.timeout_sec)
+        time.sleep(1)
         result["systemOverwriteClick"] = click_label(test, "Сохранить")
         time.sleep(2)
         body = test._safe_body_text()
@@ -95,7 +130,16 @@ def run(args: argparse.Namespace) -> dict:
 
         (artifact_dir / "web_skills_negative_ui_body.txt").write_text(body, encoding="utf-8")
         result["bodyHead"] = body[:1200]
-        required = ["emptyDescriptionWarning", "invalidJsonWarning", "systemOverwriteWarning"]
+        required = [
+            "emptyDescriptionWarning",
+            "invalidJsonWarning",
+            "generatedHasTemplateVars",
+            "generatedHasDslTemplate",
+            "generatedHasTemplateMode",
+            "generatedHasDocumentTarget",
+            "generatedTestShowsTemplate",
+            "systemOverwriteWarning",
+        ]
         result["success"] = all(bool(result.get(key)) for key in required)
         result["required"] = {key: bool(result.get(key)) for key in required}
         return result
