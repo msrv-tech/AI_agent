@@ -7,8 +7,8 @@
 		</v8:item>
 	</Title>
 	<AutoTitle>false</AutoTitle>
-	<Width>110</Width>
-	<Height>36</Height>
+	<Width>170</Width>
+	<Height>42</Height>
 	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
 		<Autofill>false</Autofill>
 	</AutoCommandBar>
@@ -20,6 +20,8 @@
 			<Group>Horizontal</Group>
 			<Representation>None</Representation>
 			<ShowTitle>false</ShowTitle>
+			<HorizontalStretch>true</HorizontalStretch>
+			<VerticalStretch>true</VerticalStretch>
 			<ExtendedTooltip name="ГруппаОсновнаяРасширеннаяПодсказка" id="2"/>
 			<ChildItems>
 				<UsualGroup name="ГруппаСписок" id="3">
@@ -29,12 +31,17 @@
 							<v8:content>Skills</v8:content>
 						</v8:item>
 					</Title>
+					<Width>42</Width>
+					<HorizontalStretch>false</HorizontalStretch>
+					<VerticalStretch>true</VerticalStretch>
 					<Group>Vertical</Group>
 					<ExtendedTooltip name="ГруппаСписокРасширеннаяПодсказка" id="4"/>
 					<ChildItems>
 						<Table name="Скилы" id="5">
 							<DataPath>Скилы</DataPath>
+							<Width>42</Width>
 							<HeightInTableRows>18</HeightInTableRows>
+							<VerticalStretch>true</VerticalStretch>
 							<CommandBarLocation>None</CommandBarLocation>
 							<ContextMenu name="СкилыКонтекстноеМеню" id="6"/>
 							<AutoCommandBar name="СкилыКоманднаяПанель" id="7"/>
@@ -47,6 +54,7 @@
 							<ChildItems>
 								<CheckBoxField name="СкилыАктивен" id="11">
 									<DataPath>Скилы.Активен</DataPath>
+									<Width>4</Width>
 									<Title>
 										<v8:item>
 											<v8:lang>ru</v8:lang>
@@ -64,6 +72,7 @@
 											<v8:content>Название</v8:content>
 										</v8:item>
 									</Title>
+									<Width>24</Width>
 									<ReadOnly>true</ReadOnly>
 									<ContextMenu name="СкилыЗаголовокКонтекстноеМеню" id="15"/>
 									<ExtendedTooltip name="СкилыЗаголовокРасширеннаяПодсказка" id="16"/>
@@ -76,6 +85,7 @@
 											<v8:content>Код</v8:content>
 										</v8:item>
 									</Title>
+									<Width>14</Width>
 									<ReadOnly>true</ReadOnly>
 									<ContextMenu name="СкилыИмяКонтекстноеМеню" id="18"/>
 									<ExtendedTooltip name="СкилыИмяРасширеннаяПодсказка" id="19"/>
@@ -130,6 +140,9 @@
 							<v8:content>Карточка skill</v8:content>
 						</v8:item>
 					</Title>
+					<Width>118</Width>
+					<HorizontalStretch>true</HorizontalStretch>
+					<VerticalStretch>true</VerticalStretch>
 					<Group>Vertical</Group>
 					<ExtendedTooltip name="ГруппаКарточкаРасширеннаяПодсказка" id="29"/>
 					<ChildItems>
@@ -140,6 +153,9 @@
 									<v8:content>JSON skill</v8:content>
 								</v8:item>
 							</Title>
+							<Width>118</Width>
+							<HorizontalStretch>true</HorizontalStretch>
+							<VerticalStretch>true</VerticalStretch>
 							<Group>Vertical</Group>
 							<Representation>StrongSeparation</Representation>
 							<ExtendedTooltip name="ГруппаСозданиеПоОписаниюРасширеннаяПодсказка" id="121"/>
@@ -152,8 +168,10 @@
 											<v8:content>Описание задачи</v8:content>
 										</v8:item>
 									</Title>
+									<AutoMaxWidth>false</AutoMaxWidth>
 									<MultiLine>true</MultiLine>
 									<Height>5</Height>
+									<HorizontalStretch>true</HorizontalStretch>
 									<ContextMenu name="ОписаниеЗадачиКонтекстноеМеню" id="131"/>
 									<ExtendedTooltip name="ОписаниеЗадачиРасширеннаяПодсказка" id="132"/>
 									<Events>
@@ -178,8 +196,13 @@
 											<v8:content>JSON</v8:content>
 										</v8:item>
 									</Title>
+									<Width>118</Width>
+									<AutoMaxWidth>false</AutoMaxWidth>
 									<MultiLine>true</MultiLine>
 									<Height>20</Height>
+									<AutoMaxHeight>false</AutoMaxHeight>
+									<HorizontalStretch>true</HorizontalStretch>
+									<VerticalStretch>true</VerticalStretch>
 									<ContextMenu name="SkillJSONКонтекстноеМеню" id="68"/>
 									<ExtendedTooltip name="SkillJSONРасширеннаяПодсказка" id="69"/>
 								</InputField>
@@ -193,8 +216,10 @@
 									<v8:content>Тестовый запрос</v8:content>
 								</v8:item>
 							</Title>
+							<AutoMaxWidth>false</AutoMaxWidth>
 							<MultiLine>true</MultiLine>
 							<Height>3</Height>
+							<HorizontalStretch>true</HorizontalStretch>
 							<ContextMenu name="ТестовыйЗапросКонтекстноеМеню" id="123"/>
 							<ExtendedTooltip name="ТестовыйЗапросРасширеннаяПодсказка" id="124"/>
 						</InputField>
@@ -207,8 +232,10 @@
 								</v8:item>
 							</Title>
 							<ReadOnly>true</ReadOnly>
+							<AutoMaxWidth>false</AutoMaxWidth>
 							<MultiLine>true</MultiLine>
 							<Height>4</Height>
+							<HorizontalStretch>true</HorizontalStretch>
 							<ContextMenu name="РезультатТестаКонтекстноеМеню" id="126"/>
 							<ExtendedTooltip name="РезультатТестаРасширеннаяПодсказка" id="127"/>
 						</InputField>

@@ -178,12 +178,25 @@ def run(args: argparse.Namespace) -> dict:
         result["generatedHasDslTemplate"] = '"dsl_template"' in generated_json
         result["generatedHasTemplateMode"] = '"dsl_template_mode"' in generated_json
         result["generatedHasDocumentTarget"] = "ЗаказПокупателя" in generated_json
+        result["generatedKeepsApprovalForDoNotWriteWithoutApproval"] = '"approval_required": true' in generated_json
         result["generatedTestFocus"] = focus_textarea(test, 2)
         replace_focused_text(test, "Создай заказ клиента для Ромашка на Кабель 10 штук")
         result["generatedTestClick"] = click_label(test, "Запустить тест")
         time.sleep(2)
         body = test._safe_body_text()
         result["generatedTestShowsTemplate"] = body_contains_any(body, ["has_dsl_template: true", "dsl_template_mode: hint"])
+
+        exact_prompt = "Создание справочника Контрагенты. В комментарии указывай код контрагента. Подтверждение не нужно"
+        result["catalogPromptFocus"] = focus_textarea(test, 0)
+        replace_focused_text(test, exact_prompt)
+        result["catalogPromptGenerateClick"] = click_label(test, "Сгенерировать JSON")
+        time.sleep(3)
+        catalog_json = read_textarea(test, 1)
+        result["catalogPromptFull"] = exact_prompt in catalog_json
+        result["catalogPromptNoTruncatedTrigger"] = 'Подтвер"' not in catalog_json and "Подтвер\n" not in catalog_json
+        result["catalogPromptRiskWrite"] = '"risk_level": "write"' in catalog_json
+        result["catalogPromptApprovalFalse"] = '"approval_required": false' in catalog_json
+        result["catalogPromptCreateReference"] = '"CreateReference"' in catalog_json
 
         test._session_call("Page.navigate", {"url": skills_url})
         test._wait_until_text_contains("Skills", args.timeout_sec)
@@ -202,7 +215,13 @@ def run(args: argparse.Namespace) -> dict:
             "generatedHasDslTemplate",
             "generatedHasTemplateMode",
             "generatedHasDocumentTarget",
+            "generatedKeepsApprovalForDoNotWriteWithoutApproval",
             "generatedTestShowsTemplate",
+            "catalogPromptFull",
+            "catalogPromptNoTruncatedTrigger",
+            "catalogPromptRiskWrite",
+            "catalogPromptApprovalFalse",
+            "catalogPromptCreateReference",
             "newSkillHasUserName",
             "newSkillNotSystem",
             "newSkillDisabled",
