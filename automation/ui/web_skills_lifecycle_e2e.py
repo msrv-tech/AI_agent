@@ -97,6 +97,17 @@ def export_skill_json(bridge_url: str, skill_name: str) -> str:
     return str(result or "")
 
 
+def visible_textarea_contains(test: BrowserQuery1CTest, needle: str) -> bool:
+    script = r"""
+((needle)=>{
+ const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>40&&r.height>15&&r.x>-1000&&r.y>-1000&&s.display!=='none'&&s.visibility!=='hidden'};
+ return Array.from(document.querySelectorAll('textarea')).filter(visible).some(e=>(e.value||'').includes(needle));
+})(""" + json.dumps(needle, ensure_ascii=False) + """)
+"""
+    raw = test._evaluate(script)
+    return raw is True or str(raw).lower() == "true"
+
+
 def run(args: argparse.Namespace) -> dict:
     artifact_dir = Path(args.artifact_dir)
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -136,7 +147,7 @@ def run(args: argparse.Namespace) -> dict:
         result["saveClick"] = click_label(test, "Сохранить")
         time.sleep(2)
         result["afterSave"] = inspect_skill(args.bridge_url, skill_name, marker)
-        result["textareaHasNameAfterSave"] = skill_name in read_textarea(test, 1)
+        result["textareaHasNameAfterSave"] = visible_textarea_contains(test, skill_name)
         exported_json = export_skill_json(args.bridge_url, skill_name)
         result["exportedHasName"] = skill_name in exported_json
 
@@ -162,6 +173,7 @@ def run(args: argparse.Namespace) -> dict:
             "savedExists": bool(result["afterSave"].get("exists")),
             "savedMatched": bool(result["afterSave"].get("matched")),
             "savedHasTemplate": bool(result["afterSave"].get("hasTemplate")),
+            "textareaHasNameAfterSave": bool(result.get("textareaHasNameAfterSave")),
             "runTestMentionsSkill": bool(result.get("runTestMentionsSkill")),
             "runTestMentionsTemplate": bool(result.get("runTestMentionsTemplate")),
             "exportedHasName": bool(result.get("exportedHasName")),
