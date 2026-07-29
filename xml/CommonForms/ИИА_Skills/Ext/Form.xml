@@ -88,6 +88,17 @@
 							<ShowTitle>false</ShowTitle>
 							<ExtendedTooltip name="ГруппаКнопкиСпискаРасширеннаяПодсказка" id="21"/>
 							<ChildItems>
+								<Button name="СоздатьНовыйСкил" id="22">
+									<Type>UsualButton</Type>
+									<CommandName>Form.Command.СоздатьНовыйСкил</CommandName>
+									<Title>
+										<v8:item>
+											<v8:lang>ru</v8:lang>
+											<v8:content>Новый</v8:content>
+										</v8:item>
+									</Title>
+									<ExtendedTooltip name="СоздатьНовыйСкилРасширеннаяПодсказка" id="23"/>
+								</Button>
 								<Button name="Удалить" id="24">
 									<CommandName>Form.Command.Удалить</CommandName>
 									<Title>
@@ -638,6 +649,15 @@
 		</Attribute>
 	</Attributes>
 	<Commands>
+		<Command name="СоздатьНовыйСкил" id="114">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Новый</v8:content>
+				</v8:item>
+			</Title>
+			<Action>СоздатьНовыйСкилОбработка</Action>
+		</Command>
 		<Command name="Удалить" id="106">
 			<Title>
 				<v8:item>

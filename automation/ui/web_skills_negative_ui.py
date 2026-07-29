@@ -55,6 +55,53 @@ def body_contains_any(body: str, needles: list[str]) -> bool:
     return any(needle.lower() in lower for needle in needles)
 
 
+def close_ok_dialog(test: BrowserQuery1CTest) -> str:
+    for label in ("OK", "ОК"):
+        clicked = click_label(test, label)
+        if clicked != "missing":
+            time.sleep(1)
+            return clicked
+    return "missing"
+
+
+def click_label_by_mouse(test: BrowserQuery1CTest, label: str, rightmost: bool = False) -> str:
+    script = r"""
+((label,rightmost)=>{
+ const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>4&&r.height>4&&r.x>-1000&&r.y>-1000&&s.display!=='none'&&s.visibility!=='hidden'};
+ const candidates=Array.from(document.querySelectorAll('*')).filter(e=>visible(e)&&(e.innerText||e.getAttribute('aria-label')||e.getAttribute('title')||e.value||'').trim()===label)
+  .map(e=>{const r=e.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height,tag:e.tagName,role:e.getAttribute('role')||'',text:(e.innerText||e.value||'').trim()};})
+  .sort((a,b)=>rightmost ? b.x-a.x : (a.w*a.h)-(b.w*b.h));
+ if(!candidates.length) return JSON.stringify({status:'missing'});
+ return JSON.stringify({status:'found', target:candidates[0]});
+})(""" + json.dumps(label, ensure_ascii=False) + "," + ("true" if rightmost else "false") + """)
+"""
+    raw = test._evaluate(script)
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return "bad-json:" + raw[:100]
+    if data.get("status") != "found":
+        return data.get("status", "missing")
+    target = data["target"]
+    x = float(target["x"])
+    y = float(target["y"])
+    test._session_call("Input.dispatchMouseEvent", {"type": "mouseMoved", "x": x, "y": y})
+    test._session_call("Input.dispatchMouseEvent", {"type": "mousePressed", "x": x, "y": y, "button": "left", "clickCount": 1})
+    test._session_call("Input.dispatchMouseEvent", {"type": "mouseReleased", "x": x, "y": y, "button": "left", "clickCount": 1})
+    return "clicked:" + target.get("tag", "")
+
+
+def wait_for_textarea_contains(test: BrowserQuery1CTest, index: int, needle: str, timeout_sec: int = 8) -> str:
+    deadline = time.time() + timeout_sec
+    last_value = ""
+    while time.time() < deadline:
+        last_value = read_textarea(test, index)
+        if needle in last_value:
+            return last_value
+        time.sleep(0.5)
+    return last_value
+
+
 def run(args: argparse.Namespace) -> dict:
     artifact_dir = Path(args.artifact_dir)
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -90,6 +137,7 @@ def run(args: argparse.Namespace) -> dict:
         time.sleep(2)
         body = test._safe_body_text()
         result["emptyDescriptionWarning"] = body_contains_any(body, ["Опишите задачу для генерации skill", "Опишите задачу"])
+        result["emptyDescriptionOk"] = close_ok_dialog(test)
 
         result["invalidJsonFocus"] = focus_textarea(test, 1)
         replace_focused_text(test, "{ bad json")
@@ -97,6 +145,23 @@ def run(args: argparse.Namespace) -> dict:
         time.sleep(2)
         body = test._safe_body_text()
         result["invalidJsonWarning"] = body_contains_any(body, ["Некорректный JSON skill", "Ошибка чтения JSON", "JSON"])
+        result["invalidJsonOk"] = close_ok_dialog(test)
+
+        test._session_call("Page.navigate", {"url": skills_url})
+        test._wait_until_text_contains("Skills", args.timeout_sec)
+        time.sleep(1)
+        result["selectSystemSkillClick"] = click_label(test, "Поиск метаданных")
+        time.sleep(1)
+        result["newSkillClick"] = click_label_by_mouse(test, "Новый")
+        new_skill_json = wait_for_textarea_contains(test, 1, '"name": "user-skill-', 8)
+        try:
+            new_skill = json.loads(new_skill_json)
+        except json.JSONDecodeError:
+            new_skill = {}
+        result["newSkillHasUserName"] = str(new_skill.get("name", "")).startswith("user-skill-")
+        result["newSkillNotSystem"] = new_skill.get("owner") != "system"
+        result["newSkillDisabled"] = new_skill.get("enabled") is False
+        result["newSkillJsonEditable"] = '"workflow"' in new_skill_json and '"policy"' in new_skill_json
 
         test._session_call("Page.navigate", {"url": skills_url})
         test._wait_until_text_contains("Skills", args.timeout_sec)
@@ -138,6 +203,10 @@ def run(args: argparse.Namespace) -> dict:
             "generatedHasTemplateMode",
             "generatedHasDocumentTarget",
             "generatedTestShowsTemplate",
+            "newSkillHasUserName",
+            "newSkillNotSystem",
+            "newSkillDisabled",
+            "newSkillJsonEditable",
             "systemOverwriteWarning",
         ]
         result["success"] = all(bool(result.get(key)) for key in required)
