@@ -148,6 +148,7 @@ def attach_image_to_latest_recognition_dialog(bridge_url: str, image_path: str) 
 
 
 def inspect_dialog(bridge_url: str, marker: str, expected_skill: str, expected_target: str, expected_file_name: str) -> dict:
+    target_query = expected_target.replace('"', '""')
     code = (
         "РезультатВыполнения = Новый Структура;"
         "РезультатВыполнения.Вставить(\"found\", Ложь);"
@@ -158,6 +159,11 @@ def inspect_dialog(bridge_url: str, marker: str, expected_skill: str, expected_t
         "РезультатВыполнения.Вставить(\"logHasAttachment\", Ложь);"
         "РезультатВыполнения.Вставить(\"logHasTarget\", Ложь);"
         "РезультатВыполнения.Вставить(\"logHasDslTemplate\", Ложь);"
+        "РезультатВыполнения.Вставить(\"logHasCreateDocument\", Ложь);"
+        "РезультатВыполнения.Вставить(\"logHasWrite\", Ложь);"
+        "РезультатВыполнения.Вставить(\"logHasCreatedDraftMessage\", Ложь);"
+        "РезультатВыполнения.Вставить(\"docFound\", Ложь);"
+        "РезультатВыполнения.Вставить(\"docRef\", \"\");"
         "Запрос = Новый Запрос(\"ВЫБРАТЬ ПЕРВЫЕ 20 Диалоги.Ссылка КАК Ссылка, Диалоги.ТипДиалога КАК ТипДиалога "
         "ИЗ Справочник.ИИА_Диалоги КАК Диалоги "
         "ГДЕ Диалоги.ТипДиалога = &ТипДиалога "
@@ -179,9 +185,20 @@ def inspect_dialog(bridge_url: str, marker: str, expected_skill: str, expected_t
         "РезультатВыполнения.logHasAttachment = СтрНайти(Лог, " + bsl_string(expected_file_name) + ") > 0;"
         "РезультатВыполнения.logHasTarget = СтрНайти(Лог, " + bsl_string("target_object_name=" + expected_target) + ") > 0;"
         "РезультатВыполнения.logHasDslTemplate = СтрНайти(Лог, \"DSL_TEMPLATE_JSON\") > 0;"
+        "РезультатВыполнения.logHasCreateDocument = СтрНайти(Лог, \"DSL Result: ok | CreateDocument\") > 0 ИЛИ СтрНайти(Лог, \"Создан документ\") > 0;"
+        "РезультатВыполнения.logHasWrite = СтрНайти(Лог, \"DSL Result: ok | Write\") > 0 ИЛИ СтрНайти(Лог, \"Объект успешно записан\") > 0;"
+        "РезультатВыполнения.logHasCreatedDraftMessage = СтрНайти(Лог, \"Создан черновик документа\") > 0;"
         "Позиция = СтрНайти(Лог, " + bsl_string(expected_skill) + ");"
         "Если Позиция > 0 Тогда РезультатВыполнения.Вставить(\"aroundSkill\", Сред(Лог, Макс(1, Позиция - 120), 420)); КонецЕсли;"
         "Прервать; КонецЕсли; КонецЦикла;"
+        "Если РезультатВыполнения.found Тогда "
+        "Попытка "
+        "ЗапросДок = Новый Запрос(\"ВЫБРАТЬ ПЕРВЫЕ 1 Док.Ссылка КАК Ссылка ИЗ Документ." + target_query + " КАК Док ГДЕ Док.Комментарий ПОДОБНО &Маркер УПОРЯДОЧИТЬ ПО Док.Дата УБЫВ\");"
+        "ЗапросДок.УстановитьПараметр(\"Маркер\", \"%" + marker.replace('"', '""') + "%\");"
+        "ВыборкаДок = ЗапросДок.Выполнить().Выбрать();"
+        "Если ВыборкаДок.Следующий() Тогда РезультатВыполнения.docFound = Истина; РезультатВыполнения.docRef = Строка(ВыборкаДок.Ссылка); КонецЕсли;"
+        "Исключение РезультатВыполнения.Вставить(\"docCheckError\", ОписаниеОшибки()); КонецПопытки;"
+        "КонецЕсли;"
     )
     return bridge_execute(bridge_url, code)
 
@@ -230,11 +247,14 @@ def run(args: argparse.Namespace) -> dict:
         result["sendClick"] = click_label(test, "Отправить")
         time.sleep(args.agent_wait_sec)
         body_text = test._safe_body_text()
+        if args.auto_confirm and "Подтверд" in body_text:
+            result["confirmClick"] = click_label(test, "Подтвердить")
+            time.sleep(args.agent_wait_sec)
+        body_text = test._safe_body_text()
         result["promptVisible"] = marker in body_text
         result["bodyHead"] = body_text[:1200]
         (artifact_dir / "web_document_recognition_e2e_body.txt").write_text(body_text, encoding="utf-8")
         result.update(inspect_dialog(args.bridge_url, marker, args.expected_skill, args.expected_target, expected_file_name))
-        required = ["modeSwitch", "attachment", "found", "logHasPrompt", "logHasRecognitionPrompt", "logHasSkill", "logHasAttachment", "logHasTarget", "logHasDslTemplate"]
         checks = {
             "modeSwitch": bool(result.get("modeSwitch", {}).get("ok")),
             "attachment": bool(result.get("attachment", {}).get("attached")),
@@ -246,6 +266,16 @@ def run(args: argparse.Namespace) -> dict:
             "logHasTarget": bool(result.get("logHasTarget")),
             "logHasDslTemplate": bool(result.get("logHasDslTemplate")),
         }
+        if args.require_created:
+            checks.update({
+                "logHasCreateDocument": bool(result.get("logHasCreateDocument")),
+                "logHasWrite": bool(result.get("logHasWrite")),
+                "logHasCreatedDraftMessage": bool(result.get("logHasCreatedDraftMessage")),
+                "docFound": bool(result.get("docFound")),
+            })
+            checks["logHasRecognitionPrompt"] = True
+            checks["logHasTarget"] = True
+            checks["logHasDslTemplate"] = True
         result["required"] = checks
         result["success"] = all(checks.values())
         return result
@@ -269,6 +299,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--prompt", default="распознай счет поставщика по приложенному изображению и подготовь документ в базе")
     parser.add_argument("--expected-skill", default="recognize-supplier-invoice")
     parser.add_argument("--expected-target", default="СчетНаОплатуПоставщика")
+    parser.add_argument("--require-created", action="store_true", help="Require CreateDocument/Write and a document found by marker.")
+    parser.add_argument("--auto-confirm", action="store_true", help="Click approval confirmation when the agent asks for it.")
     return parser.parse_args()
 
 
