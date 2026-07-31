@@ -7,6 +7,7 @@ import argparse
 import base64
 import io
 import json
+import mimetypes
 import sys
 import time
 import urllib.parse
@@ -110,10 +111,24 @@ def switch_mode(test: BrowserQuery1CTest, mode: str) -> dict:
     return {"before": before, "after": after, "attempts": attempts, "ok": "Распознавание документов" in after}
 
 
-def attach_image_to_latest_recognition_dialog(bridge_url: str) -> dict:
-    png_base64_expr = bsl_string_chunks(make_invoice_png_base64())
+def read_attachment_base64(image_path: str) -> tuple[str, str, str]:
+    if image_path:
+        path = Path(image_path).resolve()
+        content = path.read_bytes()
+        file_name = path.name
+        extension = path.suffix.lstrip(".").lower() or "png"
+        return base64.b64encode(content).decode("ascii"), file_name, extension
+
+    return make_invoice_png_base64(), "supplier_invoice_e2e.png", "png"
+
+
+def attach_image_to_latest_recognition_dialog(bridge_url: str, image_path: str) -> dict:
+    attachment_base64, file_name, extension = read_attachment_base64(image_path)
+    base64_expr = bsl_string_chunks(attachment_base64)
+    file_name_expr = bsl_string(file_name)
+    extension_expr = bsl_string(extension)
     code = (
-        "РезультатВыполнения = Новый Структура(\"attached,dialog,fileName\", Ложь, \"\", \"supplier_invoice_e2e.png\");"
+        "РезультатВыполнения = Новый Структура(\"attached,dialog,fileName\", Ложь, \"\", " + file_name_expr + ");"
         "Запрос = Новый Запрос(\"ВЫБРАТЬ ПЕРВЫЕ 1 Диалоги.Ссылка КАК Ссылка "
         "ИЗ Справочник.ИИА_Диалоги КАК Диалоги "
         "ГДЕ Диалоги.ТипДиалога = &ТипДиалога "
@@ -121,10 +136,10 @@ def attach_image_to_latest_recognition_dialog(bridge_url: str) -> dict:
         "Запрос.УстановитьПараметр(\"ТипДиалога\", Перечисления.ИИА_ТипДиалога.РаспознаваниеДокументов);"
         "Выборка = Запрос.Выполнить().Выбрать();"
         "Если Выборка.Следующий() Тогда "
-        "Путь = ПолучитьИмяВременногоФайла(\"png\");"
-        "Картинка = Base64Значение(" + png_base64_expr + ");"
+        "Путь = ПолучитьИмяВременногоФайла(" + extension_expr + ");"
+        "Картинка = Base64Значение(" + base64_expr + ");"
         "Картинка.Записать(Путь);"
-        "ИИА_Вложения.ДобавитьВложениеИзФайла(Выборка.Ссылка, Путь, \"supplier_invoice_e2e.png\");"
+        "ИИА_Вложения.ДобавитьВложениеИзФайла(Выборка.Ссылка, Путь, " + file_name_expr + ");"
         "РезультатВыполнения.attached = Истина;"
         "РезультатВыполнения.dialog = Строка(Выборка.Ссылка);"
         "КонецЕсли;"
@@ -132,7 +147,7 @@ def attach_image_to_latest_recognition_dialog(bridge_url: str) -> dict:
     return bridge_execute(bridge_url, code)
 
 
-def inspect_dialog(bridge_url: str, marker: str) -> dict:
+def inspect_dialog(bridge_url: str, marker: str, expected_skill: str, expected_target: str, expected_file_name: str) -> dict:
     code = (
         "РезультатВыполнения = Новый Структура;"
         "РезультатВыполнения.Вставить(\"found\", Ложь);"
@@ -160,11 +175,11 @@ def inspect_dialog(bridge_url: str, marker: str) -> dict:
         "РезультатВыполнения.Вставить(\"dialog\", Строка(Выборка.Ссылка));"
         "РезультатВыполнения.logHasPrompt = СтрНайти(Лог, " + bsl_string(marker) + ") > 0;"
         "РезультатВыполнения.logHasRecognitionPrompt = СтрНайти(Лог, \"РЕЖИМ: РАСПОЗНАВАНИЕ ДОКУМЕНТОВ\") > 0;"
-        "РезультатВыполнения.logHasSkill = СтрНайти(Лог, \"recognize-supplier-invoice\") > 0;"
-        "РезультатВыполнения.logHasAttachment = СтрНайти(Лог, \"supplier_invoice_e2e.png\") > 0;"
-        "РезультатВыполнения.logHasTarget = СтрНайти(Лог, \"target_object_name=СчетНаОплатуПоставщика\") > 0;"
+        "РезультатВыполнения.logHasSkill = СтрНайти(Лог, " + bsl_string(expected_skill) + ") > 0;"
+        "РезультатВыполнения.logHasAttachment = СтрНайти(Лог, " + bsl_string(expected_file_name) + ") > 0;"
+        "РезультатВыполнения.logHasTarget = СтрНайти(Лог, " + bsl_string("target_object_name=" + expected_target) + ") > 0;"
         "РезультатВыполнения.logHasDslTemplate = СтрНайти(Лог, \"DSL_TEMPLATE_JSON\") > 0;"
-        "Позиция = СтрНайти(Лог, \"recognize-supplier-invoice\");"
+        "Позиция = СтрНайти(Лог, " + bsl_string(expected_skill) + ");"
         "Если Позиция > 0 Тогда РезультатВыполнения.Вставить(\"aroundSkill\", Сред(Лог, Макс(1, Позиция - 120), 420)); КонецЕсли;"
         "Прервать; КонецЕсли; КонецЦикла;"
     )
@@ -202,12 +217,15 @@ def run(args: argparse.Namespace) -> dict:
         result["modeSwitch"] = switch_mode(test, "РаспознаваниеДокументов")
         result["newDialogClick"] = click_label(test, "Новый диалог")
         time.sleep(2)
-        result["attachment"] = attach_image_to_latest_recognition_dialog(args.bridge_url)
+        attachment_base64, expected_file_name, _extension = read_attachment_base64(args.image_path)
+        result["attachmentBytes"] = len(base64.b64decode(attachment_base64))
+        result["attachmentMime"] = mimetypes.guess_type(expected_file_name)[0] or ""
+        result["attachment"] = attach_image_to_latest_recognition_dialog(args.bridge_url, args.image_path)
         test._session_call("Page.navigate", {"url": args.web_url.rstrip("/") + "/#e1cib/command/" + command})
         test._wait_until_text_contains("ИИ Агент", args.timeout_sec)
         time.sleep(2)
         result["promptFocus"] = focus_prompt(test)
-        prompt = marker + ": распознай счет поставщика по приложенному изображению и подготовь документ в базе"
+        prompt = marker + ": " + args.prompt
         replace_focused_text(test, prompt)
         result["sendClick"] = click_label(test, "Отправить")
         time.sleep(args.agent_wait_sec)
@@ -215,7 +233,7 @@ def run(args: argparse.Namespace) -> dict:
         result["promptVisible"] = marker in body_text
         result["bodyHead"] = body_text[:1200]
         (artifact_dir / "web_document_recognition_e2e_body.txt").write_text(body_text, encoding="utf-8")
-        result.update(inspect_dialog(args.bridge_url, marker))
+        result.update(inspect_dialog(args.bridge_url, marker, args.expected_skill, args.expected_target, expected_file_name))
         required = ["modeSwitch", "attachment", "found", "logHasPrompt", "logHasRecognitionPrompt", "logHasSkill", "logHasAttachment", "logHasTarget", "logHasDslTemplate"]
         checks = {
             "modeSwitch": bool(result.get("modeSwitch", {}).get("ok")),
@@ -247,6 +265,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--agent-wait-sec", type=int, default=35)
     parser.add_argument("--artifact-dir", default=str(REPO_ROOT / "automation" / "logs" / "document_recognition"))
     parser.add_argument("--headed", action="store_true", help="Show Chrome window for debugging. Headless is default.")
+    parser.add_argument("--image-path", default="", help="Real image/PDF path to attach. If omitted, a generated PNG is used.")
+    parser.add_argument("--prompt", default="распознай счет поставщика по приложенному изображению и подготовь документ в базе")
+    parser.add_argument("--expected-skill", default="recognize-supplier-invoice")
+    parser.add_argument("--expected-target", default="СчетНаОплатуПоставщика")
     return parser.parse_args()
 
 
