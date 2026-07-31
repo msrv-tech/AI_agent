@@ -23,6 +23,7 @@
 	Реестр.Вставить("CreateDocument", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "CreateDocument", "object_name,operation_id?", Ложь, Истина, "data.write.document", Ложь, "repeat_only_with_same_operation_id"));
 	Реестр.Вставить("CreateReference", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "CreateReference", "object_name,operation_id?", Ложь, Истина, "data.write.reference", Ложь, "repeat_only_with_same_operation_id"));
 	Реестр.Вставить("SetField", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "SetField", "field|field_name,value,operation_id?", Ложь, Истина, "data.write.reference", Ложь, "repeat_only_with_same_operation_id"));
+	Реестр.Вставить("AddTableRow", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "AddTableRow", "table|table_name,data,operation_id?", Ложь, Истина, "data.write.document", Ложь, "repeat_only_with_same_operation_id"));
 	Реестр.Вставить("Write", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "Write", "operation_id?", Ложь, Истина, "data.write.reference", Ложь, "repeat_only_with_same_operation_id"));
 	
 	Возврат Реестр;

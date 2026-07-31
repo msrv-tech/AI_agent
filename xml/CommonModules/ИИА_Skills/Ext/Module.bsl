@@ -642,7 +642,7 @@
 		85,
 		Инструкция,
 		"write",
-		"GetMetadata,GetObjectFields,CheckObjectExists,FindReferenceByName,CreateReference,CreateDocument,SetField,RunQuery,Write,ShowInfo",
+		"GetMetadata,GetObjectFields,CheckObjectExists,FindReferenceByName,CreateReference,CreateDocument,SetField,AddTableRow,RunQuery,Write,ShowInfo",
 		"PostDocument,DeleteObject",
 		"metadata_before_write,approval_before_write",
 		Истина,
@@ -1653,7 +1653,7 @@
 
 	Allowed = ?(Риск = "read",
 		"GetMetadata,GetObjectFields,CheckObjectExists,RunQuery,ShowInfo",
-		"GetMetadata,GetObjectFields,CheckObjectExists,FindReferenceByName,CreateReference,CreateDocument,SetField,RunQuery,Write,ShowInfo");
+		"GetMetadata,GetObjectFields,CheckObjectExists,FindReferenceByName,CreateReference,CreateDocument,SetField,AddTableRow,RunQuery,Write,ShowInfo");
 	RequiredChecks = Новый Массив;
 	Если Риск = "write" Тогда
 		RequiredChecks.Добавить("metadata_before_write");
@@ -1682,7 +1682,7 @@
 	Если Риск = "read" Тогда
 		Возврат "GetMetadata,GetObjectFields,CheckObjectExists,RunQuery,ShowInfo";
 	КонецЕсли;
-	Возврат "GetMetadata,GetObjectFields,CheckObjectExists,FindReferenceByName,CreateReference,CreateDocument,SetField,RunQuery,Write,ShowInfo";
+	Возврат "GetMetadata,GetObjectFields,CheckObjectExists,FindReferenceByName,CreateReference,CreateDocument,SetField,AddTableRow,RunQuery,Write,ShowInfo";
 
 КонецФункции
 
