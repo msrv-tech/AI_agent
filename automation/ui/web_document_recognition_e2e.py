@@ -76,8 +76,42 @@ def focus_mode_field(test: BrowserQuery1CTest, timeout_sec: int = 15) -> str:
     return last
 
 
+def set_visible_prompt_text(test: BrowserQuery1CTest, text: str) -> dict:
+    script = r"""
+((text)=>{
+ const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>120&&r.height>25&&r.x>-1000&&r.y>-1000&&s.display!=='none'&&s.visibility!=='hidden'};
+ const items=Array.from(document.querySelectorAll('textarea')).filter(visible)
+  .sort((a,b)=>b.getBoundingClientRect().width*b.getBoundingClientRect().height-a.getBoundingClientRect().width*a.getBoundingClientRect().height);
+ if(!items.length) return {ok:false, reason:'missing'};
+ const e=items[0];
+ e.scrollIntoView({block:'center', inline:'center'});
+ e.focus();
+ e.click();
+ e.value = text;
+ e.dispatchEvent(new InputEvent('input', {bubbles:true, inputType:'insertText', data:text}));
+ e.dispatchEvent(new Event('change', {bubbles:true}));
+ return {ok:true, tag:e.tagName, value:e.value, width:e.getBoundingClientRect().width, height:e.getBoundingClientRect().height};
+})(""" + json.dumps(text, ensure_ascii=False) + """)
+"""
+    return test._evaluate(script)
+
+
+def visible_prompt_value(test: BrowserQuery1CTest) -> str:
+    script = r"""
+(()=>{
+ const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>120&&r.height>25&&r.x>-1000&&r.y>-1000&&s.display!=='none'&&s.visibility!=='hidden'};
+ const items=Array.from(document.querySelectorAll('textarea')).filter(visible)
+  .sort((a,b)=>b.getBoundingClientRect().width*b.getBoundingClientRect().height-a.getBoundingClientRect().width*a.getBoundingClientRect().height);
+ return items.length ? (items[0].value || '') : '';
+})()
+"""
+    return str(test._evaluate(script) or "")
+
+
 def switch_mode(test: BrowserQuery1CTest, mode: str) -> dict:
     before = focus_mode_field(test)
+    if "Распознавание документов" in before:
+        return {"before": before, "after": before, "attempts": [], "ok": True}
     attempts: list[dict[str, str]] = []
     after = ""
     for value in ("Распознавание документов", mode):
@@ -109,6 +143,55 @@ def switch_mode(test: BrowserQuery1CTest, mode: str) -> dict:
 """
         )
     return {"before": before, "after": after, "attempts": attempts, "ok": "Распознавание документов" in after}
+
+
+def create_recognition_dialog(bridge_url: str) -> dict:
+    code = (
+        "Ссылка = ИИА_Сервер.СоздатьНовыйДиалог(ИИА_Сервер.ИмяТекущегоПользователя(), Перечисления.ИИА_ТипДиалога.РаспознаваниеДокументов);"
+        "РезультатВыполнения = Новый Структура(\"created,dialog\", Истина, Строка(Ссылка));"
+    )
+    return bridge_execute(bridge_url, code)
+
+
+def activate_agent_tab(test: BrowserQuery1CTest, timeout_sec: int = 30) -> bool:
+    script = r"""
+(()=> {
+ const visible = (el) => {
+   const r = el.getBoundingClientRect();
+   const s = getComputedStyle(el);
+   return r.width > 10 && r.height > 8 && r.x > -1000 && r.y > -1000 && s.display !== 'none' && s.visibility !== 'hidden';
+ };
+ let tabs = Array.from(document.querySelectorAll('.openedItem, .openlistItem')).filter(visible);
+ let candidate = tabs.reverse().find((el) => {
+   const text = (el.innerText || el.title || '').trim();
+   return /Диалог ИИ|ИИ Агент|Агент ИИ/.test(text);
+ });
+ if (!candidate) {
+   const all = Array.from(document.querySelectorAll('div, span, a, button')).filter(visible)
+     .map((el) => {
+       const r = el.getBoundingClientRect();
+       return {el, text:(el.innerText || el.title || '').trim(), area:r.width*r.height, y:r.y};
+     })
+     .filter((x) => /: Агент$|: Агент\s|Диалог ИИ.*Агент/.test(x.text))
+     .sort((a,b) => a.area - b.area || a.y - b.y);
+   candidate = all.length ? all[0].el : null;
+ }
+ if (!candidate) return 'missing';
+ ['pointerdown','mousedown','mouseup','click'].forEach((type) => {
+   candidate.dispatchEvent(new MouseEvent(type, {bubbles:true, cancelable:true, view:window, buttons:1}));
+ });
+ return candidate.innerText || candidate.title || 'clicked';
+})()
+"""
+    deadline = time.time() + timeout_sec
+    while time.time() < deadline:
+        clicked = test._evaluate(script)
+        time.sleep(1)
+        if test._agent_form_visible():
+            return True
+        if clicked == "missing":
+            time.sleep(1)
+    return False
 
 
 def read_attachment_base64(image_path: str) -> tuple[str, str, str]:
@@ -145,6 +228,36 @@ def attach_image_to_latest_recognition_dialog(bridge_url: str, image_path: str) 
         "КонецЕсли;"
     )
     return bridge_execute(bridge_url, code)
+
+
+def wait_for_agent_state(test: BrowserQuery1CTest, timeout_sec: int, auto_confirm: bool = False) -> dict:
+    deadline = time.time() + timeout_sec
+    result: dict[str, object] = {"confirmed": False, "state": "timeout", "samples": []}
+    last_sample = ""
+    while time.time() < deadline:
+        if not test._agent_form_visible():
+            activate_agent_tab(test, 3)
+        body_text = test._safe_body_text()
+        sample = body_text[:1200]
+        if sample != last_sample:
+            result["samples"].append(sample[:300])
+            last_sample = sample
+        if auto_confirm and "Подтверд" in body_text:
+            result["confirmClick"] = click_label(test, "Подтвердить")
+            result["confirmed"] = True
+            time.sleep(1)
+            continue
+        if "Задача выполнена успешно" in body_text or "Создан черновик документа" in body_text:
+            result["state"] = "success"
+            result["bodyText"] = body_text
+            return result
+        if "Задача завершена с ошибкой" in body_text or "Не удалось надежно распознать" in body_text:
+            result["state"] = "error"
+            result["bodyText"] = body_text
+            return result
+        time.sleep(2)
+    result["bodyText"] = test._safe_body_text()
+    return result
 
 
 def inspect_dialog(bridge_url: str, marker: str, expected_skill: str, expected_target: str, expected_file_name: str) -> dict:
@@ -229,28 +342,47 @@ def run(args: argparse.Namespace) -> dict:
         test._open_initial_target()
         result["fontDialogClosed"] = close_font_dialog()
         command = urllib.parse.quote("CommonCommand.ИИА_Агент", safe=".")
-        test._session_call("Page.navigate", {"url": args.web_url.rstrip("/") + "/#e1cib/command/" + command})
-        test._wait_until_text_contains("ИИ Агент", args.timeout_sec)
+        test._open_agent_command()
+        result["agentTabActivated"] = activate_agent_tab(test, 30)
+        test.logger.info(f"Вкладка агента активирована: {result['agentTabActivated']}")
         result["modeSwitch"] = switch_mode(test, "РаспознаваниеДокументов")
+        test.logger.info(f"Переключение режима: {result['modeSwitch']}")
         result["newDialogClick"] = click_label(test, "Новый диалог")
+        test.logger.info(f"Новый диалог: {result['newDialogClick']}")
+        time.sleep(2)
+        result["dialogFallback"] = create_recognition_dialog(args.bridge_url)
+        test.logger.info(f"Чистый диалог создан через bridge: {result['dialogFallback']}")
+        test._session_call("Page.navigate", {"url": args.web_url.rstrip("/") + "/#e1cib/command/" + command})
+        if not test._wait_for_agent_form(20):
+            test._open_agent_command()
+        result["agentTabActivatedAfterDialogFallback"] = activate_agent_tab(test, 30)
         time.sleep(2)
         attachment_base64, expected_file_name, _extension = read_attachment_base64(args.image_path)
         result["attachmentBytes"] = len(base64.b64decode(attachment_base64))
         result["attachmentMime"] = mimetypes.guess_type(expected_file_name)[0] or ""
         result["attachment"] = attach_image_to_latest_recognition_dialog(args.bridge_url, args.image_path)
+        test.logger.info(f"Вложение добавлено: {result['attachment']}")
         test._session_call("Page.navigate", {"url": args.web_url.rstrip("/") + "/#e1cib/command/" + command})
-        test._wait_until_text_contains("ИИ Агент", args.timeout_sec)
+        if not test._wait_for_agent_form(20):
+            test._open_agent_command()
+        result["agentTabActivatedAfterAttach"] = activate_agent_tab(test, 30)
+        test.logger.info(f"Вкладка агента активирована после вложения: {result['agentTabActivatedAfterAttach']}")
         time.sleep(2)
         result["promptFocus"] = focus_prompt(test)
+        test.logger.info(f"Фокус поля запроса: {result['promptFocus']}")
         prompt = marker + ": " + args.prompt
         replace_focused_text(test, prompt)
+        result["promptValueAfterInsert"] = visible_prompt_value(test)
+        if marker not in str(result["promptValueAfterInsert"]):
+            result["promptDomSet"] = set_visible_prompt_text(test, prompt)
+            result["promptValueAfterDomSet"] = visible_prompt_value(test)
+            test.logger.info(f"DOM-ввод запроса: {result.get('promptDomSet')}")
         result["sendClick"] = click_label(test, "Отправить")
-        time.sleep(args.agent_wait_sec)
-        body_text = test._safe_body_text()
-        if args.auto_confirm and "Подтверд" in body_text:
-            result["confirmClick"] = click_label(test, "Подтвердить")
-            time.sleep(args.agent_wait_sec)
-        body_text = test._safe_body_text()
+        test.logger.info(f"Отправка запроса: {result['sendClick']}")
+        wait_state = wait_for_agent_state(test, args.agent_wait_sec, args.auto_confirm)
+        result["waitState"] = wait_state
+        test.logger.info(f"Ожидание агента: {wait_state.get('state')}, подтверждение={wait_state.get('confirmed')}")
+        body_text = str(wait_state.get("bodyText") or test._safe_body_text())
         result["promptVisible"] = marker in body_text
         result["bodyHead"] = body_text[:1200]
         (artifact_dir / "web_document_recognition_e2e_body.txt").write_text(body_text, encoding="utf-8")

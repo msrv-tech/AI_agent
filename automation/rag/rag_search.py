@@ -20,6 +20,9 @@ import json
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 if _script_dir not in sys.path:
     sys.path.insert(0, _script_dir)
+_automation_dir = os.path.dirname(_script_dir)
+if _automation_dir not in sys.path:
+    sys.path.insert(0, _automation_dir)
 
 from com_1c import connect_to_1c, call_procedure
 from com_1c.com_connector import setup_console_encoding

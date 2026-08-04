@@ -171,6 +171,10 @@ def click_label(test: BrowserQuery1CTest, label: str) -> str:
  }
  let candidates=Array.from(document.querySelectorAll('*')).filter(e=>visible(e)&&(e.innerText||e.getAttribute('aria-label')||e.getAttribute('title')||e.value||'').trim()===label)
   .map(e=>{const r=e.getBoundingClientRect();return {e:e, area:r.width*r.height};}).sort((a,b)=>a.area-b.area);
+ if(!candidates.length) {
+  candidates=Array.from(document.querySelectorAll('button, a, div, span, input')).filter(e=>visible(e)&&(e.innerText||e.getAttribute('aria-label')||e.getAttribute('title')||e.value||'').includes(label))
+   .map(e=>{const r=e.getBoundingClientRect();return {e:e, area:r.width*r.height};}).sort((a,b)=>a.area-b.area);
+ }
  if(!candidates.length) return 'missing';
  fire(candidates[0].e);
  return 'clicked';

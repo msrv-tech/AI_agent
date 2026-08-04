@@ -352,11 +352,32 @@ class BrowserQuery1CTest:
                 raise RuntimeError(
                     "Веб-клиент не смог открыть команду ИИ Агент: закончились свободные лицензии 1С."
                 )
-            if "Текущий диалог" in text or "Открыть форму запроса 1С" in text:
+            if self._agent_form_visible():
                 self.logger.info("Форма ИИ Агент открыта в web-client.")
                 return True
             time.sleep(3)
         return False
+
+    def _agent_form_visible(self) -> bool:
+        js = """
+(() => {
+  const visible = (el) => {
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    const s = window.getComputedStyle(el);
+    return r.width > 20 && r.height > 10 && r.x > -1000 && r.y > -1000
+      && s.display !== 'none' && s.visibility !== 'hidden' && s.opacity !== '0';
+  };
+  const textVisible = (pattern) => Array.from(document.querySelectorAll('button, a, div, span, input, textarea'))
+    .some((el) => visible(el) && pattern.test((el.innerText || el.value || el.title || '').trim()));
+  const hasPrompt = Array.from(document.querySelectorAll('textarea, input'))
+    .some((el) => visible(el) && el.getBoundingClientRect().width > 200 && el.getBoundingClientRect().height > 30);
+  return (textVisible(/Отправить/) && hasPrompt)
+    || (textVisible(/Прикрепить файл/) && textVisible(/Текущий диалог/))
+    || textVisible(/Открыть форму запроса 1С/);
+})()
+"""
+        return bool(self._evaluate(js))
 
     def _click_agent_theme_item(self) -> bool:
         js = """
