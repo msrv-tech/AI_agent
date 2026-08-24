@@ -8,6 +8,7 @@
 	<Events>
 		<Event name="OnOpen">ПриОткрытии</Event>
 		<Event name="OnCreateAtServer">ПриСозданииНаСервере</Event>
+		<Event name="OnActivate">ПриАктивизации</Event>
 	</Events>
 	<ChildItems>
 		<UsualGroup name="ГруппаШапка" id="86">
@@ -76,7 +77,7 @@
 								</v8:item>
 							</Title>
 							<TitleLocation>None</TitleLocation>
-							<Hiperlink>true</Hiperlink>
+							<Hyperlink>true</Hyperlink>
 							<ContextMenu name="ЛогСсылкаКонтекстноеМеню" id="132"/>
 							<ExtendedTooltip name="ЛогСсылкаРасширеннаяПодсказка" id="131"/>
 								<Events>
@@ -177,6 +178,9 @@
 											<HorizontalStretch>true</HorizontalStretch>
 											<ContextMenu name="ТекущийТипСообщенияКонтекстноеМеню" id="45"/>
 											<ExtendedTooltip name="ТекущийТипСообщенияРасширеннаяПодсказка" id="46"/>
+											<Events>
+												<Event name="OnChange">ТекущийТипСообщенияПриИзменении</Event>
+											</Events>
 										</InputField>
 										<Button name="Отправить" id="49">
 											<Type>UsualButton</Type>
@@ -232,7 +236,7 @@
 													<v8:content>Группа ссылки подтверждения</v8:content>
 												</v8:item>
 											</Title>
-											<Group>AlwaysHorizontal</Group>
+											<Group>Vertical</Group>
 											<Representation>None</Representation>
 											<ShowTitle>false</ShowTitle>
 											<ExtendedTooltip name="ГруппаСсылкиПодтвержденияРасширеннаяПодсказка" id="308"/>
@@ -308,6 +312,90 @@
 							<ContextMenu name="Декорация1КонтекстноеМеню" id="145"/>
 							<ExtendedTooltip name="Декорация1РасширеннаяПодсказка" id="146"/>
 						</LabelDecoration>
+						<InputField name="ФинальныйРезультатПоле" id="520">
+							<DataPath>ФинальныйРезультат</DataPath>
+							<Visible>false</Visible>
+							<ReadOnly>true</ReadOnly>
+							<TitleLocation>None</TitleLocation>
+							<EditMode>EnterOnInput</EditMode>
+							<AutoEditMode>true</AutoEditMode>
+							<MultiLine>true</MultiLine>
+							<Height>8</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ФинальныйРезультатПолеКонтекстноеМеню" id="521"/>
+							<ExtendedTooltip name="ФинальныйРезультатПолеРасширеннаяПодсказка" id="522"/>
+						</InputField>
+						<LabelField name="ФинальныйИзмененныйОбъектСсылка1" id="530">
+							<DataPath>ИзмененныйОбъектТекст1</DataPath>
+							<Visible>false</Visible>
+							<TitleLocation>None</TitleLocation>
+							<Hiperlink>true</Hiperlink>
+							<Height>2</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ФинальныйИзмененныйОбъектСсылка1КонтекстноеМеню" id="531"/>
+							<ExtendedTooltip name="ФинальныйИзмененныйОбъектСсылка1РасширеннаяПодсказка" id="532"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектНажатие</Event>
+							</Events>
+						</LabelField>
+						<LabelField name="ФинальныйИзмененныйОбъектСсылка2" id="533">
+							<DataPath>ИзмененныйОбъектТекст2</DataPath>
+							<Visible>false</Visible>
+							<TitleLocation>None</TitleLocation>
+							<Hiperlink>true</Hiperlink>
+							<Height>2</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ФинальныйИзмененныйОбъектСсылка2КонтекстноеМеню" id="534"/>
+							<ExtendedTooltip name="ФинальныйИзмененныйОбъектСсылка2РасширеннаяПодсказка" id="535"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектНажатие</Event>
+							</Events>
+						</LabelField>
+						<LabelField name="ФинальныйИзмененныйОбъектСсылка3" id="536">
+							<DataPath>ИзмененныйОбъектТекст3</DataPath>
+							<Visible>false</Visible>
+							<TitleLocation>None</TitleLocation>
+							<Hiperlink>true</Hiperlink>
+							<Height>2</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ФинальныйИзмененныйОбъектСсылка3КонтекстноеМеню" id="537"/>
+							<ExtendedTooltip name="ФинальныйИзмененныйОбъектСсылка3РасширеннаяПодсказка" id="538"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектНажатие</Event>
+							</Events>
+						</LabelField>
+						<LabelField name="ФинальныйИзмененныйОбъектСсылка4" id="539">
+							<DataPath>ИзмененныйОбъектТекст4</DataPath>
+							<Visible>false</Visible>
+							<TitleLocation>None</TitleLocation>
+							<Hiperlink>true</Hiperlink>
+							<Height>2</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ФинальныйИзмененныйОбъектСсылка4КонтекстноеМеню" id="540"/>
+							<ExtendedTooltip name="ФинальныйИзмененныйОбъектСсылка4РасширеннаяПодсказка" id="541"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектНажатие</Event>
+							</Events>
+						</LabelField>
+						<LabelField name="ФинальныйИзмененныйОбъектСсылка5" id="542">
+							<DataPath>ИзмененныйОбъектТекст5</DataPath>
+							<Visible>false</Visible>
+							<TitleLocation>None</TitleLocation>
+							<Hiperlink>true</Hiperlink>
+							<Height>2</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ФинальныйИзмененныйОбъектСсылка5КонтекстноеМеню" id="543"/>
+							<ExtendedTooltip name="ФинальныйИзмененныйОбъектСсылка5РасширеннаяПодсказка" id="544"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектНажатие</Event>
+							</Events>
+						</LabelField>
 					</ChildItems>
 				</UsualGroup>
 				<UsualGroup name="ГруппаПлан" id="134">
@@ -326,12 +414,113 @@
 					<ShowTitle>true</ShowTitle>
 					<ExtendedTooltip name="ГруппаПланРасширеннаяПодсказка" id="135"/>
 					<ChildItems>
+						<LabelDecoration name="ЗаголовокСсылкиНаОбъектыПравая" id="500">
+							<Visible>false</Visible>
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content>Созданные/измененные объекты</v8:content>
+								</v8:item>
+							</Title>
+							<ContextMenu name="ЗаголовокСсылкиНаОбъектыПраваяКонтекстноеМеню" id="501"/>
+							<ExtendedTooltip name="ЗаголовокСсылкиНаОбъектыПраваяРасширеннаяПодсказка" id="502"/>
+						</LabelDecoration>
+						<LabelDecoration name="ИзмененныйОбъектСсылкаПравая1" id="503">
+							<Visible>false</Visible>
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content/>
+								</v8:item>
+							</Title>
+							<Hyperlink>true</Hyperlink>
+							<Height>1</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ИзмененныйОбъектСсылкаПравая1КонтекстноеМеню" id="504"/>
+							<ExtendedTooltip name="ИзмененныйОбъектСсылкаПравая1РасширеннаяПодсказка" id="505"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектПравая1Нажатие</Event>
+							</Events>
+						</LabelDecoration>
+						<LabelDecoration name="ИзмененныйОбъектСсылкаПравая2" id="506">
+							<Visible>false</Visible>
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content/>
+								</v8:item>
+							</Title>
+							<Hyperlink>true</Hyperlink>
+							<Height>1</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ИзмененныйОбъектСсылкаПравая2КонтекстноеМеню" id="507"/>
+							<ExtendedTooltip name="ИзмененныйОбъектСсылкаПравая2РасширеннаяПодсказка" id="508"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектПравая2Нажатие</Event>
+							</Events>
+						</LabelDecoration>
+						<LabelDecoration name="ИзмененныйОбъектСсылкаПравая3" id="509">
+							<Visible>false</Visible>
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content/>
+								</v8:item>
+							</Title>
+							<Hyperlink>true</Hyperlink>
+							<Height>1</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ИзмененныйОбъектСсылкаПравая3КонтекстноеМеню" id="510"/>
+							<ExtendedTooltip name="ИзмененныйОбъектСсылкаПравая3РасширеннаяПодсказка" id="511"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектПравая3Нажатие</Event>
+							</Events>
+						</LabelDecoration>
+						<LabelDecoration name="ИзмененныйОбъектСсылкаПравая4" id="512">
+							<Visible>false</Visible>
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content/>
+								</v8:item>
+							</Title>
+							<Hyperlink>true</Hyperlink>
+							<Height>1</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ИзмененныйОбъектСсылкаПравая4КонтекстноеМеню" id="513"/>
+							<ExtendedTooltip name="ИзмененныйОбъектСсылкаПравая4РасширеннаяПодсказка" id="514"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектПравая4Нажатие</Event>
+							</Events>
+						</LabelDecoration>
+						<LabelDecoration name="ИзмененныйОбъектСсылкаПравая5" id="515">
+							<Visible>false</Visible>
+							<Title formatted="false">
+								<v8:item>
+									<v8:lang/>
+									<v8:content/>
+								</v8:item>
+							</Title>
+							<Hyperlink>true</Hyperlink>
+							<Height>1</Height>
+							<AutoMaxHeight>false</AutoMaxHeight>
+							<HorizontalStretch>true</HorizontalStretch>
+							<ContextMenu name="ИзмененныйОбъектСсылкаПравая5КонтекстноеМеню" id="516"/>
+							<ExtendedTooltip name="ИзмененныйОбъектСсылкаПравая5РасширеннаяПодсказка" id="517"/>
+							<Events>
+								<Event name="Click">ИзмененныйОбъектПравая5Нажатие</Event>
+							</Events>
+						</LabelDecoration>
 						<Table name="ПланЗадач" id="133">
 							<Representation>List</Representation>
 							<CommandBarLocation>None</CommandBarLocation>
 							<AutoMaxWidth>false</AutoMaxWidth>
 							<MaxWidth>40</MaxWidth>
-							<Height>12</Height>
+							<Height>5</Height>
 							<AutoMaxHeight>false</AutoMaxHeight>
 							<RowSelectionMode>Cell</RowSelectionMode>
 							<AutoInsertNewRow>false</AutoInsertNewRow>
@@ -433,27 +622,179 @@
 							<Title>
 								<v8:item>
 									<v8:lang/>
-									<v8:content>Группа ссылок на объекты</v8:content>
+									<v8:content>Созданные/измененные объекты</v8:content>
 								</v8:item>
 							</Title>
-							<MaxWidth>40</MaxWidth>
-							<Height>8</Height>
-							<AutoMaxHeight>false</AutoMaxHeight>
+							<AutoMaxHeight>true</AutoMaxHeight>
 							<Group>Vertical</Group>
-							<Representation>None</Representation>
-							<ShowTitle>false</ShowTitle>
-							<Visible>false</Visible>
+							<Representation>StrongSeparation</Representation>
+							<ShowTitle>true</ShowTitle>
 							<ExtendedTooltip name="ГруппаСсылкиНаОбъектыРасширеннаяПодсказка" id="172"/>
 							<ChildItems>
 								<LabelDecoration name="ЗаголовокСсылкиНаОбъекты" id="173">
 									<Title formatted="false">
 										<v8:item>
 											<v8:lang/>
-											<v8:content>Ссылки на объекты</v8:content>
+											<v8:content>Созданные/измененные объекты</v8:content>
 										</v8:item>
 									</Title>
 									<ContextMenu name="ЗаголовокСсылкиНаОбъектыКонтекстноеМеню" id="174"/>
 									<ExtendedTooltip name="ЗаголовокСсылкиНаОбъектыРасширеннаяПодсказка" id="175"/>
+								</LabelDecoration>
+								<Table name="ИзмененныеОбъектыСписок" id="388">
+									<Representation>List</Representation>
+									<CommandBarLocation>None</CommandBarLocation>
+									<Visible>false</Visible>
+									<Height>4</Height>
+									<AutoMaxHeight>false</AutoMaxHeight>
+									<RowSelectionMode>Cell</RowSelectionMode>
+									<AutoInsertNewRow>false</AutoInsertNewRow>
+									<VerticalStretch>false</VerticalStretch>
+									<HorizontalStretch>true</HorizontalStretch>
+									<DataPath>ИзмененныеОбъекты</DataPath>
+									<CommandSet>
+										<ExcludedCommand>Add</ExcludedCommand>
+										<ExcludedCommand>CancelSearch</ExcludedCommand>
+										<ExcludedCommand>Change</ExcludedCommand>
+										<ExcludedCommand>Copy</ExcludedCommand>
+										<ExcludedCommand>CopyToClipboard</ExcludedCommand>
+										<ExcludedCommand>Delete</ExcludedCommand>
+										<ExcludedCommand>EndEdit</ExcludedCommand>
+										<ExcludedCommand>Find</ExcludedCommand>
+										<ExcludedCommand>FindByCurrentValue</ExcludedCommand>
+										<ExcludedCommand>MoveDown</ExcludedCommand>
+										<ExcludedCommand>MoveUp</ExcludedCommand>
+										<ExcludedCommand>OutputList</ExcludedCommand>
+										<ExcludedCommand>SearchEverywhere</ExcludedCommand>
+										<ExcludedCommand>SearchHistory</ExcludedCommand>
+										<ExcludedCommand>SelectAll</ExcludedCommand>
+										<ExcludedCommand>ShowMultipleSelection</ExcludedCommand>
+										<ExcludedCommand>ShowRowRearrangement</ExcludedCommand>
+										<ExcludedCommand>SortListAsc</ExcludedCommand>
+										<ExcludedCommand>SortListDesc</ExcludedCommand>
+									</CommandSet>
+									<RowFilter xsi:nil="true"/>
+									<ContextMenu name="ИзмененныеОбъектыСписокКонтекстноеМеню" id="389"/>
+									<AutoCommandBar name="ИзмененныеОбъектыСписокКоманднаяПанель" id="390"/>
+									<ExtendedTooltip name="ИзмененныеОбъектыСписокРасширеннаяПодсказка" id="391"/>
+									<Events>
+										<Event name="OnActivateRow">ИзмененныеОбъектыСписокПриАктивизацииСтроки</Event>
+									</Events>
+									<ChildItems>
+										<InputField name="ИзмененныеОбъектыСсылкаНаОбъект" id="392">
+											<DataPath>ИзмененныеОбъекты.СсылкаНаОбъект</DataPath>
+											<ReadOnly>true</ReadOnly>
+											<EditMode>EnterOnInput</EditMode>
+											<AutoEditMode>true</AutoEditMode>
+											<HorizontalStretch>true</HorizontalStretch>
+											<ContextMenu name="ИзмененныеОбъектыСсылкаНаОбъектКонтекстноеМеню" id="393"/>
+											<ExtendedTooltip name="ИзмененныеОбъектыСсылкаНаОбъектРасширеннаяПодсказка" id="394"/>
+										</InputField>
+									</ChildItems>
+								</Table>
+								<InputField name="ИзмененныеОбъектыТекстПоле" id="385">
+									<DataPath>ИзмененныеОбъектыТекст</DataPath>
+									<Visible>false</Visible>
+									<ReadOnly>true</ReadOnly>
+									<TitleLocation>None</TitleLocation>
+									<EditMode>EnterOnInput</EditMode>
+									<AutoEditMode>true</AutoEditMode>
+									<MultiLine>true</MultiLine>
+									<Height>4</Height>
+									<AutoMaxHeight>false</AutoMaxHeight>
+									<HorizontalStretch>true</HorizontalStretch>
+									<ContextMenu name="ИзмененныеОбъектыТекстПолеКонтекстноеМеню" id="386"/>
+									<ExtendedTooltip name="ИзмененныеОбъектыТекстПолеРасширеннаяПодсказка" id="387"/>
+								</InputField>
+								<LabelDecoration name="ИзмененныйОбъектТекст1" id="365">
+									<Visible>false</Visible>
+									<Title formatted="false">
+										<v8:item>
+											<v8:lang/>
+											<v8:content/>
+										</v8:item>
+									</Title>
+									<Hyperlink>true</Hyperlink>
+									<Height>2</Height>
+									<AutoMaxHeight>false</AutoMaxHeight>
+									<HorizontalStretch>true</HorizontalStretch>
+									<ContextMenu name="ИзмененныйОбъектТекст1КонтекстноеМеню" id="366"/>
+									<ExtendedTooltip name="ИзмененныйОбъектТекст1РасширеннаяПодсказка" id="367"/>
+									<Events>
+										<Event name="Click">ИзмененныйОбъектНажатие</Event>
+									</Events>
+								</LabelDecoration>
+								<LabelDecoration name="ИзмененныйОбъектТекст2" id="368">
+									<Visible>false</Visible>
+									<Title formatted="false">
+										<v8:item>
+											<v8:lang/>
+											<v8:content/>
+										</v8:item>
+									</Title>
+									<Hyperlink>true</Hyperlink>
+									<Height>2</Height>
+									<AutoMaxHeight>false</AutoMaxHeight>
+									<HorizontalStretch>true</HorizontalStretch>
+									<ContextMenu name="ИзмененныйОбъектТекст2КонтекстноеМеню" id="369"/>
+									<ExtendedTooltip name="ИзмененныйОбъектТекст2РасширеннаяПодсказка" id="370"/>
+									<Events>
+										<Event name="Click">ИзмененныйОбъектНажатие</Event>
+									</Events>
+								</LabelDecoration>
+								<LabelDecoration name="ИзмененныйОбъектТекст3" id="371">
+									<Visible>false</Visible>
+									<Title formatted="false">
+										<v8:item>
+											<v8:lang/>
+											<v8:content/>
+										</v8:item>
+									</Title>
+									<Hyperlink>true</Hyperlink>
+									<Height>2</Height>
+									<AutoMaxHeight>false</AutoMaxHeight>
+									<HorizontalStretch>true</HorizontalStretch>
+									<ContextMenu name="ИзмененныйОбъектТекст3КонтекстноеМеню" id="372"/>
+									<ExtendedTooltip name="ИзмененныйОбъектТекст3РасширеннаяПодсказка" id="373"/>
+									<Events>
+										<Event name="Click">ИзмененныйОбъектНажатие</Event>
+									</Events>
+								</LabelDecoration>
+								<LabelDecoration name="ИзмененныйОбъектТекст4" id="374">
+									<Visible>false</Visible>
+									<Title formatted="false">
+										<v8:item>
+											<v8:lang/>
+											<v8:content/>
+										</v8:item>
+									</Title>
+									<Hyperlink>true</Hyperlink>
+									<Height>2</Height>
+									<AutoMaxHeight>false</AutoMaxHeight>
+									<HorizontalStretch>true</HorizontalStretch>
+									<ContextMenu name="ИзмененныйОбъектТекст4КонтекстноеМеню" id="375"/>
+									<ExtendedTooltip name="ИзмененныйОбъектТекст4РасширеннаяПодсказка" id="376"/>
+									<Events>
+										<Event name="Click">ИзмененныйОбъектНажатие</Event>
+									</Events>
+								</LabelDecoration>
+								<LabelDecoration name="ИзмененныйОбъектТекст5" id="377">
+									<Visible>false</Visible>
+									<Title formatted="false">
+										<v8:item>
+											<v8:lang/>
+											<v8:content/>
+										</v8:item>
+									</Title>
+									<Hyperlink>true</Hyperlink>
+									<Height>2</Height>
+									<AutoMaxHeight>false</AutoMaxHeight>
+									<HorizontalStretch>true</HorizontalStretch>
+									<ContextMenu name="ИзмененныйОбъектТекст5КонтекстноеМеню" id="378"/>
+									<ExtendedTooltip name="ИзмененныйОбъектТекст5РасширеннаяПодсказка" id="379"/>
+									<Events>
+										<Event name="Click">ИзмененныйОбъектНажатие</Event>
+									</Events>
 								</LabelDecoration>
 							</ChildItems>
 						</UsualGroup>
@@ -512,6 +853,21 @@
 				<v8:item>
 					<v8:lang>ru</v8:lang>
 					<v8:content>Текущий текст</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ФинальныйРезультат" id="523">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Финальный результат</v8:content>
 				</v8:item>
 			</Title>
 			<Type>
@@ -635,6 +991,171 @@
 					</Type>
 				</Column>
 			</Columns>
+		</Attribute>
+		<Attribute name="ИзмененныеОбъектыТекст" id="340">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененные объекты текст</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъект1" id="360">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект 1</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:TypeSet>cfg:AnyIBRef</v8:TypeSet>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъект2" id="361">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект 2</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:TypeSet>cfg:AnyIBRef</v8:TypeSet>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъект3" id="362">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект 3</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:TypeSet>cfg:AnyIBRef</v8:TypeSet>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъект4" id="363">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект 4</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:TypeSet>cfg:AnyIBRef</v8:TypeSet>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъект5" id="364">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект 5</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:TypeSet>cfg:AnyIBRef</v8:TypeSet>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектТекст1" id="380">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект текст 1</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектТекст2" id="381">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект текст 2</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектТекст3" id="382">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект текст 3</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектТекст4" id="383">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект текст 4</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектТекст5" id="384">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Измененный объект текст 5</v8:content>
+				</v8:item>
+			</Title>
+			<Type>
+				<v8:Type>xs:string</v8:Type>
+				<v8:StringQualifiers>
+					<v8:Length>0</v8:Length>
+					<v8:AllowedLength>Variable</v8:AllowedLength>
+				</v8:StringQualifiers>
+			</Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектНав1" id="395">
+			<Title><v8:item><v8:lang>ru</v8:lang><v8:content>Измененный объект нав 1</v8:content></v8:item></Title>
+			<Type><v8:Type>xs:string</v8:Type><v8:StringQualifiers><v8:Length>0</v8:Length><v8:AllowedLength>Variable</v8:AllowedLength></v8:StringQualifiers></Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектНав2" id="396">
+			<Title><v8:item><v8:lang>ru</v8:lang><v8:content>Измененный объект нав 2</v8:content></v8:item></Title>
+			<Type><v8:Type>xs:string</v8:Type><v8:StringQualifiers><v8:Length>0</v8:Length><v8:AllowedLength>Variable</v8:AllowedLength></v8:StringQualifiers></Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектНав3" id="397">
+			<Title><v8:item><v8:lang>ru</v8:lang><v8:content>Измененный объект нав 3</v8:content></v8:item></Title>
+			<Type><v8:Type>xs:string</v8:Type><v8:StringQualifiers><v8:Length>0</v8:Length><v8:AllowedLength>Variable</v8:AllowedLength></v8:StringQualifiers></Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектНав4" id="398">
+			<Title><v8:item><v8:lang>ru</v8:lang><v8:content>Измененный объект нав 4</v8:content></v8:item></Title>
+			<Type><v8:Type>xs:string</v8:Type><v8:StringQualifiers><v8:Length>0</v8:Length><v8:AllowedLength>Variable</v8:AllowedLength></v8:StringQualifiers></Type>
+		</Attribute>
+		<Attribute name="ИзмененныйОбъектНав5" id="399">
+			<Title><v8:item><v8:lang>ru</v8:lang><v8:content>Измененный объект нав 5</v8:content></v8:item></Title>
+			<Type><v8:Type>xs:string</v8:Type><v8:StringQualifiers><v8:Length>0</v8:Length><v8:AllowedLength>Variable</v8:AllowedLength></v8:StringQualifiers></Type>
 		</Attribute>
 		<Attribute name="ОркестраторРаботает" id="22">
 			<Title>
@@ -857,6 +1378,51 @@
 				</v8:item>
 			</Title>
 			<Action>БезПодтверждения</Action>
+		</Command>
+		<Command name="ОткрытьИзмененныйОбъект1" id="11">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Открыть объект</v8:content>
+				</v8:item>
+			</Title>
+			<Action>ОткрытьИзмененныйОбъект1</Action>
+		</Command>
+		<Command name="ОткрытьИзмененныйОбъект2" id="12">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Открыть объект</v8:content>
+				</v8:item>
+			</Title>
+			<Action>ОткрытьИзмененныйОбъект2</Action>
+		</Command>
+		<Command name="ОткрытьИзмененныйОбъект3" id="13">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Открыть объект</v8:content>
+				</v8:item>
+			</Title>
+			<Action>ОткрытьИзмененныйОбъект3</Action>
+		</Command>
+		<Command name="ОткрытьИзмененныйОбъект4" id="14">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Открыть объект</v8:content>
+				</v8:item>
+			</Title>
+			<Action>ОткрытьИзмененныйОбъект4</Action>
+		</Command>
+		<Command name="ОткрытьИзмененныйОбъект5" id="15">
+			<Title>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>Открыть объект</v8:content>
+				</v8:item>
+			</Title>
+			<Action>ОткрытьИзмененныйОбъект5</Action>
 		</Command>
 	</Commands>
 </Form>

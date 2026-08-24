@@ -40,6 +40,8 @@
 		<Metadata name="CommonForm.ИИА_Запрос1С.Form" id="4f6e0b44-8f1e-4b16-a5a6-7d34e9f9f001.0" configVersion="4f6e0b448f1e4b16a5a67d34e9f9f00201234567"/>
 		<Metadata name="CommonForm.ИИА_Настройки" id="c9081d8a-6686-40b4-b323-f19f929da5b8" configVersion="77b3957eb7efed66d7f2a1f8c26f652e16e70197"/>
 		<Metadata name="CommonForm.ИИА_Настройки.Form" id="c9081d8a-6686-40b4-b323-f19f929da5b8.0" configVersion="174279a26cc3d756ad21e7b8fbb7d6c901254524"/>
+		<Metadata name="CommonForm.ИИА_ПодтверждениеДействия" id="835862dd-9cf5-48a5-9177-37bb8d16b4fd" configVersion="835862dd9cf548a5917737bb8d16b4fd00000001"/>
+		<Metadata name="CommonForm.ИИА_ПодтверждениеДействия.Form" id="835862dd-9cf5-48a5-9177-37bb8d16b4fd.0" configVersion="835862dd9cf548a5917737bb8d16b4fd00000002"/>
 		<Metadata name="CommonForm.ИИА_РегистрацияGitsell" id="ebf1702d-1f39-4f95-8832-232f37f32691" configVersion="b35a3619ca24f2d09108074927b9d266d0fdbf5f"/>
 		<Metadata name="CommonForm.ИИА_РегистрацияGitsell.Form" id="ebf1702d-1f39-4f95-8832-232f37f32691.0" configVersion="c4b73118523b23c32b4bfc9c348b31f065d1dd78"/>
 		<Metadata name="CommonModule.ИИА_DSL" id="2135f774-d65f-45b6-86dd-ffdb4c45be6a" configVersion="d9f16c50fe5f1c44a2b74291cd956d84f3b9dc15"/>

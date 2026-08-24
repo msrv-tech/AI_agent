@@ -221,6 +221,7 @@ class BrowserQuery1CTest:
             "--no-first-run",
             "--no-default-browser-check",
             "--disable-gpu",
+            "--window-size=1920,1080",
             "about:blank",
         ]
         if self.config.headless:
@@ -289,11 +290,23 @@ class BrowserQuery1CTest:
 
     def _login(self) -> None:
         self.logger.info("Выполняем вход в web-client.")
-        initial_text = self._safe_body_text()
-        if self.config.user and self.config.user in initial_text:
-            self.logger.info("web-client уже открыт под нужным пользователем.")
-            return
-        self._wait_until_text_contains("Войти", 30)
+        self._dismiss_startup_canvas_dialog()
+        deadline = time.time() + 180
+        initial_text = ""
+        while time.time() < deadline:
+            initial_text = self._safe_body_text()
+            user_visible = self.config.user and self.config.user in initial_text
+            admin_alias_visible = self.config.user == "Администратор" and "admin" in initial_text
+            if user_visible or admin_alias_visible:
+                self.logger.info("web-client уже открыт под нужным пользователем.")
+                return
+            if "Войти" in initial_text:
+                break
+            if "Не обнаружено свободной лицензии" in initial_text:
+                raise RuntimeError("Веб-клиент не смог открыть базу: закончились свободные лицензии 1С.")
+            time.sleep(3)
+        if "Войти" not in initial_text:
+            raise RuntimeError("Не найдена форма входа web-client и пользователь не обнаружен в рабочей области за 180 секунд.")
         login_js = """
 (() => {
   const login = document.getElementById('authWindow_basic_login');
@@ -322,15 +335,40 @@ class BrowserQuery1CTest:
         self._wait_until_text_contains(self.config.user, 90)
         self.logger.info("Вход в web-client выполнен.")
 
-    def _open_agent_command(self) -> None:
-        self.logger.info("Переходим к команде ИИ Агент через hash-навигацию.")
-        encoded_command = "CommonCommand.%D0%98%D0%98%D0%90_%D0%90%D0%B3%D0%B5%D0%BD%D1%82"
-        target_url = self.config.web_url.rstrip("/") + f"/#e1cib/command/{encoded_command}"
-        self._session_call("Page.navigate", {"url": target_url})
-        if self._wait_for_agent_form(20):
-            return
+    def _dismiss_startup_canvas_dialog(self) -> None:
+        deadline = time.time() + 75
+        while time.time() < deadline:
+            try:
+                text = self._safe_body_text().strip()
+                if text and text != "\xa0":
+                    return
+                viewport = self._session_call(
+                    "Runtime.evaluate",
+                    {
+                        "expression": "JSON.stringify({w: window.innerWidth || 800, h: window.innerHeight || 600})",
+                        "returnByValue": True,
+                    },
+                )["result"]["result"].get("value", "{}")
+                size = json.loads(str(viewport))
+                x = int(float(size.get("w", 800)) * 0.875)
+                y = int(float(size.get("h", 600)) * 0.72)
+                for click_x, click_y in ((x, y), (670, 350)):
+                    self._session_call("Input.dispatchMouseEvent", {"type": "mouseMoved", "x": click_x, "y": click_y})
+                    self._session_call(
+                        "Input.dispatchMouseEvent",
+                        {"type": "mousePressed", "x": click_x, "y": click_y, "button": "left", "clickCount": 1},
+                    )
+                    self._session_call(
+                        "Input.dispatchMouseEvent",
+                        {"type": "mouseReleased", "x": click_x, "y": click_y, "button": "left", "clickCount": 1},
+                    )
+                    time.sleep(1)
+                time.sleep(5)
+            except Exception:
+                time.sleep(2)
 
-        self.logger.info("Hash-навигация не помогла, пробуем клик по пункту меню ИИ Агент.")
+    def _open_agent_command(self) -> None:
+        self.logger.info("Пробуем открыть ИИ Агент через пункт меню.")
         if self._click_agent_theme_item() and self._wait_for_agent_form(20):
             return
 
@@ -340,6 +378,13 @@ class BrowserQuery1CTest:
 
         self.logger.info("Пробуем открыть ИИ Агент через глобальный поиск.")
         if self._open_agent_via_global_search() and self._wait_for_agent_form(20):
+            return
+
+        self.logger.info("Переходим к команде ИИ Агент через hash-навигацию.")
+        encoded_command = "CommonCommand.%D0%98%D0%98%D0%90_%D0%90%D0%B3%D0%B5%D0%BD%D1%82"
+        target_url = self.config.web_url.rstrip("/") + f"/#e1cib/command/{encoded_command}"
+        self._session_call("Page.navigate", {"url": target_url})
+        if self._wait_for_agent_form(20):
             return
 
         raise RuntimeError("Форма ИИ Агент не открылась через web-client за отведённое время.")
@@ -361,36 +406,77 @@ class BrowserQuery1CTest:
     def _agent_form_visible(self) -> bool:
         js = """
 (() => {
-  const visible = (el) => {
-    if (!el) return false;
-    const r = el.getBoundingClientRect();
-    const s = window.getComputedStyle(el);
-    return r.width > 20 && r.height > 10 && r.x > -1000 && r.y > -1000
-      && s.display !== 'none' && s.visibility !== 'hidden' && s.opacity !== '0';
-  };
-  const textVisible = (pattern) => Array.from(document.querySelectorAll('button, a, div, span, input, textarea'))
-    .some((el) => visible(el) && pattern.test((el.innerText || el.value || el.title || '').trim()));
-  const hasPrompt = Array.from(document.querySelectorAll('textarea, input'))
-    .some((el) => visible(el) && el.getBoundingClientRect().width > 200 && el.getBoundingClientRect().height > 30);
-  return (textVisible(/Отправить/) && hasPrompt)
-    || (textVisible(/Прикрепить файл/) && textVisible(/Текущий диалог/))
-    || textVisible(/Открыть форму запроса 1С/);
+  const bodyText = (document.body && document.body.innerText || '').replace(/\\s+/g, ' ').trim();
+  if ((bodyText.includes('Текущий диалог') && bodyText.includes('Отправить'))
+      || bodyText.includes('Открыть форму запроса 1С')) {
+    return true;
+  }
+  return false;
 })()
 """
-        return bool(self._evaluate(js))
+        result = self._evaluate(js)
+        return result is True or str(result).lower() == "true"
 
     def _click_agent_theme_item(self) -> bool:
         js = """
 (() => {
-  const el = document.getElementById('themesCell_theme_12');
-  if (!el) return 'missing';
-  ['pointerdown', 'mousedown', 'mouseup', 'click'].forEach((type) => {
-    el.dispatchEvent(new MouseEvent(type, {bubbles:true, cancelable:true, view:window, buttons:1}));
-  });
-  return 'clicked';
+  const visible = (el) => {
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    return r.width > 5 && r.height > 5 && r.x >= 0 && r.y >= 0
+      && s.display !== 'none' && s.visibility !== 'hidden';
+  };
+  const click = (el) => {
+    const r = el.getBoundingClientRect();
+    ['pointerdown','mousedown','mouseup','click'].forEach((type) => {
+      el.dispatchEvent(new MouseEvent(type, {bubbles:true, cancelable:true, view:window, buttons:1, clientX:r.x + r.width / 2, clientY:r.y + r.height / 2}));
+    });
+  };
+  const nodes = Array.from(document.querySelectorAll('a,button,div,span')).filter(visible)
+    .map((el) => ({el, text:(el.innerText || el.title || '').replace(/\\s+/g, ' ').trim(), r:el.getBoundingClientRect()}));
+  let command = nodes
+    .filter((item) => item.text === 'ИИ Агент' && item.r.x > 190 && item.r.y > 70 && item.r.y < 180)
+    .sort((a,b) => a.r.y - b.r.y)[0];
+  if (command) {
+    click(command.el);
+    return JSON.stringify({result:'command-clicked', x: command.r.x + command.r.width / 2, y: command.r.y + command.r.height / 2});
+  }
+  const theme = nodes
+    .filter((item) => item.text === 'ИИ Агент' && item.r.x < 180)
+    .sort((a,b) => a.r.y - b.r.y)[0]?.el;
+  if (!theme) return 'missing';
+  click(theme);
+  const r = theme.getBoundingClientRect();
+  return JSON.stringify({result:'theme-clicked', x: r.x + r.width / 2, y: r.y + r.height / 2});
 })()
 """
-        return self._evaluate(js) == "clicked"
+        first = self._evaluate(js)
+        try:
+            first_data = json.loads(str(first))
+        except Exception:
+            first_data = {"result": str(first or "")}
+        if first_data.get("result") == "command-clicked":
+            return True
+        time.sleep(3)
+        second = self._evaluate(js)
+        try:
+            second_data = json.loads(str(second))
+        except Exception:
+            second_data = {"result": str(second or "")}
+        if second_data.get("result") == "command-clicked":
+            return True
+        for x, y in ((260, 112), (250, 112), (270, 112)):
+            self._session_call("Input.dispatchMouseEvent", {"type": "mouseMoved", "x": x, "y": y})
+            self._session_call(
+                "Input.dispatchMouseEvent",
+                {"type": "mousePressed", "x": x, "y": y, "button": "left", "buttons": 1, "clickCount": 1},
+            )
+            self._session_call(
+                "Input.dispatchMouseEvent",
+                {"type": "mouseReleased", "x": x, "y": y, "button": "left", "buttons": 0, "clickCount": 1},
+            )
+            time.sleep(1)
+        return True
 
     def _click_functions_button(self) -> bool:
         js = """

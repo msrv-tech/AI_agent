@@ -62,7 +62,7 @@
 				<xr:Item xsi:type="xr:MDObjectRef">Role.ИИА_ОсновнаяРоль</xr:Item>
 			</DefaultRoles>
 			<Vendor />
-			<Version>0.9.2</Version>
+			<Version>0.9.3</Version>
 			<DefaultStyle />
 			<BriefInformation />
 			<DetailedInformation />
@@ -121,6 +121,7 @@
 			<CommonForm>ИИА_Запрос1С</CommonForm>
 			<CommonForm>ИИА_РегистрацияGitsell</CommonForm>
 			<CommonForm>ИИА_Настройки</CommonForm>
+			<CommonForm>ИИА_ПодтверждениеДействия</CommonForm>
 			<CommonForm>ИИА_RAG</CommonForm>
 			<CommonForm>ИИА_Skills</CommonForm>
 			<Catalog>ИИА_Диалоги</Catalog>

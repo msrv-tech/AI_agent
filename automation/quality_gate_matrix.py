@@ -43,7 +43,7 @@ DOC_RECOGNITION_CASES = {
     },
     "vat_invoice": {
         "prompt": "распознай счет-фактуру по приложенному файлу и подготовь документ в базе",
-        "expected_skill": "recognize-vat-invoice",
+        "expected_skill": "recognize-invoice-factura",
         "expected_target": "СчетФактураПолученный",
     },
 }
@@ -213,6 +213,8 @@ def build_ui_jobs(args: argparse.Namespace, artifact_dir: Path) -> list[tuple[st
                 case_args += ["--image-path", image_path]
             if args.require_document_created:
                 case_args.append("--require-created")
+            if args.require_visible_created_links:
+                case_args.append("--require-visible-created-links")
             if args.auto_confirm:
                 case_args.append("--auto-confirm")
             jobs.append((
@@ -247,6 +249,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--include-approval", action="store_true")
     parser.add_argument("--include-document-recognition", action="store_true")
     parser.add_argument("--require-document-created", action="store_true")
+    parser.add_argument("--require-visible-created-links", action="store_true")
     parser.add_argument("--auto-confirm", action="store_true")
     parser.add_argument(
         "--document-files",
@@ -264,6 +267,7 @@ def main() -> int:
         args.include_negative_ui = True
         args.include_approval = True
         args.include_document_recognition = True
+        args.require_visible_created_links = True
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     artifact_dir = Path(args.artifact_dir) / ("matrix_" + timestamp)
