@@ -1,5 +1,15 @@
+param(
+    [string]$UserName = "codex",
+    [string]$Password = $env:AI_AGENT_GUEST_PASSWORD,
+    [string]$QemuGuestAgentMsiPath = "\\DEV1\D\bsl\tw\qga.msi"
+)
+
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
+
+if ([string]::IsNullOrWhiteSpace($Password)) {
+    throw "Set AI_AGENT_GUEST_PASSWORD or pass -Password explicitly."
+}
 
 $logDir = "C:\AIAgent"
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
@@ -78,7 +88,7 @@ function Ensure-QemuGuestAgent {
 }
 
 Write-Log "guest_enable_management.ps1 started"
-Ensure-LocalAdmin -UserName "codex" -Password "codex"
+Ensure-LocalAdmin -UserName $UserName -Password $Password
 Configure-WinRm
-Ensure-QemuGuestAgent -MsiPath "\\DEV1\D\bsl\tw\qga.msi"
+Ensure-QemuGuestAgent -MsiPath $QemuGuestAgentMsiPath
 Write-Log "guest_enable_management.ps1 completed"

@@ -1,9 +1,9 @@
 param(
     [string]$ComputerName = "192.168.2.130",
     [string]$UserName = "codex",
-    [string]$Password = "codex",
+    [string]$Password = $env:AI_AGENT_GUEST_PASSWORD,
     [string]$TaskUser = "Admin",
-    [string]$TaskPassword = "Admin",
+    [string]$TaskPassword = $env:AI_AGENT_TASK_PASSWORD,
     [string]$PlatformExe = "C:\Tools\1cv8\8.5.1.1150\bin\1cv8.exe",
     [string]$BasePath = "",
     [string]$ShareRoot = "\\DEV1\D",
@@ -24,6 +24,12 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+if ([string]::IsNullOrWhiteSpace($Password)) {
+    throw "Set AI_AGENT_GUEST_PASSWORD or pass -Password explicitly."
+}
+if ([string]::IsNullOrWhiteSpace($TaskPassword)) {
+    throw "Set AI_AGENT_TASK_PASSWORD or pass -TaskPassword explicitly."
+}
 $env:PSModulePath = @(
     Join-Path $HOME "Documents\WindowsPowerShell\Modules"
     Join-Path $env:ProgramFiles "WindowsPowerShell\Modules"
