@@ -17,13 +17,7 @@ for _path in (REPO_ROOT, AUTOMATION_ROOT):
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
 
-from automation.ui.web_agent_skill_e2e import (
-    cleanup_fixture,
-    click_label,
-    close_font_dialog,
-    install_fixture_skill,
-    replace_focused_text,
-)
+from automation.ui.web_agent_skill_e2e import click_label, close_font_dialog, replace_focused_text
 from automation.ui.web_query1c_test import BrowserQuery1CTest, Logger, WebUiConfig, setup_console_encoding
 
 
@@ -55,6 +49,23 @@ def capture_png(test: BrowserQuery1CTest, path: Path) -> None:
     path.write_bytes(base64.b64decode(response["result"]["data"]))
 
 
+def reveal_json_fragment(test: BrowserQuery1CTest, fragment: str) -> str:
+    encoded = json.dumps(fragment, ensure_ascii=False)
+    script = r"""
+((fragment)=>{
+ const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>40&&r.height>15&&r.x>-1000&&r.y>-1000&&s.display!=='none'&&s.visibility!=='hidden'};
+ const items=Array.from(document.querySelectorAll('textarea')).filter(visible)
+  .sort((a,b)=>a.getBoundingClientRect().y-b.getBoundingClientRect().y);
+ const jsonEditor=items.find(e=>(e.value||'').includes(fragment));
+ if(!jsonEditor) return 'missing:' + items.length;
+ const index=jsonEditor.value.indexOf(fragment);
+ const ratio=Math.max(0, index) / Math.max(1, jsonEditor.value.length);
+ jsonEditor.scrollTop=Math.max(0, jsonEditor.scrollHeight*ratio-jsonEditor.clientHeight*0.25);
+ return 'revealed:' + index + ':' + jsonEditor.value.length;
+})(""" + encoded + ")"
+    return test._evaluate(script)
+
+
 def open_command(test: BrowserQuery1CTest, web_url: str, command_name: str, wait_text: str, timeout_sec: int) -> None:
     encoded = urllib.parse.quote(command_name, safe=".")
     test._session_call("Page.navigate", {"url": web_url.rstrip("/") + "/#e1cib/command/" + encoded})
@@ -82,17 +93,12 @@ def run(args: argparse.Namespace) -> dict:
         skip_com_prepare=True,
     )
     test = BrowserQuery1CTest(config, Logger(config.log_file))
-    skill_name = "user-skill-infostart-release"
-    marker = "INFOSTART_RELEASE_SKILL"
     try:
-        install_fixture_skill(args.bridge_url, skill_name, marker)
         test._launch_browser()
         test._open_initial_target()
         result["fontDialogClosed"] = close_font_dialog()
 
         open_command(test, args.web_url, "CommonCommand.ИИА_Skills", "Skills", args.timeout_sec)
-        capture_png(test, media_dir / "skills_json_editor.png")
-
         description = (
             "Создать skill для документа ЗаказПокупателя: находить контрагента и номенклатуру "
             "по названию, заполнять заказ клиента, количество и цену, перед записью требовать подтверждение."
@@ -101,34 +107,19 @@ def run(args: argparse.Namespace) -> dict:
         replace_focused_text(test, description)
         result["generateClick"] = click_label(test, "Сгенерировать JSON")
         time.sleep(4)
-        capture_png(test, media_dir / "skills_generated_json.png")
 
         result["testFocus"] = focus_textarea(test, 2)
         replace_focused_text(test, "Создай заказ клиента для Ромашка на Кабель 10 штук")
         result["testClick"] = click_label(test, "Запустить тест")
         time.sleep(3)
-        capture_png(test, media_dir / "skills_test_run.png")
+        result["jsonReveal"] = reveal_json_fragment(test, '"dsl_template"')
+        time.sleep(1)
+        capture_png(test, media_dir / "skills_dsl_workflow.png")
 
-        open_command(test, args.web_url, "CommonCommand.ИИА_Агент", "ИИ Агент", args.timeout_sec)
-        result["newDialogClick"] = click_label(test, "Новый диалог")
-        time.sleep(2)
-        result["agentPromptFocus"] = focus_textarea(test, 0)
-        prompt = marker + ": создай заказ клиента для Ромашка на Кабель 1 штука. Не записывай без подтверждения."
-        replace_focused_text(test, prompt)
-        result["sendClick"] = click_label(test, "Отправить")
-        time.sleep(args.agent_wait_sec)
-        capture_png(test, media_dir / "agent_skill_selected.png")
-
-        result["success"] = all((media_dir / name).exists() for name in [
-            "skills_json_editor.png",
-            "skills_generated_json.png",
-            "skills_test_run.png",
-            "agent_skill_selected.png",
-        ])
+        result["success"] = (media_dir / "skills_dsl_workflow.png").exists()
         return result
     finally:
         test._close()
-        cleanup_fixture(args.bridge_url, skill_name, marker)
 
 
 def parse_args() -> argparse.Namespace:

@@ -125,6 +125,8 @@ class WebUiConfig:
     artifact_dir: Optional[str]
     headless: bool
     skip_com_prepare: bool
+    window_width: int = 1920
+    window_height: int = 1080
 
 
 class Logger:
@@ -221,7 +223,7 @@ class BrowserQuery1CTest:
             "--no-first-run",
             "--no-default-browser-check",
             "--disable-gpu",
-            "--window-size=1920,1080",
+            f"--window-size={self.config.window_width},{self.config.window_height}",
             "about:blank",
         ]
         if self.config.headless:

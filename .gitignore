@@ -42,9 +42,16 @@ automation/com_1c/logs/
 
 # Логи сборки и запуска
 automation/logs/
+automation/.rutube-browser-profile/
 temp/tau2-bench/
 temp/infostart-chrome-profile/
+temp/*.pdf
 vendor/tau2-bench/
+
+# Генерируемые медиа и диагностика статей
+docs/articles/**/media/*_result.json
+docs/articles/**/media/*_01_ready.png
+docs/articles/**/media/*.mp4
 
 # BSL Language Server (скачивается отдельно)
 automation/bsl-language-server-*-exec.jar
