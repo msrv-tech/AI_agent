@@ -23,6 +23,7 @@ DEFAULT_BP = 'Srvr="192.168.2.126:2541";Ref="fresh-bp-demo";Usr="Админис�
 DEFAULT_UNF = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";Usr="Администратор";Pwd="";'
 DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
 DEFAULT_BRIDGE_URL = DEFAULT_WEB_URL + "/hs/codex-test/command"
+DEFAULT_CLOUD_WEB_URL = os.getenv("FRESH_CLOUD_WEB_URL", "https://1cfresh.com/a/sbm/2226502/ru_RU/")
 
 
 DOC_RECOGNITION_CASES = {
@@ -192,6 +193,14 @@ def build_ui_jobs(args: argparse.Namespace, artifact_dir: Path) -> list[tuple[st
             artifact_dir / "ui" / "skills_negative",
             args.ui_timeout_sec + 120,
         ))
+    if args.include_result_table_link:
+        result_link_args = browser_common[:] + ["--agent-wait-sec", str(args.web_agent_wait_sec)]
+        jobs.append((
+            "automation/ui/web_result_table_link_e2e.py",
+            result_link_args,
+            artifact_dir / "ui" / "result_table_link",
+            args.web_agent_wait_sec + args.ui_timeout_sec + 90,
+        ))
     if args.include_approval:
         jobs.append((
             "automation/ui/web_agent_skill_approval_e2e.py",
@@ -226,9 +235,83 @@ def build_ui_jobs(args: argparse.Namespace, artifact_dir: Path) -> list[tuple[st
     return jobs
 
 
+def run_web_com_gate(name: str, web_url: str, user: str, password: str, group: str, artifact_dir: Path, timeout_sec: int, agent_wait_sec: int, auto_confirm: bool, headed: bool) -> dict:
+    log_dir = artifact_dir / "web" / name
+    log_dir.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        sys.executable,
+        "automation/ui/web_com_gate.py",
+        "--web-url",
+        web_url,
+        "--user",
+        user,
+        "--password",
+        password,
+        "--examples-group",
+        group,
+        "--log-dir",
+        str(log_dir),
+        "--artifact-dir",
+        str(log_dir),
+        "--timeout-sec",
+        str(max(90, timeout_sec // 10)),
+        "--agent-wait-sec",
+        str(agent_wait_sec),
+    ]
+    if auto_confirm:
+        cmd.append("--auto-confirm")
+    if headed:
+        cmd.append("--headed")
+    per_example_timeout = max(agent_wait_sec + 120, 240)
+    total_timeout = max(timeout_sec, per_example_timeout * 16)
+    result = run_command(cmd, total_timeout)
+    result["name"] = name
+    result["kind"] = "web_com_examples"
+    result["report"] = latest_report(log_dir)
+    if result["success"] and result["report"]:
+        result["success"] = bool(result["report"].get("quality_gate_passed"))
+    return result
+
+
+def apply_profile(args: argparse.Namespace) -> None:
+    if args.profile != "cloud-fresh":
+        return
+    args.skip_bp = True
+    args.skip_unf = True
+    if args.cloud_web_url:
+        args.web_url = args.cloud_web_url
+    else:
+        args.web_url = DEFAULT_CLOUD_WEB_URL
+    env_user = os.getenv("FRESH_CLOUD_USER", "")
+    env_password = os.getenv("FRESH_CLOUD_PASSWORD", "")
+    if args.user == "Администратор" and env_user:
+        args.user = env_user
+    if not args.password and env_password:
+        args.password = env_password
+    if not args.include_negative_ui and not any(
+        flag for flag in (
+            args.include_ui,
+            args.include_skill_write,
+            args.include_skill_lifecycle,
+            args.include_approval,
+            args.include_document_recognition,
+            args.include_result_table_link,
+        )
+    ):
+        args.include_negative_ui = True
+        args.include_result_table_link = True
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Release quality gate matrix for 1C AI Agent")
     parser.add_argument("--artifact-dir", default=str(REPO_ROOT / "automation" / "logs" / "quality_gate_matrix"))
+    parser.add_argument(
+        "--profile",
+        default="local",
+        choices=["local", "cloud-fresh"],
+        help="local: COM gate по BP/UNF; cloud-fresh: browser gate для опубликованного 1С:Фреш",
+    )
+    parser.add_argument("--cloud-web-url", default="", help="URL облачного приложения 1С:Фреш")
     parser.add_argument("--group", default="extended", help="test_examples group: smoke|recovery|write|safety|metadata|extended")
     parser.add_argument("--score-mode", default="heuristic", choices=["heuristic", "llm", "hybrid"])
     parser.add_argument("--bp-connection", default=DEFAULT_BP)
@@ -240,12 +323,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--bridge-url", default=DEFAULT_BRIDGE_URL)
     parser.add_argument("--user", default="Администратор")
     parser.add_argument("--password", default="")
+    parser.add_argument("--web-agent-wait-sec", type=int, default=180)
     parser.add_argument("--ui-timeout-sec", type=int, default=90)
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--include-ui", action="store_true", help="Enable all default UI/E2E suites")
     parser.add_argument("--include-skill-write", action="store_true")
     parser.add_argument("--include-skill-lifecycle", action="store_true")
     parser.add_argument("--include-negative-ui", action="store_true")
+    parser.add_argument("--include-result-table-link", action="store_true")
     parser.add_argument("--include-approval", action="store_true")
     parser.add_argument("--include-document-recognition", action="store_true")
     parser.add_argument("--require-document-created", action="store_true")
@@ -261,19 +346,52 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    apply_profile(args)
+    if args.profile == "cloud-fresh":
+        env_user = os.getenv("FRESH_CLOUD_USER", "")
+        explicit_user = args.user and args.user != "Администратор"
+        if not explicit_user and not env_user:
+            print(json.dumps({
+                "passed": False,
+                "error": "Для profile=cloud-fresh задайте --user или FRESH_CLOUD_USER в .env.",
+            }, ensure_ascii=False, indent=2))
+            return 2
     if args.include_ui:
         args.include_skill_write = True
         args.include_skill_lifecycle = True
         args.include_negative_ui = True
+        args.include_result_table_link = True
         args.include_approval = True
         args.include_document_recognition = True
         args.require_visible_created_links = True
+
+    if args.profile == "cloud-fresh":
+        # На production Fresh HTTP bridge codex-test обычно недоступен.
+        args.include_skill_write = False
+        args.include_skill_lifecycle = False
+        args.include_approval = False
+        args.include_document_recognition = False
+        if args.include_ui or args.include_negative_ui:
+            args.include_negative_ui = True
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     artifact_dir = Path(args.artifact_dir) / ("matrix_" + timestamp)
     artifact_dir.mkdir(parents=True, exist_ok=True)
 
     results: list[dict] = []
+    if args.profile == "cloud-fresh":
+        results.append(run_web_com_gate(
+            "cloud_fresh",
+            args.web_url,
+            args.user,
+            args.password,
+            args.group,
+            artifact_dir,
+            args.com_timeout_sec,
+            args.web_agent_wait_sec,
+            args.auto_confirm,
+            args.headed,
+        ))
     if not args.skip_bp:
         results.append(run_com_gate("bp", args.bp_connection, args.group, args.score_mode, artifact_dir, args.com_timeout_sec))
     if not args.skip_unf:
@@ -287,6 +405,8 @@ def main() -> int:
     report = {
         "timestamp": timestamp,
         "artifact_dir": str(artifact_dir),
+        "profile": args.profile,
+        "web_url": args.web_url if args.profile == "cloud-fresh" else "",
         "passed": passed,
         "total": len(results),
         "passed_count": sum(1 for item in results if item.get("success")),

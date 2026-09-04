@@ -290,6 +290,49 @@ class BrowserQuery1CTest:
         self._session_call("Runtime.enable")
         self.logger.info("CDP-сессия подключена.")
 
+    @staticmethod
+    def _is_fresh_cloud_url(url: str) -> bool:
+        return "1cfresh.com" in (url or "").lower()
+
+    def _login_fresh_openid(self) -> bool:
+        """Вход через страницу OpenID 1С:Фреш (1cfresh.com/a/openid/...)."""
+        login_js = """
+(() => {
+  const visible = (el) => {
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    return r.width > 20 && r.height > 10 && s.display !== 'none' && s.visibility !== 'hidden';
+  };
+  const byPlaceholder = (value) => Array.from(document.querySelectorAll('input')).find(
+    (el) => visible(el) && (el.placeholder || '').trim() === value
+  );
+  const login = byPlaceholder('Пользователь') || document.querySelector('input[type="text"], input:not([type])');
+  const password = byPlaceholder('Пароль') || document.querySelector('input[type="password"]');
+  const button = Array.from(document.querySelectorAll('button')).find(
+    (el) => visible(el) && (el.innerText || '').trim() === 'Войти'
+  );
+  if (!login || !password || !button) {
+    return 'auth-controls-missing';
+  }
+  const setValue = (el, value) => {
+    el.focus();
+    el.value = value;
+    el.dispatchEvent(new Event('input', {bubbles: true}));
+    el.dispatchEvent(new Event('change', {bubbles: true}));
+  };
+  setValue(login, %s);
+  setValue(password, %s);
+  button.click();
+  return 'submitted';
+})()
+""" % (json.dumps(self.config.user), json.dumps(self.config.password))
+        result = self._evaluate(login_js)
+        if result != "submitted":
+            return False
+        self.logger.info("Форма OpenID 1С:Фреш отправлена, ждём переход в приложение.")
+        time.sleep(8)
+        return True
+
     def _login(self) -> None:
         self.logger.info("Выполняем вход в web-client.")
         self._dismiss_startup_canvas_dialog()
@@ -302,6 +345,17 @@ class BrowserQuery1CTest:
             if user_visible or admin_alias_visible:
                 self.logger.info("web-client уже открыт под нужным пользователем.")
                 return
+            fresh_openid = (
+                self._is_fresh_cloud_url(self.config.web_url)
+                or "Вход в сервис 1С:Фреш" in initial_text
+                or "/a/openid/" in (self._current_url() or "")
+            )
+            if fresh_openid and ("Пользователь" in initial_text or "/a/openid/" in (self._current_url() or "")):
+                if not self.config.user:
+                    raise RuntimeError("Для 1С:Фреш задайте --user или FRESH_CLOUD_USER.")
+                if not self._login_fresh_openid():
+                    raise RuntimeError("Не удалось отправить форму OpenID 1С:Фреш.")
+                continue
             if "Войти" in initial_text:
                 break
             if "Не обнаружено свободной лицензии" in initial_text:
@@ -720,6 +774,12 @@ class BrowserQuery1CTest:
                 last_error = exc
                 time.sleep(3)
         raise last_error if last_error is not None else RuntimeError("Не удалось прочитать текст страницы.")
+
+    def _current_url(self) -> str:
+        try:
+            return self._evaluate("location.href")
+        except Exception:
+            return ""
 
     def _wait_until_text_contains(self, text: str, timeout_sec: int) -> None:
         expected = text.lower()

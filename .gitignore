@@ -9,6 +9,7 @@ xml83/
 *.lck
 
 # Временные файлы
+temp/
 *.tmp
 *.bak
 *~
@@ -43,9 +44,7 @@ automation/com_1c/logs/
 # Логи сборки и запуска
 automation/logs/
 automation/.rutube-browser-profile/
-temp/tau2-bench/
-temp/infostart-chrome-profile/
-temp/*.pdf
+.runtime/
 vendor/tau2-bench/
 
 # Генерируемые медиа и диагностика статей

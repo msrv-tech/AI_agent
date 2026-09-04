@@ -55,6 +55,42 @@ python automation\quality_gate_matrix.py --group extended --include-ui --documen
 python automation\quality_gate_matrix.py --group extended --include-skill-write --include-document-recognition --require-document-created --auto-confirm
 ```
 
+### Cloud Fresh gate
+
+Для опубликованного приложения на [1С:Фреш](https://1cfresh.com/a/sbm/2226502/ru_RU/) COM и HTTP bridge недоступны снаружи. Используется browser gate:
+
+1. OpenID-вход в сервис (`FRESH_CLOUD_USER` / `FRESH_CLOUD_PASSWORD`).
+2. Прогон сценариев `test_examples.py` через форму «ИИ Агент» в web-client.
+3. Опционально negative UI для Skills (без bridge).
+
+Подготовка `.env`:
+
+```powershell
+FRESH_CLOUD_WEB_URL=https://1cfresh.com/a/sbm/2226502/ru_RU/
+FRESH_CLOUD_USER=ваш_логин
+FRESH_CLOUD_PASSWORD=ваш_пароль
+```
+
+Базовый прогон extended-сценариев + negative UI:
+
+```powershell
+python automation\quality_gate_matrix.py --profile cloud-fresh --group extended --auto-confirm
+```
+
+Только browser COM gate (без Skills UI):
+
+```powershell
+python automation\ui\web_com_gate.py --examples-group extended --auto-confirm --headed
+```
+
+Smoke-прогон (4 сценария):
+
+```powershell
+python automation\quality_gate_matrix.py --profile cloud-fresh --group smoke --auto-confirm
+```
+
+Пороги успеха те же: все сценарии passed, avg score ≥ 70, min score ≥ 40.
+
 ## Что Считается Успехом
 
 - Не только текст "успешно", а системные факты: `RunQuery`, `CreateDocument`, `Write`, измененные объекты, найденный документ по маркеру, ссылка в форме агента.

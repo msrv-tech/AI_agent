@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.14">
+	<ExchangePlan uuid="bcde302f-a39a-40d5-8507-41795c886e09">
+		<InternalInfo>
+			<xr:ThisNode>7ba12c5f-42d9-4b09-9bb0-0395d5fa75be</xr:ThisNode>
+			<xr:GeneratedType name="ExchangePlanObject.МиграцияПриложений" category="Object">
+				<xr:TypeId>ea406b90-d2d7-4906-887d-76a04e0b19f7</xr:TypeId>
+				<xr:ValueId>6d9f8a44-f816-4cd8-ada0-43139417ff00</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="ExchangePlanRef.МиграцияПриложений" category="Ref">
+				<xr:TypeId>26db0a08-598d-460b-b9b2-637af0ead71b</xr:TypeId>
+				<xr:ValueId>269a186f-53f4-4d76-9250-d8b3c09fc694</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="ExchangePlanSelection.МиграцияПриложений" category="Selection">
+				<xr:TypeId>ba83e17d-97a8-45c3-aef9-5f0cbe7ec3bb</xr:TypeId>
+				<xr:ValueId>91c28e08-46f2-4826-ad86-0ed4546e7e1a</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="ExchangePlanList.МиграцияПриложений" category="List">
+				<xr:TypeId>2cdd1ab5-069b-4798-aa3f-ecb95b24fa02</xr:TypeId>
+				<xr:ValueId>bd82ae79-581d-494a-8c60-9a19f0089834</xr:ValueId>
+			</xr:GeneratedType>
+			<xr:GeneratedType name="ExchangePlanManager.МиграцияПриложений" category="Manager">
+				<xr:TypeId>ed1be9cf-1564-4ae8-be2c-a04afc223a1b</xr:TypeId>
+				<xr:ValueId>7161d6d3-bfc4-4285-9941-8510118fb68b</xr:ValueId>
+			</xr:GeneratedType>
+		</InternalInfo>
+		<Properties>
+			<ObjectBelonging>Adopted</ObjectBelonging>
+			<Name>МиграцияПриложений</Name>
+			<Comment/>
+			<ExtendedConfigurationObject>b5c14196-5850-49a2-8f8a-1153f5f81e31</ExtendedConfigurationObject>
+		</Properties>
+		<ChildObjects/>
+	</ExchangePlan>
+</MetaDataObject>

@@ -125,6 +125,7 @@ def run(args: argparse.Namespace) -> dict:
     try:
         test._launch_browser()
         test._open_initial_target()
+        test._login()
         result["fontDialogClosed"] = close_font_dialog()
         command = urllib.parse.quote("CommonCommand.ИИА_Skills", safe=".")
         skills_url = args.web_url.rstrip("/") + "/#e1cib/command/" + command
