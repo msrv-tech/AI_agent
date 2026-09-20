@@ -21,6 +21,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -537,14 +538,55 @@ def prepare_source(source: Path, destination: Path) -> None:
     audit_preflight(destination)
 
 
+def resolve_platform(platform: Path) -> Path:
+    if not str(platform):
+        raise RuntimeError("Не задан путь к 1cv8: --platform или PLATFORM_85.")
+    resolved = platform.expanduser()
+    if not resolved.is_file():
+        raise RuntimeError(f"1cv8 не найден: {resolved}")
+    return resolved.resolve()
+
+
+def designer_command(platform: Path, args: list[str]) -> list[str]:
+    command = [str(platform), *args]
+    if os.name == "nt":
+        return command
+    xvfb = shutil.which("xvfb-run")
+    if xvfb is None:
+        raise RuntimeError("На Linux Designer запускается через xvfb-run, но xvfb-run не найден.")
+    return [xvfb, "-a", *command]
+
+
+def read_1c_log(args: list[str]) -> str:
+    if "/Out" not in args:
+        return ""
+    log_path = Path(args[args.index("/Out") + 1])
+    if not log_path.is_file():
+        return ""
+    return log_path.read_text(encoding="utf-8-sig", errors="replace").strip()
+
+
+def run_1c_command(command: list[str], args: list[str], timeout_sec: int) -> None:
+    env = os.environ.copy()
+    if os.name != "nt":
+        env["GDK_BACKEND"] = "x11"
+        env.pop("WAYLAND_DISPLAY", None)
+    result = subprocess.run(command, timeout=timeout_sec, check=False, env=env)
+    if result.returncode:
+        details = read_1c_log(args)
+        suffix = f" Лог: {details}" if details else ""
+        raise RuntimeError(f"1C exited with code {result.returncode}: {' '.join(command)}.{suffix}")
+
+
 def designer_args(connection_string: str, server: str, ref: str, user: str, password: str) -> list[str]:
     args = ["DESIGNER", "/DisableStartupDialogs", "/DisableStartupMessages"]
     if server and ref:
-        args.extend(["/S", f"{server}\\{ref}"])
+        separator = "\\" if os.name == "nt" else "/"
+        args.extend(["/S", f"{server}{separator}{ref}"])
     elif connection_string:
         args.extend(["/IBConnectionString", connection_string])
     else:
-        raise RuntimeError("FRESH_1C_SERVER/FRESH_1C_REF or FRESH_1C_CONNECTION_STRING is required for --build")
+        raise RuntimeError("Для сборки в существующей ИБ нужны FRESH_1C_SERVER/FRESH_1C_REF или FRESH_1C_CONNECTION_STRING.")
     if user:
         args.extend(["/N", user])
     if password:
@@ -553,9 +595,15 @@ def designer_args(connection_string: str, server: str, ref: str, user: str, pass
 
 
 def run_1c(executable: Path, args: list[str]) -> None:
-    result = subprocess.run([str(executable), *args], timeout=600, check=False)
-    if result.returncode:
-        raise RuntimeError(f"1C exited with code {result.returncode}")
+    run_1c_command(designer_command(executable, args), args, 600)
+
+
+def create_file_infobase(platform: Path, db_dir: Path) -> None:
+    if db_dir.exists():
+        shutil.rmtree(db_dir)
+    db_dir.parent.mkdir(parents=True, exist_ok=True)
+    create_args = ["CREATEINFOBASE", f'File="{db_dir}"']
+    run_1c_command(designer_command(platform, create_args), create_args, 120)
 
 
 def build_cfe(
@@ -568,8 +616,7 @@ def build_cfe(
     password: str,
     platform: Path,
 ) -> None:
-    if not platform.is_file():
-        raise RuntimeError(f"1cv8 executable not found: {platform}")
+    platform = resolve_platform(platform)
     output.parent.mkdir(parents=True, exist_ok=True)
     log_dir = PROJECT_ROOT / "automation" / "build" / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -581,7 +628,56 @@ def build_cfe(
         output.unlink()
     run_1c(platform, base + ["/Out", str(dump_log), "/DumpCfg", str(output), "-Extension", EXTENSION_NAME])
     if not output.is_file():
-        raise RuntimeError(f"CFE was not created: {output}")
+        raise RuntimeError(f"CFE не создан: {output}. Лог: {dump_log}")
+
+
+def load_extension_xml(
+    source: Path,
+    platform: Path,
+    connection_string: str,
+    server: str,
+    ref: str,
+    user: str,
+    password: str,
+    update_db: bool = True,
+) -> None:
+    platform = resolve_platform(platform)
+    if not source.is_dir():
+        raise RuntimeError(f"Каталог XML не найден: {source}")
+    log_dir = PROJECT_ROOT / "automation" / "build" / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    base = designer_args(connection_string, server, ref, user, password)
+    load_log = log_dir / "fresh_restore_load.log"
+    run_1c(platform, base + ["/Out", str(load_log), "/LoadConfigFromFiles", str(source), "-Extension", EXTENSION_NAME])
+    if update_db:
+        update_log = log_dir / "fresh_restore_update.log"
+        run_1c(platform, base + ["/Out", str(update_log), "/UpdateDBCfg", "-Extension", EXTENSION_NAME])
+
+
+def build_cfe_temp_ib(prepared: Path, output: Path, platform: Path) -> None:
+    platform = resolve_platform(platform)
+    if not prepared.is_dir():
+        raise RuntimeError(f"Подготовленный XML не найден: {prepared}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    log_dir = PROJECT_ROOT / "automation" / "build" / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    temp_parent = PROJECT_ROOT / "temp"
+    temp_parent.mkdir(parents=True, exist_ok=True)
+    temp_root = Path(tempfile.mkdtemp(prefix="fresh_cfe_", dir=str(temp_parent)))
+    db_dir = temp_root / "ib"
+    load_log = log_dir / "fresh_build_load.log"
+    dump_log = log_dir / "fresh_build_dump.log"
+    try:
+        create_file_infobase(platform, db_dir)
+        base = ["DESIGNER", "/DisableStartupDialogs", "/DisableStartupMessages", "/F", str(db_dir)]
+        run_1c(platform, base + ["/Out", str(load_log), "/LoadConfigFromFiles", str(prepared), "-Extension", EXTENSION_NAME])
+        if output.exists():
+            output.unlink()
+        run_1c(platform, base + ["/Out", str(dump_log), "/DumpCfg", str(output), "-Extension", EXTENSION_NAME])
+        if not output.is_file():
+            raise RuntimeError(f"CFE не создан: {output}. Лог: {dump_log}")
+    finally:
+        shutil.rmtree(temp_root, ignore_errors=True)
 
 
 def main() -> int:
@@ -597,6 +693,11 @@ def main() -> int:
     parser.add_argument("--user", default=os.getenv("FRESH_1C_USER", ""))
     parser.add_argument("--password", default=os.getenv("FRESH_1C_PASSWORD", ""))
     parser.add_argument("--platform", type=Path, default=Path(os.getenv("PLATFORM_85", "")))
+    parser.add_argument(
+        "--temp-ib",
+        action="store_true",
+        help="Собрать CFE во временной файловой ИБ. Нужна локальная лицензия 1С.",
+    )
     args = parser.parse_args()
 
     prepare_source(args.source.resolve(), args.prepared.resolve())
@@ -606,16 +707,28 @@ def main() -> int:
     if not args.build:
         print("Preparation complete. Pass --build to create CFE.")
         return 0
-    build_cfe(
-        args.prepared.resolve(),
-        args.output.resolve(),
-        args.connection_string,
-        args.server,
-        args.ref,
-        args.user,
-        args.password,
-        args.platform.resolve(),
-    )
+    platform = resolve_platform(args.platform)
+    use_existing_ib = bool((args.server and args.ref) or args.connection_string)
+    if args.temp_ib and use_existing_ib:
+        raise RuntimeError("Нельзя одновременно --temp-ib и FRESH_1C_SERVER/FRESH_1C_CONNECTION_STRING.")
+    if args.temp_ib:
+        build_cfe_temp_ib(args.prepared.resolve(), args.output.resolve(), platform)
+    elif use_existing_ib:
+        build_cfe(
+            args.prepared.resolve(),
+            args.output.resolve(),
+            args.connection_string,
+            args.server,
+            args.ref,
+            args.user,
+            args.password,
+            platform,
+        )
+    else:
+        raise RuntimeError(
+            "Для сборки CFE нужна лицензированная ИБ: задайте FRESH_1C_SERVER/FRESH_1C_REF "
+            "или --temp-ib (файловая ИБ, нужна локальная лицензия 1С)."
+        )
     print(f"Fresh CFE built: {args.output.resolve()}")
     return 0
 
