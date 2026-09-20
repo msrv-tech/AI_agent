@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Запуск тестов ИИА через COM.
+Запуск тестов ИИА через HTTP-bridge.
 
 Перед тестами выполняется обновление БД (xml → конфигурация → UpdateDBCfg).
 Флаг --skip-update пропускает обновление.
 
-Запуск (из каталога automation):
-    python run_tests.py                    # бесплатные тесты (по умолчанию)
-    python run_tests.py --dry-run          # тесты холостого хода (mock, без ИИ)
-    python run_tests.py --with-ai          # все тесты, включая с вызовом ИИ
-    python run_tests.py --ai-only          # только боевые тесты с ИИ
-    python run_tests.py --test ТестRunQuery # один тест
-    python run_tests.py --skip-update      # пропустить обновление БД
-    python run_tests.py --connection "File=\"D:\\base\";"
+Запуск:
+    python automation/ops/run_tests.py
+    python automation/ops/run_tests.py --dry-run
+    python automation/ops/run_tests.py --bridge-url http://192.168.2.127/fresh-unf/hs/codex-test --skip-update
 """
 
 import sys
@@ -22,17 +18,19 @@ import subprocess
 # Поддержка запуска из каталога automation/ops
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 _automation_dir = os.path.dirname(_script_dir)
-for _path in (_script_dir, _automation_dir):
+_repo_root = os.path.dirname(_automation_dir)
+for _path in (_script_dir, _automation_dir, _repo_root):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
-from com_1c import connect_to_1c, call_procedure
-from com_1c.com_connector import setup_console_encoding
-from com_1c.config import get_connection_string
+from automation.bridge.client import call_exported
+from automation.bridge.config import get_bridge_url, get_connection_string, setup_console_encoding
 
 
 def _get(obj, name, default=None):
-    """Безопасно получает атрибут COM-объекта."""
+    """Безопасно получает поле результата теста."""
+    if isinstance(obj, dict):
+        return obj.get(name, default)
     try:
         return getattr(obj, name, default)
     except Exception:
@@ -64,12 +62,17 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Запуск тестов ИИА через COM"
+        description="Запуск тестов ИИА через HTTP-bridge"
+    )
+    parser.add_argument(
+        "--bridge-url",
+        default=None,
+        help="URL HTTP-сервиса Codex Test Bridge",
     )
     parser.add_argument(
         "--connection", "-c",
         default=None,
-        help="Строка подключения к 1С",
+        help="Строка подключения к 1С только для update_1c.py (конфигуратор)",
     )
     parser.add_argument(
         "--test", "-t",
@@ -106,6 +109,7 @@ def main():
     connection_string = get_connection_string(args.connection)
     if args.connection:
         os.environ["1C_CONNECTION_STRING"] = connection_string
+    bridge_url = get_bridge_url(args.bridge_url)
 
     # Предварительное обновление БД (xml → конфигурация → UpdateDBCfg)
     if not args.skip_update:
@@ -127,19 +131,9 @@ def main():
             print(f"Ошибка при обновлении БД: {e}", file=sys.stderr)
             return 1
 
-    conn = connect_to_1c(connection_string)
-    if not conn:
-        print("Ошибка: не удалось подключиться к 1С", file=sys.stderr)
-        return 1
-
     if args.test:
-        # Один тест
         try:
-            result = call_procedure(
-                conn,
-                "ИИА_Тесты",
-                args.test,
-            )
+            result = call_exported(bridge_url, "ИИА_Тесты", args.test, timeout=600)
         except Exception as e:
             print(f"Ошибка вызова ИИА_Тесты.{args.test}: {e}", file=sys.stderr)
             return 1
@@ -161,11 +155,7 @@ def main():
         else:
             proc_name = "ЗапуститьБесплатныеТесты"
         try:
-            results = call_procedure(
-                conn,
-                "ИИА_Тесты",
-                proc_name,
-            )
+            results = call_exported(bridge_url, "ИИА_Тесты", proc_name, timeout=1800)
         except Exception as e:
             print(f"Ошибка вызова ИИА_Тесты.{proc_name}: {e}", file=sys.stderr)
             return 1
@@ -185,9 +175,11 @@ def main():
 
         all_ok = True
         try:
-            count = results.Count()
-            for i in range(count):
-                r = results.Get(i)
+            rows = list(results) if isinstance(results, list) else []
+            if not rows and results is not None and not isinstance(results, list):
+                print(f"Ошибка чтения результатов: неожиданный тип {type(results)}", file=sys.stderr)
+                return 1
+            for i, r in enumerate(rows):
                 name = _get(r, "ИмяТеста", f"Тест{i+1}")
                 ok = _print_result(name, r, verbose=args.verbose)
                 if not ok:

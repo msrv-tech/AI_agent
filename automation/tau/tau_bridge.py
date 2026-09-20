@@ -5,7 +5,7 @@ Bridge-слой между внешним benchmark runner и 1С-агентом
 Поддерживает два режима:
     - stateless replay: собирает prompt из всей истории и вызывает
       СоздатьДиалогИВыполнитьАгентаСинхронно;
-    - session mode: работает turn-by-turn через COM entrypoints
+    - session mode: работает turn-by-turn через HTTP-bridge entrypoints
       СоздатьBridgeСессию / ВыполнитьХодBridge / ЗакрытьBridgeСессию.
 """
 
@@ -20,13 +20,13 @@ from pathlib import Path
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _AUTOMATION_DIR = _SCRIPT_DIR.parent
-for _path in (str(_SCRIPT_DIR), str(_AUTOMATION_DIR)):
+_REPO_ROOT = _AUTOMATION_DIR.parent
+for _path in (str(_SCRIPT_DIR), str(_AUTOMATION_DIR), str(_REPO_ROOT)):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
-from com_1c import connect_to_1c, call_procedure, get_enum_value  # noqa: E402
-from com_1c.com_connector import setup_console_encoding  # noqa: E402
-from com_1c.config import get_connection_string  # noqa: E402
+from automation.bridge.client import bsl_string, call_exported, execute_bsl  # noqa: E402
+from automation.bridge.config import get_bridge_url, setup_console_encoding  # noqa: E402
 
 
 DEFAULT_SYSTEM_PREFIX = (
@@ -38,6 +38,8 @@ DEFAULT_SYSTEM_PREFIX = (
 
 
 def _get(obj, name, default=None):
+    if isinstance(obj, dict):
+        return obj.get(name, default)
     try:
         return getattr(obj, name, default)
     except Exception:
@@ -46,7 +48,7 @@ def _get(obj, name, default=None):
 
 @dataclass
 class BridgeConfig:
-    connection_string: str
+    bridge_url: str
     user: str = "Администратор"
     dialog_type: str = "Агент"
     system_prefix: str = DEFAULT_SYSTEM_PREFIX
@@ -79,17 +81,15 @@ class BridgeResponse:
     error: str = ""
 
 
-def load_bridge_config(config_path: str | None, connection_override: str | None) -> BridgeConfig:
+def load_bridge_config(config_path: str | None, bridge_override: str | None) -> BridgeConfig:
     raw = {}
     if config_path:
         with open(config_path, "r", encoding="utf-8") as f:
             raw = json.load(f)
 
-    connection_string = get_connection_string(
-        connection_override or raw.get("connection_string")
-    )
+    bridge_url = get_bridge_url(bridge_override or raw.get("bridge_url"))
     return BridgeConfig(
-        connection_string=connection_string,
+        bridge_url=bridge_url,
         user=raw.get("user", "Администратор"),
         dialog_type=raw.get("dialog_type", "Агент"),
         system_prefix=raw.get("system_prefix", DEFAULT_SYSTEM_PREFIX),
@@ -169,15 +169,14 @@ def build_prompt(request: BridgeRequest, config: BridgeConfig) -> str:
     return prompt
 
 
-def _resolve_dialog_type(conn, dialog_type: str):
+def _dialog_enum_name(dialog_type: str) -> str:
     type_map = {
         "Agent": "Агент",
         "Агент": "Агент",
         "Запрос1С": "Запрос1С",
         "Zapros1S": "Запрос1С",
     }
-    enum_name = type_map.get(dialog_type, "Агент")
-    return get_enum_value(conn, "ИИА_ТипДиалога", enum_name)
+    return type_map.get(dialog_type, "Агент")
 
 
 def _extract_agent_reply(log_text: str) -> str:
@@ -203,26 +202,23 @@ def _extract_agent_reply(log_text: str) -> str:
 
 
 def create_session(config: BridgeConfig) -> tuple[bool, str, str]:
-    conn = connect_to_1c(config.connection_string)
-    if not conn:
-        return False, "", "Не удалось подключиться к 1С через COM"
-
-    dialog_type = _resolve_dialog_type(conn, config.dialog_type)
-    if dialog_type is None:
-        return False, "", f"Не удалось получить перечисление типа диалога: {config.dialog_type}"
-
+    enum_name = _dialog_enum_name(config.dialog_type)
     try:
-        result = call_procedure(
-            conn,
-            "ИИА_ДиалогCOM",
-            "СоздатьBridgeСессию",
-            config.user,
-            dialog_type,
+        result = execute_bsl(
+            config.bridge_url,
+            "РезультатВыполнения = ИИА_ДиалогCOM.СоздатьBridgeСессию("
+            + bsl_string(config.user)
+            + ", Перечисления.ИИА_ТипДиалога."
+            + enum_name
+            + ");",
+            timeout=60,
         )
     except Exception as exc:
         return False, "", f"Ошибка вызова ИИА_ДиалогCOM.СоздатьBridgeСессию: {exc}"
 
     session_id = str(_get(result, "SessionId") or _get(result, "СсылкаДиалога") or "")
+    if isinstance(_get(result, "СсылкаДиалога"), dict):
+        session_id = str(_get(result, "SessionId") or _get(result, "СсылкаДиалога").get("uuid") or "")
     ok = bool(_get(result, "Успех", False)) and bool(session_id)
     return ok, session_id, "" if ok else "Bridge session не была создана"
 
@@ -231,16 +227,13 @@ def close_session(config: BridgeConfig, session_id: str) -> tuple[bool, str]:
     if not session_id:
         return False, "Пустой session_id"
 
-    conn = connect_to_1c(config.connection_string)
-    if not conn:
-        return False, "Не удалось подключиться к 1С через COM"
-
     try:
-        result = call_procedure(
-            conn,
+        result = call_exported(
+            config.bridge_url,
             "ИИА_ДиалогCOM",
             "ЗакрытьBridgeСессию",
-            session_id,
+            bsl_string(session_id),
+            timeout=60,
         )
     except Exception as exc:
         return False, f"Ошибка вызова ИИА_ДиалогCOM.ЗакрытьBridgeСессию: {exc}"
@@ -248,35 +241,27 @@ def close_session(config: BridgeConfig, session_id: str) -> tuple[bool, str]:
     return bool(_get(result, "Успех", False)), str(_get(result, "Сообщение") or "")
 
 
+def _dialog_ref_str(value, fallback: str = "") -> str:
+    if isinstance(value, dict):
+        return str(value.get("uuid") or value.get("presentation") or fallback)
+    return str(value or fallback)
+
+
 def run_bridge_turn(
     request: BridgeRequest,
     config: BridgeConfig,
     session_id: str,
 ) -> BridgeResponse:
-    conn = connect_to_1c(config.connection_string)
-    if not conn:
-        return BridgeResponse(
-            ok=False,
-            task_id=request.task_id,
-            user_message=request.user_message,
-            prompt_text="",
-            agent_success=False,
-            agent_reply="",
-            dialog_ref="",
-            usage_tokens=0,
-            log_excerpt="",
-            session_id=session_id,
-            error="Не удалось подключиться к 1С через COM",
-        )
-
     prompt_text = build_prompt(request, config)
     try:
-        result = call_procedure(
-            conn,
-            "ИИА_ДиалогCOM",
-            "ВыполнитьХодBridge",
-            session_id,
-            prompt_text,
+        result = execute_bsl(
+            config.bridge_url,
+            "РезультатВыполнения = ИИА_ДиалогCOM.ВыполнитьХодBridge("
+            + bsl_string(session_id)
+            + ", "
+            + bsl_string(prompt_text)
+            + ");",
+            timeout=280,
         )
     except Exception as exc:
         return BridgeResponse(
@@ -306,7 +291,7 @@ def run_bridge_turn(
         prompt_text=prompt_text,
         agent_success=success,
         agent_reply=reply,
-        dialog_ref=str(_get(result, "СсылкаДиалога") or session_id),
+        dialog_ref=_dialog_ref_str(_get(result, "СсылкаДиалога"), session_id),
         usage_tokens=int(_get(result, "UsageTokens") or 0),
         log_excerpt=log_text[: config.max_log_chars],
         session_id=str(_get(result, "SessionId") or session_id),
@@ -315,47 +300,16 @@ def run_bridge_turn(
 
 
 def run_bridge(request: BridgeRequest, config: BridgeConfig) -> BridgeResponse:
-    conn = connect_to_1c(config.connection_string)
-    if not conn:
-        return BridgeResponse(
-            ok=False,
-            task_id=request.task_id,
-            user_message=request.user_message,
-            prompt_text="",
-            agent_success=False,
-            agent_reply="",
-            dialog_ref="",
-            usage_tokens=0,
-            log_excerpt="",
-            session_id="",
-            error="Не удалось подключиться к 1С через COM",
-        )
+    from automation.bridge.client import run_agent_dialog
 
     prompt_text = build_prompt(request, config)
-    enum_val = _resolve_dialog_type(conn, config.dialog_type)
-    if enum_val is None:
-        return BridgeResponse(
-            ok=False,
-            task_id=request.task_id,
-            user_message=request.user_message,
-            prompt_text=prompt_text,
-            agent_success=False,
-            agent_reply="",
-            dialog_ref="",
-            usage_tokens=0,
-            log_excerpt="",
-            session_id="",
-            error=f"Не удалось получить перечисление типа диалога: {config.dialog_type}",
-        )
-
     try:
-        result = call_procedure(
-            conn,
-            "ИИА_ДиалогCOM",
-            "СоздатьДиалогИВыполнитьАгентаСинхронно",
+        result = run_agent_dialog(
+            config.bridge_url,
             config.user,
             prompt_text,
-            enum_val,
+            config.dialog_type,
+            auto_confirm=True,
         )
     except Exception as exc:
         return BridgeResponse(
@@ -374,7 +328,7 @@ def run_bridge(request: BridgeRequest, config: BridgeConfig) -> BridgeResponse:
 
     success = bool(_get(result, "Успех", False))
     log_text = str(_get(result, "Лог") or "")
-    dialog_ref = str(_get(result, "СсылкаДиалога") or "")
+    dialog_ref = _dialog_ref_str(_get(result, "СсылкаДиалога") or result.get("dialog_uuid"))
     usage_tokens = int(_get(result, "UsageTokens") or 0)
     agent_reply = _extract_agent_reply(log_text)
 
@@ -402,14 +356,14 @@ def main() -> int:
     parser.add_argument("--history", default=None, help="Путь к JSON-истории сообщений")
     parser.add_argument("--text", default=None, help="Последнее сообщение пользователя")
     parser.add_argument("--task-id", default="adhoc_task", help="Идентификатор задачи")
-    parser.add_argument("--connection", "-c", default=None, help="Строка подключения к 1С")
+    parser.add_argument("--bridge-url", default=None, help="URL HTTP-сервиса Codex Test Bridge")
     parser.add_argument("--output", default=None, help="Путь к JSON-ответу")
     parser.add_argument("--session-id", default=None, help="ID существующей bridge-сессии")
     parser.add_argument("--create-session", action="store_true", help="Создать bridge-сессию и вернуть session_id")
     parser.add_argument("--close-session", default=None, help="Закрыть bridge-сессию по session_id")
     args = parser.parse_args()
 
-    config = load_bridge_config(args.config, args.connection)
+    config = load_bridge_config(args.config, args.bridge_url)
     if args.create_session:
         ok, session_id, error = create_session(config)
         payload = {"ok": ok, "session_id": session_id, "error": error}

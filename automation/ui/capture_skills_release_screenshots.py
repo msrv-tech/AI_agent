@@ -90,7 +90,7 @@ def run(args: argparse.Namespace) -> dict:
         log_file=str(media_dir / "capture_skills_release_screenshots.log"),
         artifact_dir=str(media_dir),
         headless=not args.headed,
-        skip_com_prepare=True,
+        skip_query1c_prepare=True,
     )
     test = BrowserQuery1CTest(config, Logger(config.log_file))
     try:

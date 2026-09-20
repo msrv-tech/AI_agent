@@ -3,18 +3,17 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import re
 import sys
 from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 AUTOMATION = ROOT / "automation"
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(AUTOMATION))
 
-from com_1c.config import get_connection_string
-from com_1c.com_connector import call_procedure, connect_to_1c, get_enum_value
+from automation.bridge.client import bsl_string, execute_bsl
+from automation.bridge.config import get_bridge_url
 
 
 def _as_bool(value) -> bool:
@@ -31,8 +30,13 @@ def _as_int(value) -> int:
         return 0
 
 
-def run_scenario(conn, scenario: dict, out_dir: Path) -> dict:
-    dialog_type = get_enum_value(conn, "ИИА_ТипДиалога", "Запрос1С")
+def _field(obj, name, default=None):
+    if isinstance(obj, dict):
+        return obj.get(name, default)
+    return default
+
+
+def run_scenario(bridge_url: str, scenario: dict, out_dir: Path) -> dict:
     result = {
         "id": scenario["id"],
         "title": scenario["title"],
@@ -44,15 +48,28 @@ def run_scenario(conn, scenario: dict, out_dir: Path) -> dict:
         "errors": [],
     }
 
-    session = call_procedure(conn, "ИИА_ДиалогCOM", "СоздатьBridgeСессию", "Администратор", dialog_type)
-    session_id = str(session.SessionId)
+    session = execute_bsl(
+        bridge_url,
+        "РезультатВыполнения = ИИА_ДиалогCOM.СоздатьBridgeСессию("
+        + bsl_string("Администратор")
+        + ", Перечисления.ИИА_ТипДиалога.Запрос1С);",
+    )
+    session_id = str(_field(session, "SessionId") or "")
     messages = [scenario["prompt"]] + list(scenario.get("followups", []))
     last = None
     for index, text in enumerate(messages, start=1):
-        turn = call_procedure(conn, "ИИА_ДиалогCOM", "ВыполнитьХодBridge", session_id, text)
+        turn = execute_bsl(
+            bridge_url,
+            "РезультатВыполнения = ИИА_ДиалогCOM.ВыполнитьХодBridge("
+            + bsl_string(session_id)
+            + ", "
+            + bsl_string(text)
+            + ");",
+            timeout=280,
+        )
         last = turn
-        turn_success = _as_bool(turn.Успех)
-        usage = _as_int(turn.UsageTokens)
+        turn_success = _as_bool(_field(turn, "Успех"))
+        usage = _as_int(_field(turn, "UsageTokens"))
         result["turns"].append({"index": index, "text": text, "success": turn_success, "usage_tokens": usage})
         result["usage_tokens"] = usage
         if not turn_success:
@@ -60,10 +77,16 @@ def run_scenario(conn, scenario: dict, out_dir: Path) -> dict:
             break
 
     if last is not None:
-        state = call_procedure(conn, "ИИА_Сервер", "ПолучитьСостояниеЗапроса1С", last.СсылкаДиалога)
-        result["query"] = str(state.ТекстЗапроса or "")
-        result["rows"] = _as_int(state.КоличествоСтрок)
-        log_text = str(last.Лог or "")
+        dialog_uuid = session_id
+        state = execute_bsl(
+            bridge_url,
+            "СсылкаДиалога = Справочники.ИИА_Диалоги.ПолучитьСсылку(Новый УникальныйИдентификатор("
+            + bsl_string(dialog_uuid)
+            + ")); РезультатВыполнения = ИИА_Сервер.ПолучитьСостояниеЗапроса1С(СсылкаДиалога);",
+        )
+        result["query"] = str(_field(state, "ТекстЗапроса") or "")
+        result["rows"] = _as_int(_field(state, "КоличествоСтрок"))
+        log_text = str(_field(last, "Лог") or "")
         (out_dir / f"{scenario['id']}.log").write_text(log_text, encoding="utf-8")
         (out_dir / f"{scenario['id']}.query.txt").write_text(result["query"], encoding="utf-8")
 
@@ -80,6 +103,7 @@ def run_scenario(conn, scenario: dict, out_dir: Path) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--scenarios", default=str(Path(__file__).with_name("followup_scenarios.json")))
+    parser.add_argument("--bridge-url", default=None)
     parser.add_argument("--only", nargs="*", default=None)
     args = parser.parse_args()
 
@@ -89,17 +113,14 @@ def main() -> int:
         scenarios = [item for item in scenarios if item["id"] in wanted]
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = ROOT / "automation" / "logs" / "demo_followups" / f"com_{stamp}"
+    out_dir = ROOT / "automation" / "logs" / "demo_followups" / f"bridge_{stamp}"
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    conn = connect_to_1c(get_connection_string())
-    if conn is None:
-        return 1
+    bridge_url = get_bridge_url(args.bridge_url)
 
     results = []
     for scenario in scenarios:
         print(f"\n== {scenario['id']} ==")
-        res = run_scenario(conn, scenario, out_dir)
+        res = run_scenario(bridge_url, scenario, out_dir)
         results.append(res)
         print(f"success={res['success']} rows={res['rows']} usage={res['usage_tokens']}")
         if res["errors"]:

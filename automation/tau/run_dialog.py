@@ -1,29 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-Создание и запуск диалога агента ИИ через COM (без открытия 1С).
+Создание и запуск диалога агента ИИ через HTTP-bridge.
 
-Запуск (из каталога automation):
-    python run_dialog.py --text "Покажи всех контрагентов" --type Запрос1С
-    python run_dialog.py --text "Создай документ" --type Agent --log-file run_log.txt
-    python run_dialog.py -t "Задача" -u "Администратор" --connection "File=\"D:\\base\";"
+    python automation/tau/run_dialog.py --text "Покажи всех контрагентов" --type Запрос1С
+    python automation/tau/run_dialog.py --text "Создай документ" --type Agent --log-file run_log.txt
 """
 
-import sys
 import os
+import sys
 from datetime import datetime
 
-# Поддержка запуска из каталога automation/tau
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 _automation_dir = os.path.dirname(_script_dir)
-for _path in (_script_dir, _automation_dir):
+_repo_root = os.path.dirname(_automation_dir)
+for _path in (_script_dir, _automation_dir, _repo_root):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
-from com_1c import connect_to_1c, call_procedure, get_enum_value
-from com_1c.com_connector import setup_console_encoding
-from com_1c.config import get_connection_string
+from automation.bridge.client import run_agent_dialog
+from automation.bridge.config import get_bridge_url, setup_console_encoding
 
-# Максимальный размер лог-файла в байтах (по умолчанию 10 МБ)
 DEFAULT_MAX_LOG_SIZE = 10 * 1024 * 1024
 
 
@@ -32,34 +28,18 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Создание и запуск диалога агента ИИ через COM (без GUI 1С)"
+        description="Создание и запуск диалога агента ИИ через HTTP-bridge"
     )
-    parser.add_argument(
-        "--text", "-t",
-        required=True,
-        help="Текст задачи для агента",
-    )
-    parser.add_argument(
-        "--user", "-u",
-        default="Администратор",
-        help="Имя пользователя (по умолчанию: Администратор)",
-    )
+    parser.add_argument("--text", "-t", required=True, help="Текст задачи для агента")
+    parser.add_argument("--user", "-u", default="Администратор", help="Имя пользователя")
     parser.add_argument(
         "--type",
         choices=["Agent", "Агент", "Запрос1С", "Zapros1S"],
         default="Agent",
-        help="Тип диалога: Agent (Агент) или Запрос1С (по умолчанию: Agent)",
+        help="Тип диалога: Agent (Агент) или Запрос1С",
     )
-    parser.add_argument(
-        "--connection", "-c",
-        default=None,
-        help="Строка подключения к 1С",
-    )
-    parser.add_argument(
-        "--log-file",
-        default=None,
-        help="Путь к файлу для записи лога (опционально)",
-    )
+    parser.add_argument("--bridge-url", default=None, help="URL HTTP-сервиса Codex Test Bridge")
+    parser.add_argument("--log-file", default=None, help="Путь к файлу для записи лога")
     parser.add_argument(
         "--log-max-size",
         type=int,
@@ -67,60 +47,24 @@ def main():
         metavar="BYTES",
         help=f"Макс. размер лог-файла в байтах, при превышении выполняется ротация (по умолчанию {DEFAULT_MAX_LOG_SIZE})",
     )
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Подробный вывод",
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Подробный вывод")
     args = parser.parse_args()
 
-    connection_string = get_connection_string(args.connection)
-    conn = connect_to_1c(connection_string)
-    if not conn:
-        return 1
-
-    # Маппинг типа на имя значения перечисления ИИА_ТипДиалога
-    type_map = {
-        "Agent": "Агент",
-        "Агент": "Агент",
-        "Запрос1С": "Запрос1С",
-        "Zapros1S": "Запрос1С",
-    }
-    enum_value_name = type_map.get(args.type, "Агент")
-
-    enum_val = get_enum_value(conn, "ИИА_ТипДиалога", enum_value_name)
-    if enum_val is None:
-        print(f"Ошибка: не удалось получить перечисление ИИА_ТипДиалога.{enum_value_name}", file=sys.stderr)
-        return 1
-
     try:
-        result = call_procedure(
-            conn,
-            "ИИА_ДиалогCOM",
-            "СоздатьДиалогИВыполнитьАгентаСинхронно",
+        result = run_agent_dialog(
+            get_bridge_url(args.bridge_url),
             args.user,
             args.text,
-            enum_val,
+            args.type,
+            auto_confirm=True,
         )
     except Exception as e:
-        print(f"Ошибка вызова ИИА_ДиалогCOM: {e}", file=sys.stderr)
+        print(f"Ошибка вызова агента: {e}", file=sys.stderr)
         return 1
 
-    if result is None:
-        print("Ошибка: процедура вернула пустой результат", file=sys.stderr)
-        return 1
-
-    # Получаем поля из COM-структуры (result — объект 1С с полями Успех, Лог, СсылкаДиалога)
-    def _get(obj, name, default=None):
-        try:
-            return getattr(obj, name, default)
-        except Exception:
-            return default
-
-    success = _get(result, "Успех", False)
-    log_text = _get(result, "Лог") or ""
-    ref_obj = _get(result, "СсылкаДиалога")
-    ref_str = str(ref_obj) if ref_obj is not None else ""
+    success = bool(result.get("Успех"))
+    log_text = result.get("Лог") or ""
+    ref_str = str(result.get("СсылкаДиалога") or result.get("dialog_uuid") or "")
 
     print("--- Результат ---")
     print(f"Диалог: {ref_str}")
@@ -132,7 +76,6 @@ def main():
     if args.log_file:
         try:
             log_path = os.path.abspath(args.log_file)
-            # Ротация: если файл превышает лимит, сохраняем в .old и начинаем заново
             if os.path.exists(log_path) and os.path.getsize(log_path) >= args.log_max_size:
                 old_path = log_path + ".old"
                 if os.path.exists(old_path):
@@ -140,7 +83,6 @@ def main():
                 os.rename(log_path, old_path)
                 if args.verbose:
                     print(f"Ротация лога: {log_path} -> {old_path}")
-            # Заголовок сессии: дата, диалог, задача, результат
             session_header = (
                 f"\n{'='*60}\n"
                 f"run_dialog | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"

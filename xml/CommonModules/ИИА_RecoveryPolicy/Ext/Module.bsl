@@ -2,13 +2,13 @@
 
 Функция ПолучитьРеестрПолитикВосстановления() Экспорт
 	Реестр = Новый Соответствие;
-	Реестр.Вставить("table_not_found", Новый Структура("id,actions,max_attempts", "table_not_found_policy", "GetMetadata->GetObjectFields->RunQuery", 3));
-	Реестр.Вставить("object_not_found", Новый Структура("id,actions,max_attempts", "object_not_found_policy", "GetMetadata->GetObjectFields->RunQuery", 3));
-	Реестр.Вставить("field_not_found", Новый Структура("id,actions,max_attempts", "field_not_found_policy", "RepairDSL|SwitchObject", 3));
+	Реестр.Вставить("table_not_found", Новый Структура("id,actions,max_attempts", "table_not_found_policy", "GetMetadata->GetObjectFields->RunQuery", 2));
+	Реестр.Вставить("object_not_found", Новый Структура("id,actions,max_attempts", "object_not_found_policy", "GetMetadata->GetObjectFields->RunQuery", 2));
+	Реестр.Вставить("field_not_found", Новый Структура("id,actions,max_attempts", "field_not_found_policy", "RepairDSL|SwitchObject", 2));
 	Реестр.Вставить("query_syntax_error", Новый Структура("id,actions,max_attempts", "query_syntax_policy", "RepairDSL", 2));
 	Реестр.Вставить("query_execution_error", Новый Структура("id,actions,max_attempts", "query_execution_policy", "RepairDSL|GetObjectFields", 2));
 	Реестр.Вставить("parameter_missing", Новый Структура("id,actions,max_attempts", "parameter_missing_policy", "RepairDSL", 2));
-	Реестр.Вставить("query_safety_violation", Новый Структура("id,actions,max_attempts", "query_safety_policy", "GetObjectFields|RepairDSL", 3));
+	Реестр.Вставить("query_safety_violation", Новый Структура("id,actions,max_attempts", "query_safety_policy", "GetObjectFields|RepairDSL", 2));
 	Реестр.Вставить("write_failed", Новый Структура("id,actions,max_attempts", "write_retry_same_operation_policy", "ResumeSameOperation|AbortUnsafeRetry", 2));
 	Реестр.Вставить("storage_write_error", Новый Структура("id,actions,max_attempts", "storage_write_same_operation_policy", "ResumeSameOperation|AbortUnsafeRetry", 2));
 	Реестр.Вставить("capability_violation", Новый Структура("id,actions,max_attempts", "capability_violation_policy", "AbortWithExplanation", 1));

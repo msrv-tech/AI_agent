@@ -13,7 +13,7 @@
 
 1. Локальный checkout Tau-Bench уже должен лежать в `vendor/tau2-bench`.
 2. В Python должны быть установлены зависимости Tau-Bench.
-3. Должен работать COM-доступ к 1С и быть настроен `1C_CONNECTION_STRING`.
+3. Должен работать HTTP-bridge к 1С и быть настроен `BRIDGE_URL`.
 4. Должна быть настроена модель для user simulator Tau-Bench: `TAU_BENCH_USER_LLM`.
 5. Для режима с NL judge желательно задать:
    - `TAU_NL_ASSERTIONS_MODEL`
@@ -72,7 +72,7 @@ uv run python ..\..\automation\tau\run_tau_with_1c_agent.py --domain telecom --u
 2. Регистрирует custom agent `onec_tau_agent`.
 3. Tau-Bench orchestrator вызывает этот агент turn-by-turn.
 4. Агент отправляет ход в [`tau_bridge.py`](../automation/tau/tau_bridge.py).
-5. Bridge работает через COM session API в 1С.
+5. Bridge работает через HTTP session API в 1С.
 6. Ответ агента возвращается в Tau-Bench как `AssistantMessage`.
 
 ## Важное ограничение
@@ -98,7 +98,7 @@ uv run python ..\..\automation\tau\run_tau_with_1c_agent.py --domain telecom --u
 
 - В системе может не быть установленных зависимостей Tau-Bench.
 - В системе может не быть `uv`.
-- Может не работать COM/1С на этой машине.
+- Может не работать HTTP-bridge/1С на этой машине.
 - Может быть недоступен LLM для user simulator.
 
 ## Следующий шаг после smoke-run

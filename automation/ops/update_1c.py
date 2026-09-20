@@ -27,12 +27,13 @@ import sys
 # Поддержка запуска из каталога automation/ops
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 _automation_dir = os.path.dirname(_script_dir)
-for _path in (_script_dir, _automation_dir):
+_repo_root = os.path.dirname(_automation_dir)
+for _path in (_script_dir, _automation_dir, _repo_root):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
-from com_1c.config import get_connection_string, get_platform_85
-from com_1c.com_connector import setup_console_encoding
+from automation.bridge.config import get_connection_string, get_platform_85
+from automation.bridge.config import setup_console_encoding
 
 EXTENSION_NAME = "ИИ_Агент"
 

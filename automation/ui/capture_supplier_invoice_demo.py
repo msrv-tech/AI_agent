@@ -488,7 +488,7 @@ def run(args: argparse.Namespace) -> dict:
         log_file=str(diagnostics_dir / "capture_supplier_invoice_demo.log"),
         artifact_dir=str(diagnostics_dir),
         headless=True,
-        skip_com_prepare=True,
+        skip_query1c_prepare=True,
         window_width=1600,
         window_height=900,
     )

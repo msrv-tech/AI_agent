@@ -309,7 +309,7 @@ def open_agent_and_check_link(args: argparse.Namespace, document_marker: str, do
         log_file=str(artifact_dir / "web_agent_skill_write_e2e.log"),
         artifact_dir=str(artifact_dir),
         headless=not args.headed,
-        skip_com_prepare=True,
+        skip_query1c_prepare=True,
     )
     test = BrowserQuery1CTest(config, Logger(config.log_file))
     try:

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Release quality gate runner for the 1C AI Agent.
 
-Runs the reusable COM scenarios against one or more configurations and,
-optionally, browser/bridge E2E tests for skills, write flow, negative UI and
+Runs the reusable HTTP-bridge scenarios against one or more configurations and,
+optionally, browser E2E tests for skills, write flow, negative UI and
 document recognition. The script intentionally orchestrates existing tests
 instead of duplicating their assertions.
 """
@@ -17,12 +17,13 @@ import sys
 import time
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BP = 'Srvr="192.168.2.126:2541";Ref="fresh-bp-demo";Usr="Администратор";Pwd="";'
-DEFAULT_UNF = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";Usr="Администратор";Pwd="";'
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from automation.bridge.config import DEFAULT_BP_BRIDGE_URL, DEFAULT_UNF_BRIDGE_URL
 DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
-DEFAULT_BRIDGE_URL = DEFAULT_WEB_URL + "/hs/codex-test/command"
+DEFAULT_BRIDGE_URL = DEFAULT_UNF_BRIDGE_URL
 DEFAULT_CLOUD_WEB_URL = os.getenv("FRESH_CLOUD_WEB_URL", "https://1cfresh.com/a/sbm/2226502/ru_RU/")
 
 
@@ -89,14 +90,16 @@ def latest_report(log_dir: Path) -> dict:
     return report
 
 
-def run_com_gate(name: str, connection: str, group: str, score_mode: str, artifact_dir: Path, timeout_sec: int) -> dict:
-    log_dir = artifact_dir / "com" / name
+def run_bridge_gate(name: str, bridge_url: str, user: str, group: str, score_mode: str, artifact_dir: Path, timeout_sec: int) -> dict:
+    log_dir = artifact_dir / "bridge" / name
     log_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         sys.executable,
-        "automation/com_1c/test_examples.py",
-        "--connection",
-        connection,
+        "automation/bridge/test_examples.py",
+        "--bridge-url",
+        bridge_url,
+        "--user",
+        user,
         "--examples-group",
         group,
         "--score-mode",
@@ -106,7 +109,7 @@ def run_com_gate(name: str, connection: str, group: str, score_mode: str, artifa
     ]
     result = run_command(cmd, timeout_sec)
     result["name"] = name
-    result["kind"] = "com_examples"
+    result["kind"] = "bridge_examples"
     result["report"] = latest_report(log_dir)
     if result["success"] and result["report"]:
         result["success"] = bool(result["report"].get("quality_gate_passed"))
@@ -235,12 +238,12 @@ def build_ui_jobs(args: argparse.Namespace, artifact_dir: Path) -> list[tuple[st
     return jobs
 
 
-def run_web_com_gate(name: str, web_url: str, user: str, password: str, group: str, artifact_dir: Path, timeout_sec: int, agent_wait_sec: int, auto_confirm: bool, headed: bool) -> dict:
+def run_web_quality_gate(name: str, web_url: str, user: str, password: str, group: str, artifact_dir: Path, timeout_sec: int, agent_wait_sec: int, auto_confirm: bool, headed: bool) -> dict:
     log_dir = artifact_dir / "web" / name
     log_dir.mkdir(parents=True, exist_ok=True)
     cmd = [
         sys.executable,
-        "automation/ui/web_com_gate.py",
+        "automation/ui/web_quality_gate.py",
         "--web-url",
         web_url,
         "--user",
@@ -266,7 +269,7 @@ def run_web_com_gate(name: str, web_url: str, user: str, password: str, group: s
     total_timeout = max(timeout_sec, per_example_timeout * 16)
     result = run_command(cmd, total_timeout)
     result["name"] = name
-    result["kind"] = "web_com_examples"
+    result["kind"] = "web_examples"
     result["report"] = latest_report(log_dir)
     if result["success"] and result["report"]:
         result["success"] = bool(result["report"].get("quality_gate_passed"))
@@ -309,16 +312,18 @@ def parse_args() -> argparse.Namespace:
         "--profile",
         default="local",
         choices=["local", "cloud-fresh"],
-        help="local: COM gate по BP/UNF; cloud-fresh: browser gate для опубликованного 1С:Фреш",
+        help="local: HTTP-bridge gate по BP/UNF; cloud-fresh: browser gate для опубликованного 1С:Фреш",
     )
     parser.add_argument("--cloud-web-url", default="", help="URL облачного приложения 1С:Фреш")
     parser.add_argument("--group", default="extended", help="test_examples group: smoke|recovery|write|safety|metadata|extended")
     parser.add_argument("--score-mode", default="heuristic", choices=["heuristic", "llm", "hybrid"])
-    parser.add_argument("--bp-connection", default=DEFAULT_BP)
-    parser.add_argument("--unf-connection", default=DEFAULT_UNF)
+    parser.add_argument("--bp-bridge", default=DEFAULT_BP_BRIDGE_URL)
+    parser.add_argument("--unf-bridge", default=DEFAULT_UNF_BRIDGE_URL)
+    parser.add_argument("--bp-user", default="Admin")
+    parser.add_argument("--unf-user", default="Администратор")
     parser.add_argument("--skip-bp", action="store_true")
     parser.add_argument("--skip-unf", action="store_true")
-    parser.add_argument("--com-timeout-sec", type=int, default=1200)
+    parser.add_argument("--gate-timeout-sec", type=int, default=1800)
     parser.add_argument("--web-url", default=DEFAULT_WEB_URL)
     parser.add_argument("--bridge-url", default=DEFAULT_BRIDGE_URL)
     parser.add_argument("--user", default="Администратор")
@@ -380,22 +385,22 @@ def main() -> int:
 
     results: list[dict] = []
     if args.profile == "cloud-fresh":
-        results.append(run_web_com_gate(
+        results.append(run_web_quality_gate(
             "cloud_fresh",
             args.web_url,
             args.user,
             args.password,
             args.group,
             artifact_dir,
-            args.com_timeout_sec,
+            args.gate_timeout_sec,
             args.web_agent_wait_sec,
             args.auto_confirm,
             args.headed,
         ))
     if not args.skip_bp:
-        results.append(run_com_gate("bp", args.bp_connection, args.group, args.score_mode, artifact_dir, args.com_timeout_sec))
+        results.append(run_bridge_gate("bp", args.bp_bridge, args.bp_user, args.group, args.score_mode, artifact_dir, args.gate_timeout_sec))
     if not args.skip_unf:
-        results.append(run_com_gate("unf", args.unf_connection, args.group, args.score_mode, artifact_dir, args.com_timeout_sec))
+        results.append(run_bridge_gate("unf", args.unf_bridge, args.unf_user, args.group, args.score_mode, artifact_dir, args.gate_timeout_sec))
 
     for script, script_args, out_dir, timeout_sec in build_ui_jobs(args, artifact_dir):
         out_dir.mkdir(parents=True, exist_ok=True)

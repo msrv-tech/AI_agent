@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-RAG-поиск через COM.
+RAG-поиск через HTTP-bridge.
 
 Вызывает ИИА_RAG_Поиск.ВыполнитьПоискПоТексту(ЗапросТекст, TopK) и выводит результаты.
-С флагом --fields вызывает ВыполнитьПоискПоТекстуСПолями и выводит поля (реквизиты/измерения/ресурсы) для анализа RAG.
+С флагом --fields вызывает ВыполнитьПоискПоТекстуСПолями.
 
-Запуск (из каталога automation):
-    python rag_search.py остатки склад
-    python rag_search.py "запасы склад" "реализация товары"
-    python rag_search.py --top 5 реализация
-    python rag_search.py --fields "продажи реализация категории динамика"
-    python rag_search.py -c "File=\"D:\\base\";" номенклатура контрагенты
+    python automation/rag/rag_search.py остатки склад
+    python automation/rag/rag_search.py --fields "продажи реализация"
 """
 
 import sys
@@ -18,22 +14,20 @@ import os
 import json
 
 _script_dir = os.path.dirname(os.path.abspath(__file__))
-if _script_dir not in sys.path:
-    sys.path.insert(0, _script_dir)
 _automation_dir = os.path.dirname(_script_dir)
-if _automation_dir not in sys.path:
-    sys.path.insert(0, _automation_dir)
+_repo_root = os.path.dirname(_automation_dir)
+for _path in (_script_dir, _automation_dir, _repo_root):
+    if _path not in sys.path:
+        sys.path.insert(0, _path)
 
-from com_1c import connect_to_1c, call_procedure
-from com_1c.com_connector import setup_console_encoding
-from com_1c.config import get_connection_string
+from automation.bridge.client import call_exported
+from automation.bridge.config import get_bridge_url, setup_console_encoding
 
 
-def search_rag(conn, query: str, top_k: int = 10, with_fields: bool = False) -> list:
-    """Выполняет RAG-поиск и возвращает список результатов.
-    Если with_fields=True, для каждого результата получает поля (attrs для Document/Catalog, reg для регистров)."""
+def search_rag(bridge_url: str, query: str, top_k: int = 10, with_fields: bool = False) -> list:
+    """Выполняет RAG-поиск и возвращает список результатов."""
     proc = "ВыполнитьПоискПоТекстуСПолями" if with_fields else "ВыполнитьПоискПоТексту"
-    json_str = call_procedure(conn, "ИИА_RAG_Поиск", proc, query, top_k)
+    json_str = call_exported(bridge_url, "ИИА_RAG_Поиск", proc, '"' + query.replace('"', '""') + '"', str(top_k))
     if json_str is None or not isinstance(json_str, str):
         return []
     try:
@@ -47,7 +41,7 @@ def main():
 
     import argparse
     parser = argparse.ArgumentParser(
-        description="RAG-поиск по метаданным через COM"
+        description="RAG-поиск по метаданным через HTTP-bridge"
     )
     parser.add_argument(
         "words",
@@ -56,9 +50,9 @@ def main():
         help="Слова/фразы для поиска (каждый аргумент — один запрос)",
     )
     parser.add_argument(
-        "--connection", "-c",
+        "--bridge-url",
         default=None,
-        help="Строка подключения к 1С",
+        help="URL HTTP-сервиса Codex Test Bridge",
     )
     parser.add_argument(
         "--top", "-n",
@@ -73,11 +67,7 @@ def main():
     )
     args = parser.parse_args()
 
-    connection_string = get_connection_string(args.connection)
-    conn = connect_to_1c(connection_string)
-    if conn is None:
-        print("Ошибка: не удалось подключиться к 1С.", file=sys.stderr)
-        return 1
+    bridge_url = get_bridge_url(args.bridge_url)
 
     if args.words:
         queries = args.words
@@ -86,7 +76,7 @@ def main():
 
     for query in queries:
         print(f"\n--- Запрос: «{query}» ---")
-        results = search_rag(conn, query, args.top, with_fields=args.fields)
+        results = search_rag(bridge_url, query, args.top, with_fields=args.fields)
         if not results:
             print("  Результатов нет.")
             continue

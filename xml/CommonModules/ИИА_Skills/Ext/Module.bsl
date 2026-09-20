@@ -11,7 +11,7 @@
 		"покажи,выбери,отчет,отчёт,остатки,остаток,продажи,продажа,топ,список,сколько,динамика",
 		"Агент,Запрос1С",
 		100,
-		"Сначала используй RAG/GetMetadata/GetObjectFields для уточнения объектов и полей. Для дат в RunQuery используй ДАТАВРЕМЯ(...), не используй функцию текущей даты. Ограничивай большие выборки через ПЕРВЫЕ. Итог показывай через ShowInfo.",
+		"Сначала используй RAG/GetMetadata/GetObjectFields для уточнения объектов и полей. Для дат в RunQuery используй ДАТАВРЕМЯ(...), не используй функцию текущей даты. По умолчанию ограничивай выборку через ПЕРВЫЕ; полная выборка — только RunQuery с unlimited=true с учётом риска долгого запроса и памяти. Итог показывай через ShowInfo.",
 		"read",
 		"GetMetadata,GetObjectFields,CheckObjectExists,RunQuery,ShowInfo",
 		"CreateReference,CreateDocument,SetField,Write,PostDocument,DeleteObject",

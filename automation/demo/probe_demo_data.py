@@ -2,16 +2,16 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 AUTOMATION = ROOT / "automation"
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(AUTOMATION))
 
-from com_1c.config import get_connection_string
-from com_1c.com_connector import connect_to_1c, execute_query
+from automation.bridge.client import query
+from automation.bridge.config import get_bridge_url
 
 
 PROBES = {
@@ -35,18 +35,29 @@ PROBES = {
 }
 
 
+def _count(payload: dict) -> int:
+    rows = payload.get("rows") or payload.get("result") or []
+    if isinstance(rows, list) and rows:
+        first = rows[0]
+        if isinstance(first, dict):
+            value = first.get("C") or first.get("c") or next(iter(first.values()), 0)
+            return int(float(str(value).replace(",", ".")))
+    count = payload.get("count")
+    if count is not None:
+        return int(count)
+    return 0
+
+
 def main() -> int:
-    conn = connect_to_1c(get_connection_string())
-    if conn is None:
-        return 1
+    bridge_url = get_bridge_url()
     result = {}
     for group, checks in PROBES.items():
         result[group] = {}
         print(f"\n## {group}")
-        for name, query in checks:
+        for name, text in checks:
             try:
-                rows = execute_query(conn, query, ["C"])
-                count = int(float(str(rows[0]["C"]).replace(",", "."))) if rows else 0
+                payload = query(bridge_url, text, limit=1)
+                count = _count(payload)
                 result[group][name] = count
                 print(f"{name}: {count}")
             except Exception as exc:

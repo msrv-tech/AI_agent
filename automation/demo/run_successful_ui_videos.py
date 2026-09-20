@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--report", required=True, help="report.json from run_followup_com.py")
+    parser.add_argument("--report", required=True, help="report.json from run_followup_bridge.py")
     parser.add_argument("--scenarios", default=str(Path(__file__).with_name("followup_scenarios.json")))
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--windows-compatible", action="store_true")

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Browser-based quality gate for 1C:Fresh cloud (without COM/HTTP bridge).
+"""Browser-based quality gate for 1C:Fresh cloud (without HTTP-bridge).
 
-Runs the same README examples as automation/com_1c/test_examples.py through the
+Runs the same README examples as automation/bridge/test_examples.py through the
 published web-client: OpenID login, agent form, prompt submission, UI log capture,
 heuristic scoring and scenario rules.
 """
@@ -21,7 +21,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AUTOMATION_ROOT = REPO_ROOT / "automation"
-for _path in (REPO_ROOT, AUTOMATION_ROOT, AUTOMATION_ROOT / "com_1c"):
+for _path in (REPO_ROOT, AUTOMATION_ROOT, AUTOMATION_ROOT / "bridge"):
     _path_str = str(_path)
     if _path_str not in sys.path:
         sys.path.insert(0, _path_str)
@@ -30,7 +30,7 @@ from automation.ui.web_agent_modes_e2e import send_prompt, switch_mode
 from automation.ui.web_agent_skill_e2e import click_label, close_font_dialog
 from automation.ui.web_document_recognition_e2e import wait_for_agent_state
 from automation.ui.web_query1c_test import BrowserQuery1CTest, Logger, WebUiConfig, setup_console_encoding
-from test_examples import (  # noqa: E402
+from automation.bridge.test_examples import (  # noqa: E402
     EXAMPLE_GROUPS,
     QUALITY_GATE_MIN_AVG_SCORE,
     QUALITY_GATE_MIN_SINGLE_SCORE,
@@ -180,10 +180,10 @@ def run(args: argparse.Namespace) -> dict:
         query_params_json="",
         expected_text="",
         timeout_sec=args.timeout_sec,
-        log_file=str(artifact_dir / "web_com_gate.log"),
+        log_file=str(artifact_dir / "web_quality_gate.log"),
         artifact_dir=str(artifact_dir),
         headless=not args.headed,
-        skip_com_prepare=True,
+        skip_query1c_prepare=True,
     )
     logger = Logger(config.log_file)
     test = BrowserQuery1CTest(config, logger)
@@ -294,7 +294,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--examples")
     parser.add_argument("--score-mode", default="heuristic", choices=["heuristic"])
     parser.add_argument("--log-dir", default=str(REPO_ROOT / "automation" / "logs"))
-    parser.add_argument("--artifact-dir", default=str(REPO_ROOT / "automation" / "logs" / "web_com_gate"))
+    parser.add_argument("--artifact-dir", default=str(REPO_ROOT / "automation" / "logs" / "web_quality_gate"))
     parser.add_argument("--timeout-sec", type=int, default=120)
     parser.add_argument("--agent-wait-sec", type=int, default=180)
     parser.add_argument("--auto-confirm", action="store_true")

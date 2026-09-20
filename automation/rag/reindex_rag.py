@@ -2,7 +2,7 @@
 """
 Запуск переиндексации RAG и уведомление в Telegram по окончании.
 
-Вызывает ИИА_RAG_Индексатор.ПерестроитьИндекс() через COM, измеряет время,
+Вызывает ИИА_RAG_Индексатор.ПерестроитьИндекс() через HTTP-bridge, измеряет время,
 отправляет уведомление в Telegram (успех или ошибка).
 
 Запуск (из каталога automation):
@@ -20,15 +20,14 @@ import urllib.parse
 from datetime import datetime
 
 _script_dir = os.path.dirname(os.path.abspath(__file__))
-if _script_dir not in sys.path:
-    sys.path.insert(0, _script_dir)
 _automation_dir = os.path.dirname(_script_dir)
-if _automation_dir not in sys.path:
-    sys.path.insert(0, _automation_dir)
+_repo_root = os.path.dirname(_automation_dir)
+for _path in (_script_dir, _automation_dir, _repo_root):
+    if _path not in sys.path:
+        sys.path.insert(0, _path)
 
-from com_1c import connect_to_1c, call_procedure
-from com_1c.com_connector import setup_console_encoding
-from com_1c.config import get_connection_string
+from automation.bridge.client import call_exported
+from automation.bridge.config import get_bridge_url, setup_console_encoding
 
 # Загрузка .env для Telegram
 try:
@@ -90,9 +89,9 @@ def main():
         description="Переиндексация RAG и уведомление в Telegram"
     )
     parser.add_argument(
-        "--connection", "-c",
+        "--bridge-url",
         default=None,
-        help="Строка подключения к 1С",
+        help="URL HTTP-сервиса Codex Test Bridge",
     )
     parser.add_argument(
         "--no-telegram",
@@ -101,22 +100,11 @@ def main():
     )
     args = parser.parse_args()
 
-    connection_string = get_connection_string(args.connection)
     started_at = datetime.now()
-
-    print("Подключение к 1С...")
-    conn = connect_to_1c(connection_string)
-    if conn is None:
-        msg = (
-            "<b>RAG: переиндексация — ошибка</b>\n\n"
-            "Не удалось подключиться к базе 1С."
-        )
-        send_telegram_with_status(msg, args.no_telegram)
-        return 1
 
     print("Запуск переиндексации RAG...")
     try:
-        call_procedure(conn, "ИИА_RAG_Индексатор", "ПерестроитьИндекс")
+        call_exported(get_bridge_url(args.bridge_url), "ИИА_RAG_Индексатор", "ПерестроитьИндекс", timeout=600)
     except Exception as exc:
         elapsed = (datetime.now() - started_at).total_seconds()
         err_text = str(exc)

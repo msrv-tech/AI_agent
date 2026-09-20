@@ -3,7 +3,7 @@
 Браузерный UI тест опубликованного веб-клиента 1С для сценария Запрос1С.
 
 Текущий сценарий:
-1. Подготавливает диалог Запрос1С через COM, чтобы агент/форма получили актуальный черновик.
+1. Подготавливает диалог Запрос1С через HTTP-bridge, чтобы агент/форма получили актуальный черновик.
 2. Открывает опубликованный web-client в Chrome через DevTools Protocol.
 3. Выполняет вход под пользователем 1С.
 4. Пытается открыть команду "ИИ Агент" через hash-навигацию web-клиента.
@@ -18,7 +18,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import shutil
 import socket
 import subprocess
@@ -53,41 +52,12 @@ for _path in (REPO_ROOT, AUTOMATION_ROOT):
     if _path_str not in sys.path:
         sys.path.insert(0, _path_str)
 
-from com_1c import call_procedure, connect_to_1c, get_enum_value
+from automation.bridge.client import prepare_query1c_dialog
+from automation.bridge.config import get_bridge_url
 
 
 DEFAULT_CONNECTION_STRING = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";'
 DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
-
-
-def _parse_1c_connection_string(value: str) -> dict[str, str]:
-    result: dict[str, str] = {}
-    for key, raw in re.findall(r"([A-Za-zА-Яа-я0-9_]+)\s*=\s*(\"(?:[^\"]|\"\")*\"|[^;]*)\s*;?", value or ""):
-        item = raw.strip()
-        if item.startswith('"') and item.endswith('"'):
-            item = item[1:-1].replace('""', '"')
-        result[key.lower()] = item
-    return result
-
-
-def _com_connection_string(base_path: str, user: str, password: str) -> str:
-    parts = _parse_1c_connection_string(base_path)
-    if parts:
-        parts["usr"] = user
-        parts["pwd"] = password
-        ordered_keys = ["file", "srvr", "ref", "usr", "pwd"]
-        keys = [key for key in ordered_keys if key in parts] + [
-            key for key in parts if key not in ordered_keys
-        ]
-        names = {
-            "file": "File",
-            "srvr": "Srvr",
-            "ref": "Ref",
-            "usr": "Usr",
-            "pwd": "Pwd",
-        }
-        return "".join(f'{names.get(key, key)}="{parts[key]}";' for key in keys)
-    return f'File="{base_path}";Usr="{user}";Pwd="{password}";'
 
 
 def setup_console_encoding() -> None:
@@ -124,7 +94,8 @@ class WebUiConfig:
     log_file: Optional[str]
     artifact_dir: Optional[str]
     headless: bool
-    skip_com_prepare: bool
+    skip_query1c_prepare: bool
+    bridge_url: str = ""
     window_width: int = 1920
     window_height: int = 1080
 
@@ -164,8 +135,8 @@ class BrowserQuery1CTest:
     def run(self) -> int:
         try:
             self.logger.info(f"Старт browser Query1C test: web_url={self.config.web_url}")
-            if not self.config.skip_com_prepare:
-                self._prepare_query1c_dialog_via_com()
+            if not self.config.skip_query1c_prepare:
+                self._prepare_query1c_dialog_via_bridge()
             self._launch_browser()
             self._open_initial_target()
             self._login()
@@ -183,29 +154,14 @@ class BrowserQuery1CTest:
         finally:
             self._close()
 
-    def _prepare_query1c_dialog_via_com(self) -> None:
-        connection_string = _com_connection_string(self.config.base_path, self.config.user, self.config.password)
-        self.logger.info("Подготавливаем диалог Запрос1С через COM.")
-        connection = connect_to_1c(connection_string)
-        if not connection:
-            raise RuntimeError("Не удалось открыть COM-подключение к 1С.")
-        dialog_type = get_enum_value(connection, "ИИА_ТипДиалога", "Запрос1С")
-        if dialog_type is None:
-            raise RuntimeError("Не найдено перечисление ИИА_ТипДиалога.Запрос1С.")
-        dialog_ref = call_procedure(
-            connection,
-            "ИИА_Сервер",
-            "СоздатьНовыйДиалог",
+    def _prepare_query1c_dialog_via_bridge(self) -> None:
+        bridge_url = get_bridge_url(self.config.bridge_url or None)
+        if not self.config.bridge_url:
+            bridge_url = self.config.web_url.rstrip("/") + "/hs/codex-test"
+        self.logger.info("Подготавливаем диалог Запрос1С через HTTP-bridge.")
+        prepare_query1c_dialog(
+            bridge_url,
             self.config.user,
-            dialog_type,
-        )
-        if dialog_ref is None:
-            raise RuntimeError("COM не вернул ссылку на диалог Запрос1С.")
-        call_procedure(
-            connection,
-            "ИИА_Сервер",
-            "СохранитьЧерновикЗапроса1С",
-            dialog_ref,
             self.config.query_text,
             self.config.query_params_json,
         )
@@ -855,7 +811,8 @@ def parse_args() -> WebUiConfig:
         default=str(Path("automation") / "logs" / "web_query1c_artifacts"),
     )
     parser.add_argument("--headed", action="store_true")
-    parser.add_argument("--skip-com-prepare", action="store_true")
+    parser.add_argument("--skip-query1c-prepare", action="store_true")
+    parser.add_argument("--bridge-url", default="")
     args = parser.parse_args()
     return WebUiConfig(
         web_url=args.web_url,
@@ -870,7 +827,8 @@ def parse_args() -> WebUiConfig:
         log_file=args.log_file,
         artifact_dir=args.artifact_dir,
         headless=not args.headed,
-        skip_com_prepare=args.skip_com_prepare,
+        skip_query1c_prepare=args.skip_query1c_prepare,
+        bridge_url=args.bridge_url,
     )
 
 

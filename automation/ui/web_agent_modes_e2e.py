@@ -156,7 +156,7 @@ def run(args: argparse.Namespace) -> dict:
         log_file=str(artifact_dir / "web_agent_modes_e2e.log"),
         artifact_dir=str(artifact_dir),
         headless=not args.headed,
-        skip_com_prepare=True,
+        skip_query1c_prepare=True,
     )
     test = BrowserQuery1CTest(config, Logger(config.log_file))
     skill_name = "user-skill-agent-modes-e2e"

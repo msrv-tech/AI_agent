@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import sys
 import time
 import uuid
@@ -17,7 +16,8 @@ for _path in (REPO_ROOT, AUTOMATION_ROOT):
     if _path_str not in sys.path:
         sys.path.insert(0, _path_str)
 
-from com_1c import call_procedure, connect_to_1c, get_enum_value
+from automation.bridge.client import prepare_query1c_dialog
+from automation.bridge.config import get_bridge_url
 
 
 DEFAULT_HOST_JOBS_ROOT = REPO_ROOT / "automation" / "logs" / "vm_ui_jobs"
@@ -25,36 +25,6 @@ DEFAULT_GUEST_JOBS_ROOT = r"\\DEV1\D\bsl\AI_agent\automation\logs\vm_ui_jobs"
 HOST_PREPARED_QUERY1C_MARKER = "__HOST_PREPARED_QUERY1C__"
 DEFAULT_CONNECTION_STRING = 'Srvr="192.168.2.126:2541";Ref="fresh-unf";'
 DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
-
-
-def _parse_1c_connection_string(value: str) -> dict[str, str]:
-    result: dict[str, str] = {}
-    for key, raw in re.findall(r"([A-Za-zА-Яа-я0-9_]+)\s*=\s*(\"(?:[^\"]|\"\")*\"|[^;]*)\s*;?", value or ""):
-        item = raw.strip()
-        if item.startswith('"') and item.endswith('"'):
-            item = item[1:-1].replace('""', '"')
-        result[key.lower()] = item
-    return result
-
-
-def _com_connection_string(base_path: str, user: str, password: str) -> str:
-    parts = _parse_1c_connection_string(base_path)
-    if parts:
-        parts["usr"] = user
-        parts["pwd"] = password
-        ordered_keys = ["file", "srvr", "ref", "usr", "pwd"]
-        keys = [key for key in ordered_keys if key in parts] + [
-            key for key in parts if key not in ordered_keys
-        ]
-        names = {
-            "file": "File",
-            "srvr": "Srvr",
-            "ref": "Ref",
-            "usr": "Usr",
-            "pwd": "Pwd",
-        }
-        return "".join(f'{names.get(key, key)}="{parts[key]}";' for key in keys)
-    return f'File="{base_path}";Usr="{user}";Pwd="{password}";'
 
 
 def ensure_dir(path: Path) -> Path:
@@ -93,7 +63,7 @@ def build_job(args: argparse.Namespace, job_id: str, run_dir: Path) -> dict[str,
         "web_url": args.web_url,
         "chrome_exe": args.chrome_exe,
         "headed": args.headed,
-        "skip_com_prepare": args.prepare_query1c_on_host,
+        "skip_query1c_prepare": args.prepare_query1c_on_host,
         "run_dir": str(run_dir),
         "log_file": str(run_dir / "ui_test.log"),
         "screenshot_dir": str(run_dir / "artifacts"),
@@ -114,30 +84,10 @@ def wait_for_result(host_jobs_root: Path, job_id: str, timeout_sec: int) -> Path
 
 
 def prepare_query1c_dialog_on_host(args: argparse.Namespace) -> None:
-    connection_string = _com_connection_string(args.base_path, args.user, args.password)
-    connection = connect_to_1c(connection_string)
-    if not connection:
-        raise RuntimeError("Не удалось открыть COM-подключение к 1С на хосте для подготовки Query1C.")
-    dialog_type = get_enum_value(connection, "ИИА_ТипДиалога", "Запрос1С")
-    if dialog_type is None:
-        raise RuntimeError("Не найдено перечисление ИИА_ТипДиалога.Запрос1С на хосте.")
-    dialog_ref = call_procedure(
-        connection,
-        "ИИА_Сервер",
-        "СоздатьНовыйДиалог",
-        args.user,
-        dialog_type,
-    )
-    if dialog_ref is None:
-        raise RuntimeError("Хост не получил ссылку на диалог Query1C.")
-    call_procedure(
-        connection,
-        "ИИА_Сервер",
-        "СохранитьЧерновикЗапроса1С",
-        dialog_ref,
-        args.query_text,
-        args.query_params_json,
-    )
+    bridge_url = get_bridge_url(getattr(args, "bridge_url", None))
+    if not getattr(args, "bridge_url", None):
+        bridge_url = str(args.web_url).rstrip("/") + "/hs/codex-test"
+    prepare_query1c_dialog(bridge_url, args.user, args.query_text, args.query_params_json)
 
 
 def parse_args() -> argparse.Namespace:
@@ -162,6 +112,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--chrome-exe", default=r"C:\Program Files\Google\Chrome\Application\chrome.exe")
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--prepare-query1c-on-host", action="store_true")
+    parser.add_argument("--bridge-url", default="")
     parser.add_argument("--leave-open", action="store_true")
     parser.add_argument("--wait-timeout-sec", type=int, default=600)
     parser.add_argument("--host-jobs-root", default=str(DEFAULT_HOST_JOBS_ROOT))

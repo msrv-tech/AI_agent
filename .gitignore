@@ -27,7 +27,7 @@ README_КАРКАС.md
 **/settings/
 *.prefs
 
-# Python (com_1c и др.)
+# Python
 __pycache__/
 *.pyc
 *.pyo
@@ -39,7 +39,6 @@ __pycache__/
 КонфигурацияТест/
 automation/vanessa/logs/
 automation/tau/logs/
-automation/com_1c/logs/
 
 # Логи сборки и запуска
 automation/logs/

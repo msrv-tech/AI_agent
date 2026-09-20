@@ -10,7 +10,7 @@
 	Реестр.Вставить("FindReferenceByName", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "FindReferenceByName", "object_name,name|value", Истина, Ложь, "data.read", Истина, "retry_same_call"));
 	Реестр.Вставить("FindReferenceByGUID", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "FindReferenceByGUID", "guid", Истина, Ложь, "data.read", Истина, "retry_same_call"));
 	Реестр.Вставить("FindReferenceByURL", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "FindReferenceByURL", "url", Истина, Ложь, "data.read", Истина, "retry_same_call"));
-	Реестр.Вставить("RunQuery", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "RunQuery", "query", Истина, Ложь, "data.read", Истина, "retry_same_call"));
+	Реестр.Вставить("RunQuery", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "RunQuery", "query, unlimited?", Истина, Ложь, "data.read", Истина, "retry_same_call"));
 	Реестр.Вставить("ShowInfo", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "ShowInfo", "message", Истина, Ложь, "data.read", Истина, "retry_same_call"));
 	Реестр.Вставить("GetChangedObjects", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "GetChangedObjects", "-", Истина, Ложь, "data.read", Истина, "retry_same_call"));
 	Реестр.Вставить("GetMetadata", Новый Структура("name,input_schema,idempotent,requires_write,capability,supports_safe_retries,retry_strategy", "GetMetadata", "filter?", Истина, Ложь, "metadata.read", Истина, "retry_same_call"));
@@ -49,9 +49,11 @@
 		Возврат Результат;
 	КонецЕсли;
 	
-	Требуемое = ПолучитьCapabilityДляДействия(Строка(Шаг.action));
-	Результат.Требуемое = Требуемое;
-	Если ПустаяСтрока(Требуемое) Тогда
+	Допустимые = ПолучитьДопустимыеCapabilityДляДействия(Строка(Шаг.action));
+	Если Допустимые.Количество() > 0 Тогда
+		Результат.Требуемое = Строка(Допустимые[0]);
+	КонецЕсли;
+	Если Допустимые.Количество() = 0 Тогда
 		Возврат Результат;
 	КонецЕсли;
 	
@@ -61,11 +63,32 @@
 		Возврат Результат;
 	КонецЕсли;
 	
-	Если КонтекстВыполнения.DSL_Capabilities.Найти(Требуемое) = Неопределено Тогда
-		Результат.Успех = Ложь;
-		Результат.Сообщение = "Недостаточно прав для действия '" + Строка(Шаг.action) + "'. Требуется capability '" + Требуемое + "'.";
-	КонецЕсли;
+	Для Каждого Кандидат Из Допустимые Цикл
+		Если КонтекстВыполнения.DSL_Capabilities.Найти(Строка(Кандидат)) <> Неопределено Тогда
+			Возврат Результат;
+		КонецЕсли;
+	КонецЦикла;
 	
+	Результат.Успех = Ложь;
+	Результат.Сообщение = "Недостаточно прав для действия '" + Строка(Шаг.action) + "'. Требуется capability '" + Результат.Требуемое + "'.";
+	Возврат Результат;
+КонецФункции
+
+Функция ПолучитьДопустимыеCapabilityДляДействия(Знач Действие)
+	Результат = Новый Массив;
+	Основное = ПолучитьCapabilityДляДействия(Действие);
+	Если ПустаяСтрока(Основное) Тогда
+		Возврат Результат;
+	КонецЕсли;
+	Результат.Добавить(Основное);
+	ДействиеВРег = ВРег(СокрЛП(Строка(Действие)));
+	Если ДействиеВРег = "WRITE" Или ДействиеВРег = "SETFIELD" Тогда
+		Если Основное = "data.write.reference" И Результат.Найти("data.write.document") = Неопределено Тогда
+			Результат.Добавить("data.write.document");
+		ИначеЕсли Основное = "data.write.document" И Результат.Найти("data.write.reference") = Неопределено Тогда
+			Результат.Добавить("data.write.reference");
+		КонецЕсли;
+	КонецЕсли;
 	Возврат Результат;
 КонецФункции
 

@@ -2,9 +2,9 @@
 
 ## Уровни проверки
 
-### COM gate
+### HTTP-bridge gate
 
-Быстрый и переносимый уровень. Запускает агента через COM без браузера и проверяет:
+Быстрый и переносимый уровень. Запускает агента через Codex Test Bridge без браузера и проверяет:
 
 - корректный бизнес-результат;
 - DSL-действия;
@@ -15,14 +15,14 @@
 
 Примеры:
 
-```powershell
-python automation\com_1c\test_examples.py --connection 'Srvr="192.168.2.126:2541";Ref="fresh-bp-demo";Usr="Администратор";Pwd="";' --examples-group extended
-python automation\com_1c\test_examples.py --connection 'Srvr="192.168.2.126:2541";Ref="fresh-unf";Usr="Администратор";Pwd="";' --examples-group extended
+```bash
+python automation/bridge/test_examples.py --bridge-url 'http://192.168.2.127/fresh-bp-demo/hs/codex-test' --user Admin --examples-group extended
+python automation/bridge/test_examples.py --bridge-url 'http://192.168.2.127/fresh-unf/hs/codex-test' --examples-group extended
 ```
 
 ### Matrix gate
 
-Релизный оркестратор. Прогоняет COM gate по нескольким конфигурациям и опциональные UI/E2E проверки:
+Релизный оркестратор. Прогоняет HTTP-bridge gate по нескольким конфигурациям и опциональные UI/E2E проверки:
 
 - обычный агент выбирает skill;
 - skill реально создает/записывает документ и показывает ссылку;
@@ -57,7 +57,7 @@ python automation\quality_gate_matrix.py --group extended --include-skill-write 
 
 ### Cloud Fresh gate
 
-Для опубликованного приложения на [1С:Фреш](https://1cfresh.com/a/sbm/2226502/ru_RU/) COM и HTTP bridge недоступны снаружи. Используется browser gate:
+Для опубликованного приложения на [1С:Фреш](https://1cfresh.com/a/sbm/2226502/ru_RU/) внешний HTTP-bridge обычно недоступен. Используется browser gate:
 
 1. OpenID-вход в сервис (`FRESH_CLOUD_USER` / `FRESH_CLOUD_PASSWORD`).
 2. Прогон сценариев `test_examples.py` через форму «ИИ Агент» в web-client.
@@ -77,10 +77,10 @@ FRESH_CLOUD_PASSWORD=ваш_пароль
 python automation\quality_gate_matrix.py --profile cloud-fresh --group extended --auto-confirm
 ```
 
-Только browser COM gate (без Skills UI):
+Только browser gate (без Skills UI):
 
 ```powershell
-python automation\ui\web_com_gate.py --examples-group extended --auto-confirm --headed
+python automation/ui/web_quality_gate.py --examples-group extended --auto-confirm --headed
 ```
 
 Smoke-прогон (4 сценария):

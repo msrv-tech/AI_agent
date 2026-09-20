@@ -16,7 +16,7 @@ for _path in (REPO_ROOT, REPO_ROOT / "automation"):
         sys.path.insert(0, str(_path))
 
 from automation.ui.web_agent_modes_e2e import send_prompt, switch_mode
-from automation.ui.web_com_gate import open_agent_form
+from automation.ui.web_quality_gate import open_agent_form
 from automation.ui.web_document_recognition_e2e import wait_for_agent_state
 from automation.ui.web_query1c_test import BrowserQuery1CTest, Logger, WebUiConfig, setup_console_encoding
 
@@ -104,7 +104,7 @@ def run(args: argparse.Namespace) -> dict:
         log_file=str(artifact_dir / "web_result_table_link_e2e.log"),
         artifact_dir=str(artifact_dir),
         headless=not args.headed,
-        skip_com_prepare=True,
+        skip_query1c_prepare=True,
     )
     test = BrowserQuery1CTest(config, Logger(config.log_file))
     result: dict = {"passed": False, "prompt": args.prompt}

@@ -128,7 +128,7 @@ def run(args: argparse.Namespace) -> dict:
         log_file=str(artifact_dir / "web_skills_lifecycle_e2e.log"),
         artifact_dir=str(artifact_dir),
         headless=not args.headed,
-        skip_com_prepare=True,
+        skip_query1c_prepare=True,
     )
     test = BrowserQuery1CTest(config, Logger(config.log_file))
     result: dict[str, object] = {"skillName": skill_name, "marker": marker}

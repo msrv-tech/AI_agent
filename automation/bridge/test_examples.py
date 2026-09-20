@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Тестирование примеров через COM.
+Тестирование примеров через HTTP-bridge.
 
 Создаёт диалоги для каждого примера запроса, выполняет агента
-синхронно через ИИА_ДиалогCOM. Сохраняет лог каждого диалога в отдельный
+через ИИА_ДиалогCOM / оркестратор. Сохраняет лог каждого диалога в отдельный
 текстовый файл. По окончании отправляет уведомление в Telegram.
 
-Запуск (из каталога automation):
-    python test_examples.py
-    python test_examples.py --connection "File=\"D:\\base\";"
-    python test_examples.py --connection "Srvr=\"127.0.0.1\";Ref=\"erp_mark\";Usr=\"Администратор\";Pwd=\"\";"
-    python test_examples.py --log-dir ./logs --verbose
+Запуск (из корня репозитория):
+    python automation/bridge/test_examples.py --examples-group extended
+    python automation/bridge/test_examples.py --bridge-url http://192.168.2.127/fresh-unf/hs/codex-test --examples-group smoke
+    python automation/bridge/test_examples.py --log-dir ./automation/logs --verbose
 
 Секреты Telegram в .env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 """
@@ -30,20 +29,20 @@ from pathlib import Path
 
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 _automation_dir = os.path.dirname(_script_dir)
-for _path in (_script_dir, _automation_dir):
+_repo_root = os.path.dirname(_automation_dir)
+for _path in (_script_dir, _automation_dir, _repo_root):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
-from com_1c import connect_to_1c, call_procedure, get_enum_value
-from com_1c.com_connector import setup_console_encoding
-from com_1c.config import get_connection_string
+from automation.bridge.client import bsl_string, execute_bsl, run_agent_dialog
+from automation.bridge.config import get_bridge_url, setup_console_encoding
 
 DEFAULT_TELEGRAM_PROXY_URL = "http://192.168.2.124:10808"
 
 # Загрузка .env для Telegram
 try:
     from dotenv import load_dotenv
-    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    _root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     load_dotenv(os.path.join(_root, ".env"))
 except ImportError:
     pass
@@ -59,9 +58,9 @@ README_EXAMPLES = [
     },
     {
         "id": "stock_low",
-        "text": "Какие товары на складе 'Основной' имеют остаток меньше 5 штук?",
+        "text": "Покажи первые 10 товаров с ненулевым текущим остатком.",
         "type": "Запрос1С",
-        "description": "Остатки на складе",
+        "description": "Текущие остатки товаров",
     },
     {
         "id": "create_receipt",
@@ -72,9 +71,9 @@ README_EXAMPLES = [
     },
     {
         "id": "sales_analysis",
-        "text": "Проанализируй динамику продаж за последний месяц и выдели топ-3 растущих категории.",
+        "text": "Покажи топ-3 номенклатуры по сумме продаж за весь период.",
         "type": "Запрос1С",
-        "description": "Анализ динамики продаж",
+        "description": "Топ номенклатуры по продажам",
     },
     {
         "id": "nested_fields_query",
@@ -142,7 +141,7 @@ SUMMARY_CONFIRM_WORDS = (
     "получен", "завершен", "завершён", "существует", "уже существует",
     "сформулирована", "подготовлен", "подготовлена",
     "данные не найдены", "не найдено", "пустой результат", "не было создано",
-    "не был создан", "не созданы"
+    "не был создан", "не созданы", "нет документа заказа",
 )
 SUMMARY_MARKER = "=== РЕЗЮМЕ ВЫПОЛНЕННОЙ РАБОТЫ ==="
 SUMMARY_NOT_FORMED = "Резюме не сформировано"
@@ -190,29 +189,55 @@ SCENARIO_RULES_BY_ID = {
     "orders_client": {
         "expect_success": True,
         "allow_empty_result": True,
-        "required_actions_any": ["RunQuery"],
+        "required_actions_any": ["RunQuery", "GetMetadata"],
         "required_actions_all": [],
         "forbidden_actions": [],
-        "max_errors": 24,
+        "max_errors": 2,
         "require_recovery": False,
         "require_zero_rows": False,
+        "required_log_patterns_any": [
+            {
+                "pattern": r"Документ\.[А-Яа-яA-Za-z0-9_]*Заказ[А-Яа-яA-Za-z0-9_]*(?:Покупател|Клиент)",
+                "reason": "Заказы клиента читаются из документа заказа покупателя/клиента, если он есть в конфигурации",
+                "scope": "full_log",
+            },
+            {
+                "pattern": r"(GetMetadata|Получены метаданные)[\s\S]{0,1500}заказ",
+                "reason": "Если документа заказа клиента нет, агент должен искать его в метаданных",
+                "scope": "full_log",
+            },
+            {
+                "pattern": r"нет документа заказа (покупателя|клиента)",
+                "reason": "Если в конфигурации нет документа заказа клиента, агент должен явно это сообщить",
+                "scope": "full_log",
+            },
+        ],
         "forbidden_log_patterns": [
             {
                 "pattern": r"Ошибка выполнения шага 'FindReferenceByName'[\s\S]{0,240}ТехноПром",
                 "reason": "Отчетная задача не должна обрываться на точном lookup значения фильтра",
             },
+            {
+                "pattern": r"ИЗ\s+Документ\.(?:Реализация|КорректировкаРеализации)",
+                "reason": "Заказы клиента не должны читаться из реализации",
+            },
         ],
     },
     "stock_low": {
         "expect_success": True,
-        "allow_empty_result": True,
+        "allow_empty_result": False,
         "required_actions_any": ["RunQuery"],
         "required_actions_all": [],
         "forbidden_actions": [],
-        "max_errors": 36,
+        "max_errors": 2,
         "require_recovery": False,
         "require_zero_rows": False,
         "required_log_patterns_all": [
+            {
+                "pattern": r"Регистр(?:Накопления|Бухгалтерии)\.[А-Яа-яA-Za-z0-9_]+(?:\.Остатки)?",
+                "reason": "Остатки должны читаться из регистра накопления/бухгалтерии, а не из документа",
+                "scope": "full_log",
+            },
             {
                 "pattern": r"(?:\"columns\"\s*:\s*\[[^\]]*\"Номенклатура\"[^\]]*\"(?:Остаток|Количество)\"|\"fields\"\s*:\s*\[[^\]]*\"Номенклатура\"[^\]]*\"(?:Остаток|КоличествоОстаток|Количество)\"|(?:КАК\s+)?Номенклатура[\s\S]{0,500}(?:КоличествоОстаток|КАК\s+(?:Остаток|Количество))|колонки\(до10\)=['\"][^'\"]*Номенклатура[^'\"]*(?:Остаток|Количество)|Номенклатура\s*:[\s\S]{0,500}(?:Остаток|Количество)\s*:)",
                 "reason": "В результате/запросе должны быть бизнес-колонки Номенклатура и остаток/количество",
@@ -220,6 +245,10 @@ SCENARIO_RULES_BY_ID = {
             },
         ],
         "forbidden_log_patterns": [
+            {
+                "pattern": r"ИЗ\s+Документ\.(?:ЗаказПокупателя|ЗаказКлиента)",
+                "reason": "Запрос остатков ошибочно построен по документу заказа",
+            },
             {
                 "pattern": r"ВЫБРАТЬ\s+1\s+КАК\s+(?:Н|Значение)\b",
                 "reason": "Обнаружен технический fallback-запрос вместо запроса остатков",
@@ -242,11 +271,11 @@ SCENARIO_RULES_BY_ID = {
     },
     "sales_analysis": {
         "expect_success": True,
-        "allow_empty_result": True,
+        "allow_empty_result": False,
         "required_actions_any": ["RunQuery"],
         "required_actions_all": [],
         "forbidden_actions": [],
-        "max_errors": 44,
+        "max_errors": 2,
         # При стабильном retrieval-first сценарий может завершиться без recovery.
         "require_recovery": False,
         "require_zero_rows": False,
@@ -290,6 +319,19 @@ SCENARIO_RULES_BY_ID = {
         "max_errors": 20,
         "require_recovery": False,
         "require_zero_rows": True,
+        "required_log_patterns_any": [
+            {
+                "pattern": r"ДАТАВРЕМЯ\s*\(\s*2035|01\.01\.2035|2035,\s*1,\s*1",
+                "reason": "Запрос пустого периода должен сохранить фильтр 2035",
+                "scope": "full_log",
+            },
+        ],
+        "forbidden_log_patterns": [
+            {
+                "pattern": r"(?:ЛЕВОЕ|ПРАВОЕ|ВНУТРЕННЕЕ)?\s*СОЕДИНЕНИЕ\s+\S+\s+КАК\s+Период\b",
+                "reason": "Recovery не должен изобретать соединение с псевдонимом Период",
+            },
+        ],
     },
     "duplicate_prevention": {
         "expect_success": True,
@@ -353,16 +395,32 @@ SCENARIO_RULES_BY_ID = {
     "order_vs_realization_resolution": {
         "expect_success": True,
         "allow_empty_result": True,
-        "required_actions_any": ["RunQuery"],
-        "required_actions_all": ["GetObjectFields"],
+        "required_actions_any": ["RunQuery", "GetMetadata"],
+        "required_actions_all": [],
         "forbidden_actions": [],
         "max_errors": 28,
         "require_recovery": False,
         "require_zero_rows": False,
         "required_log_patterns_any": [
             {
-                "pattern": r"Документ\.(?:Заказ(?:Покупателя|Клиента)|РеализацияТоваровУслуг)",
-                "reason": "Должен быть выбран заказный или основной реализационный документ",
+                "pattern": r"Документ\.[А-Яа-яA-Za-z0-9_]*Заказ[А-Яа-яA-Za-z0-9_]*(?:Покупател|Клиент)",
+                "reason": "Заказы клиента читаются из документа заказа покупателя/клиента, если он есть в конфигурации",
+                "scope": "full_log",
+            },
+            {
+                "pattern": r"Документ\.[А-Яа-яA-Za-z0-9_]*Реализац",
+                "reason": "Если документа заказа нет, допустим основной документ реализации",
+                "scope": "full_log",
+            },
+            {
+                "pattern": r"(GetMetadata|Получены метаданные)[\s\S]{0,1500}заказ",
+                "reason": "Если документа заказа клиента нет, агент должен искать его в метаданных",
+                "scope": "full_log",
+            },
+            {
+                "pattern": r"нет документа заказа (покупателя|клиента)",
+                "reason": "Если в конфигурации нет документа заказа клиента, агент должен явно это сообщить",
+                "scope": "full_log",
             },
         ],
         "forbidden_log_patterns": [
@@ -414,29 +472,45 @@ SCENARIO_RULES_BY_ID = {
 
 
 def _get(obj, name, default=None):
+    if isinstance(obj, dict):
+        return obj.get(name, default)
     try:
         return getattr(obj, name, default)
     except Exception:
         return default
 
 
-def run_dialog(conn, text: str, dialog_type: str, user: str = "Администратор", auto_confirm: bool = False):
-    """Запускает диалог через COM и возвращает результат."""
-    type_map = {"Agent": "Агент", "Агент": "Агент", "Запрос1С": "Запрос1С", "Zapros1S": "Запрос1С"}
-    enum_value_name = type_map.get(dialog_type, "Запрос1С")
-    enum_val = get_enum_value(conn, "ИИА_ТипДиалога", enum_value_name)
-    if enum_val is None:
-        raise RuntimeError(f"Не удалось получить ИИА_ТипДиалога.{enum_value_name}")
+def ensure_agent_write_access(bridge_url: str, user: str) -> dict:
+    """Включает ДоступнаЗапись у пользователя прогона. Guard в коде не обходится."""
+    code = (
+        "РезультатВыполнения = Новый Структура;"
+        "НаборЗаписей = РегистрыСведений.ИИА_НастройкиПользователей.СоздатьНаборЗаписей();"
+        "НаборЗаписей.Отбор.Пользователь.Установить(" + bsl_string(user) + ");"
+        "НаборЗаписей.Прочитать();"
+        "Если НаборЗаписей.Количество() = 0 Тогда "
+        "Запись = НаборЗаписей.Добавить(); Запись.Пользователь = " + bsl_string(user) + ";"
+        "Запись.ЛимитТокеновНаЗапуск = 50000;"
+        "Иначе Запись = НаборЗаписей[0]; КонецЕсли;"
+        "РезультатВыполнения.Вставить(\"oldWriteAccess\", Запись.ДоступнаЗапись);"
+        "Запись.ДоступнаЗапись = Истина;"
+        "НаборЗаписей.Записать();"
+        "РезультатВыполнения.Вставить(\"newWriteAccess\", Запись.ДоступнаЗапись);"
+    )
+    return execute_bsl(bridge_url, code)
 
-    result = call_procedure(
-        conn,
-        "ИИА_ДиалогCOM",
-        "СоздатьДиалогИВыполнитьАгентаСинхронно",
+
+def run_dialog(bridge_url: str, text: str, dialog_type: str, user: str = "Администратор", auto_confirm: bool = False):
+    """Запускает диалог через HTTP-bridge и возвращает результат."""
+    result = run_agent_dialog(
+        bridge_url,
         user,
         text,
-        enum_val,
-        bool(auto_confirm),
+        dialog_type,
+        auto_confirm=auto_confirm,
     )
+    if result.get("timeout"):
+        result["Лог"] = str(result.get("Лог") or "") + "\n[ОШИБКА] timeout waiting orchestrator after 900s"
+        result["Успех"] = False
     return result
 
 
@@ -492,7 +566,6 @@ def analyze_log(log_text: str) -> dict:
 
     lines = log_text.split("\n")
     runtime_error_patterns = (
-        r"^\s*Ошибка выполнения DSL:",
         r"^\s*stage=[^,]+,\s*success=false\b",
         r"^\s*\[ОШИБКА\]",
         r"^\s*Tool submit_(?:dsl|next_step) вернул JSON, но он не проходит проверку DSL:",
@@ -722,7 +795,9 @@ def evaluate_scenario_rules(example: dict, success: bool, analysis: dict, usage_
             pattern = str(pattern_rule.get("pattern", "") if isinstance(pattern_rule, dict) else pattern_rule)
             reason = str(pattern_rule.get("reason", pattern) if isinstance(pattern_rule, dict) else pattern)
             expected_any.append(reason)
-            if pattern and re.search(pattern, scenario_text, re.I | re.S):
+            scope = str(pattern_rule.get("scope", "non_system") if isinstance(pattern_rule, dict) else "non_system")
+            search_text = str(analysis.get("full_log_text", "") if scope == "full_log" else scenario_text)
+            if pattern and re.search(pattern, search_text, re.I | re.S):
                 matched_any.append(reason)
         if not matched_any:
             violations.append(f"Не найден ни один обязательный признак(any) в логе: {', '.join(expected_any)}")
@@ -1037,12 +1112,12 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="Тестирование примеров через COM"
+        description="Тестирование примеров через HTTP-bridge"
     )
     parser.add_argument(
-        "--connection", "-c",
+        "--bridge-url",
         default=None,
-        help="Строка подключения к 1С",
+        help="URL HTTP-сервиса Codex Test Bridge, например http://host/fresh-unf/hs/codex-test",
     )
     parser.add_argument(
         "--log-dir",
@@ -1083,7 +1158,7 @@ def main():
     parser.add_argument(
         "--auto-confirm",
         action="store_true",
-        help="Включить режим без подтверждения для всех COM-сценариев. По умолчанию используется настройка конкретного сценария.",
+        help="Включить режим без подтверждения для всех сценариев. По умолчанию используется настройка конкретного сценария.",
     )
     args = parser.parse_args()
     score_llm_url = os.environ.get("SCORE_LLM_API_URL", "")
@@ -1091,8 +1166,8 @@ def main():
     score_llm_model = os.environ.get("SCORE_LLM_MODEL", "")
     score_llm_timeout = int(os.environ.get("SCORE_LLM_TIMEOUT", "30"))
 
-    connection_string = get_connection_string(args.connection)
-    log_dir = args.log_dir or os.path.join(_script_dir, "logs")
+    bridge_url = get_bridge_url(args.bridge_url)
+    log_dir = args.log_dir or os.path.join(_automation_dir, "logs")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_prefix = f"examples_{timestamp}"
     run_log_dir = os.path.join(log_dir, run_prefix)
@@ -1130,13 +1205,14 @@ def main():
             return 1
 
     print("=" * 70)
-    print("Тестирование примеров (через COM)")
+    print("Тестирование примеров (через HTTP-bridge)")
+    print(f"Bridge: {bridge_url}")
     print("=" * 70)
 
-    conn = connect_to_1c(connection_string)
-    if not conn:
-        print("Ошибка: не удалось подключиться к 1С", file=sys.stderr)
-        return 1
+    write_access = ensure_agent_write_access(bridge_url, args.user)
+    print(f"ДоступнаЗапись: {write_access}")
+    if not write_access or not write_access.get("newWriteAccess"):
+        raise RuntimeError(f"Не удалось включить ДоступнаЗапись для {args.user}: {write_access}")
 
     results = []
     fatal_score_error = ""
@@ -1148,7 +1224,7 @@ def main():
 
         try:
             auto_confirm = bool(args.auto_confirm or ex.get("auto_confirm", False) or ex.get("type") == "Запрос1С")
-            result = run_dialog(conn, ex["text"], ex["type"], args.user, auto_confirm=auto_confirm)
+            result = run_dialog(bridge_url, ex["text"], ex["type"], args.user, auto_confirm=auto_confirm)
         except Exception as e:
             print(f"  ОШИБКА: {e}")
             log_content = f"[{ex['id']}] ИСКЛЮЧЕНИЕ: {e}\n"

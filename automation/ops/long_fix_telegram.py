@@ -21,10 +21,10 @@ import shutil
 from pathlib import Path
 
 _script_dir = os.path.dirname(os.path.abspath(__file__))
-_root = os.path.dirname(_script_dir)
+_root = os.path.dirname(os.path.dirname(_script_dir))
 _automation_dir = os.path.dirname(_script_dir)
 _tau_dir = os.path.join(_automation_dir, "tau")
-for _path in (_script_dir, _automation_dir, _tau_dir):
+for _path in (_script_dir, _automation_dir, _tau_dir, _root):
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
@@ -34,8 +34,8 @@ try:
 except ImportError:
     pass
 
-from com_1c.com_connector import setup_console_encoding
-from test_examples import (
+from automation.bridge.config import setup_console_encoding
+from automation.bridge.test_examples import (
     README_EXAMPLES,
     GITSELL_RUB_PER_TOKEN,
     send_telegram_notification,
@@ -49,7 +49,7 @@ APPROVAL_TIMEOUT = 86400     # 24 ч
 
 
 def _log_dir():
-    return os.path.join(_script_dir, "logs")
+    return os.path.join(_automation_dir, "logs")
 
 
 def _cycle_state_path():
@@ -114,13 +114,13 @@ def run_update_1c():
 
 def run_tests(examples_arg=None):
     """Запускает test_examples.py. Возвращает (returncode, run_id, report_path)."""
-    cmd = [sys.executable, os.path.join(_script_dir, "test_examples.py")]
+    cmd = [sys.executable, os.path.join(_automation_dir, "bridge", "test_examples.py")]
     if examples_arg:
         cmd.extend(["--examples", examples_arg])
-    env = {**os.environ, "PYTHONPATH": _script_dir}
+    env = {**os.environ, "PYTHONPATH": _root}
     result = subprocess.run(
         cmd,
-        cwd=_script_dir,
+        cwd=_root,
         env=env,
         timeout=7200,  # 2 ч макс на тесты
     )

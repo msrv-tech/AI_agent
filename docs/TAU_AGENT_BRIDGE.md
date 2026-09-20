@@ -6,7 +6,7 @@
 
 В репозитории добавлен scaffold и runtime:
 
-- [`tau_bridge.py`](../automation/tau/tau_bridge.py) — CLI bridge между benchmark runner и COM-входом 1С-агента;
+- [`tau_bridge.py`](../automation/tau/tau_bridge.py) — CLI bridge между benchmark runner и HTTP-входом 1С-агента;
 - [`tau_bridge_config.example.json`](../automation/tau/tau_bridge_config.example.json) — шаблон конфига;
 - [`tau2_1c_agent.py`](../automation/tau/tau2_1c_agent.py) — custom agent для Tau-Bench;
 - [`run_tau_with_1c_agent.py`](../automation/tau/run_tau_with_1c_agent.py) — programmatic runner;
@@ -19,7 +19,7 @@ Bridge поддерживает два режима:
 - `stateless replay`
 - `session mode`
 
-В `session mode` используются COM entrypoints:
+В `session mode` используются HTTP-bridge entrypoints:
 
 - `СоздатьBridgeСессию`
 - `ВыполнитьХодBridge`
@@ -29,7 +29,7 @@ Bridge поддерживает два режима:
 
 ## Почему начинаем так
 
-- У вас уже есть стабильный COM entrypoint.
+- У вас уже есть стабильный HTTP-bridge entrypoint.
 - Можно начать с минимального количества новых рисков.
 - Ошибки будут локализованы в bridge-слое, а не размазаны по 1С-ядру и внешнему benchmark.
 

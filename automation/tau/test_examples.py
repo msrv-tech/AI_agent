@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Совместимый shim: фактическая реализация перенесена в automation/com_1c/test_examples.py.
+Совместимый shim: фактическая реализация перенесена в automation/bridge/test_examples.py.
 """
 
 from pathlib import Path
@@ -11,7 +11,7 @@ _repo_root = _script_dir.parent.parent
 if str(_repo_root) not in sys.path:
     sys.path.insert(0, str(_repo_root))
 
-from automation.com_1c.test_examples import *  # noqa: F401,F403
+from automation.bridge.test_examples import *  # noqa: F401,F403
 
 
 if __name__ == "__main__":

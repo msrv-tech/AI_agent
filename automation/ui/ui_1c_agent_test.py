@@ -16,7 +16,6 @@ from __future__ import annotations
 import argparse
 import csv
 import ctypes
-import importlib.util
 import json
 import os
 import re
@@ -38,23 +37,15 @@ for _path in (REPO_ROOT, AUTOMATION_ROOT):
         sys.path.insert(0, _path_str)
 
 try:
-    from com_1c import call_procedure, connect_to_1c, get_enum_value
-except ModuleNotFoundError:
-    _com_package_root = AUTOMATION_ROOT / "com_1c"
-    _com_init = _com_package_root / "__init__.py"
-    _spec = importlib.util.spec_from_file_location(
-        "com_1c",
-        _com_init,
-        submodule_search_locations=[str(_com_package_root)],
-    )
-    if _spec is None or _spec.loader is None:
-        raise
-    _module = importlib.util.module_from_spec(_spec)
-    sys.modules["com_1c"] = _module
-    _spec.loader.exec_module(_module)
-    call_procedure = _module.call_procedure
-    connect_to_1c = _module.connect_to_1c
-    get_enum_value = _module.get_enum_value
+    from pywinauto import Application, Desktop
+    from pywinauto.keyboard import send_keys
+except ImportError:
+    Application = None
+    Desktop = None
+    send_keys = None
+
+from automation.bridge.client import prepare_query1c_dialog
+from automation.bridge.config import get_bridge_url
 
 
 def _parse_1c_connection_string(value: str) -> dict[str, str]:
@@ -74,26 +65,6 @@ def _enterprise_connection_args(base_path: str) -> list[str]:
     if "file" in parts:
         return ["/F", parts["file"]]
     return ["/F", base_path]
-
-
-def _com_connection_string(base_path: str, user: str, password: str) -> str:
-    parts = _parse_1c_connection_string(base_path)
-    if parts:
-        parts["usr"] = user
-        parts["pwd"] = password
-        ordered_keys = ["file", "srvr", "ref", "usr", "pwd"]
-        keys = [key for key in ordered_keys if key in parts] + [
-            key for key in parts if key not in ordered_keys
-        ]
-        names = {
-            "file": "File",
-            "srvr": "Srvr",
-            "ref": "Ref",
-            "usr": "Usr",
-            "pwd": "Pwd",
-        }
-        return "".join(f'{names.get(key, key)}="{parts[key]}";' for key in keys)
-    return f'File="{base_path}";Usr="{user}";Pwd="{password}";'
 
 
 def setup_console_encoding() -> None:
@@ -153,8 +124,9 @@ class UiConfig:
     web_url: str
     chrome_exe: str
     headed: bool
-    skip_com_prepare: bool
+    skip_query1c_prepare: bool
     record_start_marker: str
+    bridge_url: str = ""
 
 
 class Logger:
@@ -201,9 +173,9 @@ class OneCAgentUiTest:
                     self.config.mouse_control,
                 )
             )
-            skip_com_prepare = self.config.skip_com_prepare or HOST_PREPARED_QUERY1C_MARKER in self.config.prompt
-            if self.config.test_case == "query1c_form" and not skip_com_prepare:
-                self._prepare_query1c_dialog_via_com()
+            skip_query1c_prepare = self.config.skip_query1c_prepare or HOST_PREPARED_QUERY1C_MARKER in self.config.prompt
+            if self.config.test_case == "query1c_form" and not skip_query1c_prepare:
+                self._prepare_query1c_dialog_via_bridge()
             self._start_client()
             self._open_agent_form()
             if self.config.test_case == "query1c_form":
@@ -785,31 +757,16 @@ class OneCAgentUiTest:
         except Exception as exc:
             self.logger.info(f"Не удалось закрыть форму через window.close(): {exc}")
 
-    def _prepare_query1c_dialog_via_com(self) -> None:
-        connection_string = _com_connection_string(self.config.base_path, self.config.user, self.config.password)
-        self.logger.info("Подготавливаем диалог 'Запрос 1С' через COM до открытия UI.")
-        self.com_connection = connect_to_1c(connection_string)
-        if not self.com_connection:
-            raise RuntimeError("Не удалось установить COM-подключение к 1С для подготовки диалога Запрос1С.")
-        dialog_type = get_enum_value(self.com_connection, "ИИА_ТипДиалога", "Запрос1С")
-        if dialog_type is None:
-            raise RuntimeError("Не найдено перечисление ИИА_ТипДиалога.Запрос1С.")
-        self.prepared_dialog_ref = call_procedure(
-            self.com_connection,
-            "ИИА_Сервер",
-            "СоздатьНовыйДиалог",
+    def _prepare_query1c_dialog_via_bridge(self) -> None:
+        bridge_url = get_bridge_url(getattr(self.config, "bridge_url", "") or None)
+        if not getattr(self.config, "bridge_url", ""):
+            bridge_url = self.config.web_url.rstrip("/") + "/hs/codex-test"
+        self.logger.info("Подготавливаем диалог 'Запрос 1С' через HTTP-bridge до открытия UI.")
+        self.prepared_dialog_ref = prepare_query1c_dialog(
+            bridge_url,
             self.config.user,
-            dialog_type,
-        )
-        if self.prepared_dialog_ref is None:
-            raise RuntimeError("COM не вернул ссылку на подготовленный диалог Запрос1С.")
-        call_procedure(
-            self.com_connection,
-            "ИИА_Сервер",
-            "СохранитьЧерновикЗапроса1С",
-            self.prepared_dialog_ref,
             self.config.query_text,
-            "",
+            self.config.query_params_json,
         )
         self.logger.info("Диалог 'Запрос 1С' подготовлен и сохранён как последний диалог пользователя.")
 
@@ -2017,9 +1974,14 @@ def parse_args() -> UiConfig:
         help="Запускать browser UI test с видимым окном браузера",
     )
     parser.add_argument(
-        "--skip-com-prepare",
+        "--skip-query1c-prepare",
         action="store_true",
-        help="Не подготавливать Query1C через COM внутри гостя",
+        help="Не подготавливать Query1C через HTTP-bridge внутри гостя",
+    )
+    parser.add_argument(
+        "--bridge-url",
+        default="",
+        help="URL HTTP-сервиса Codex Test Bridge",
     )
     parser.add_argument(
         "--record-start-marker",
@@ -2062,8 +2024,9 @@ def parse_args() -> UiConfig:
         web_url=args.web_url,
         chrome_exe=args.chrome_exe,
         headed=args.headed,
-        skip_com_prepare=args.skip_com_prepare,
+        skip_query1c_prepare=args.skip_query1c_prepare,
         record_start_marker=args.record_start_marker,
+        bridge_url=args.bridge_url,
     )
 
 
@@ -2095,14 +2058,16 @@ def run_web_query1c_test(config: UiConfig, logger: Logger) -> int:
         "--timeout-sec",
         str(config.timeout_sec),
     ]
+    if config.bridge_url:
+        command.extend(["--bridge-url", config.bridge_url])
     if config.log_file:
         command.extend(["--log-file", config.log_file])
     if config.screenshot_dir:
         command.extend(["--artifact-dir", config.screenshot_dir])
     if config.headed:
         command.append("--headed")
-    if config.skip_com_prepare or HOST_PREPARED_QUERY1C_MARKER in config.prompt:
-        command.append("--skip-com-prepare")
+    if config.skip_query1c_prepare or HOST_PREPARED_QUERY1C_MARKER in config.prompt:
+        command.append("--skip-query1c-prepare")
 
     logger.info("Переключаемся на browser UI сценарий web_query1c.")
     process = subprocess.run(
