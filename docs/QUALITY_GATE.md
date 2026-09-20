@@ -39,9 +39,9 @@ python automation\quality_gate_matrix.py --group extended
 
 Последний эталонный прогон без предметных prompt-правил выбора объектов:
 
-- `matrix_20260804_150249`: PASS, 2/2 баз.
-- BP `fresh-bp-demo`: 13/13, avg `89.31`, min `67`.
-- UNF `fresh-unf`: 13/13, avg `91.62`, min `83`.
+- `matrix_20260920_104730`: PASS, 2/2 баз.
+- BP `fresh-bp-demo`: 13/13, avg `90.08`, min `77`.
+- UNF `fresh-unf`: 13/13, avg `91.69`, min `85`.
 
 Полный прогон с UI:
 
