@@ -1,0 +1,613 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.14">
+	<HTTPService uuid="f19e553f-eb69-46a1-b8f6-b16dd852d01e">
+		<Properties>
+			<Name>ИИА_АгентAPI</Name>
+			<Synonym>
+				<v8:item>
+					<v8:lang>ru</v8:lang>
+					<v8:content>HTTP API агента</v8:content>
+				</v8:item>
+			</Synonym>
+			<Comment>Безопасный HTTP API агента для 1С:Fresh. Только действия текущего пользователя: диалоги, лог, диагностика оркестратора, журнал регистрации, запуск, подтверждение и resume. Произвольный BSL и произвольные запросы запрещены.</Comment>
+			<RootURL>iia-agent</RootURL>
+			<ReuseSessions>DontUse</ReuseSessions>
+			<SessionMaxAge>20</SessionMaxAge>
+		</Properties>
+		<ChildObjects>
+			<URLTemplate uuid="aedf5dc6-4f5b-4269-9272-97157baf81b0">
+				<Properties>
+					<Name>Dialog</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="d3504cf5-8ec8-4c89-9554-12ebd2c87444">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="cd3b187c-d11b-4067-b6cb-389cc2bae8ec">
+				<Properties>
+					<Name>DialogAttachments</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog attachments</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/attachments</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="0d5012a2-20e5-4f61-8df7-4f8855d282a7">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogAttachmentsGet</Handler>
+						</Properties>
+					</Method>
+					<Method uuid="c82e6aa9-6988-4d7d-9ef7-0dec2d4907f9">
+						<Properties>
+							<Name>Post</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Post</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>POST</HTTPMethod>
+							<Handler>DialogAttachmentsPost</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="5b4cf8df-e3b5-4c77-86da-c12413613f30">
+				<Properties>
+					<Name>DialogConfirm</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog confirm</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/confirm</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="efac1aa1-1e1d-411e-b173-3f4a7a401159">
+						<Properties>
+							<Name>Post</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Post</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>POST</HTTPMethod>
+							<Handler>DialogConfirmPost</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="78b12e72-e875-4db4-a65a-44f668e3591b">
+				<Properties>
+					<Name>DialogLog</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog log</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/log</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="4efdeff9-d8c6-4ca6-8f3f-bfb51ae93f79">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogLogGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="ecece793-51c0-4651-86c7-65d8de5fc9c0">
+				<Properties>
+					<Name>DialogSend</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog send</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/send</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="a351da56-817e-47a2-aea9-f4c810d7ec96">
+						<Properties>
+							<Name>Post</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Post</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>POST</HTTPMethod>
+							<Handler>DialogSendPost</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="ffdfa669-9cf5-4de8-b188-57a98a78ce59">
+				<Properties>
+					<Name>DialogStop</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog stop</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/stop</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="f5e66524-1641-4894-b856-19ca92d731b5">
+						<Properties>
+							<Name>Post</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Post</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>POST</HTTPMethod>
+							<Handler>DialogStopPost</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="554ac3b0-3267-435a-9816-34bc0af863f3">
+				<Properties>
+					<Name>Dialogs</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialogs</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="bc36c538-2ea2-471f-970b-5a554a4a95c6">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogsGet</Handler>
+						</Properties>
+					</Method>
+					<Method uuid="79525d3f-c67a-4bd9-841c-9dbaa26a9a4e">
+						<Properties>
+							<Name>Post</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Post</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>POST</HTTPMethod>
+							<Handler>DialogsPost</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="2aacbff6-5170-4fd3-b286-f6ed7a17ba07">
+				<Properties>
+					<Name>EventLog</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Event log</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/event-log</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="4edfce03-b67b-48c2-b8f6-3008c845404b">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>EventLogGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="ccd5deb2-b123-4436-b115-ddfba71f99f8">
+				<Properties>
+					<Name>Health</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Health</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/health</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="ed270bfa-b568-47d7-85ec-be1a39855ba1">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>HealthGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="a8216b30-8ad6-4ec1-9dd6-3c2e8bd88bd2">
+				<Properties>
+					<Name>Me</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Me</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/me</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="792a5d78-96f9-430b-8f62-76b70dcff922">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>MeGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="9e553578-5e26-4420-a5ec-90eac578afb3">
+				<Properties>
+					<Name>DialogWhyStopped</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog why stopped</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/why-stopped</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="f404060a-9c45-4d5a-b4ee-644dc25239d1">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogWhyStoppedGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="587062c1-2123-4c81-9d54-e57910504c83">
+				<Properties>
+					<Name>DialogMetrics</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog metrics</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/metrics</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="bf9e5355-77ba-48d8-b066-916c69ab172c">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogMetricsGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="bf11a854-19c8-4c09-b087-0c100bfae8fa">
+				<Properties>
+					<Name>DialogTrace</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog trace</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/trace</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="d91cef3d-b766-452a-8605-5e43de2eab70">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogTraceGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="511c33b6-c237-48c5-8a62-dd92b927b0c2">
+				<Properties>
+					<Name>DialogTimeline</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog timeline</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/timeline</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="22f1a0f9-0d5c-40e5-a943-38babfdb8ce6">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogTimelineGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="886ca0b9-5287-4bb5-9897-2d655d2069d7">
+				<Properties>
+					<Name>DialogFailures</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog failures</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/failures</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="80226c02-c74f-4edb-bca0-fc0047511291">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogFailuresGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="121f95f0-fb66-4679-bd68-d68d2fea1696">
+				<Properties>
+					<Name>DialogCheckpoints</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog checkpoints</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/checkpoints</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="53a23a1a-9358-4341-a31e-ddf8aa0507ff">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogCheckpointsGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="29bc4483-dd95-4a46-b9b4-3540ce1e6c2e">
+				<Properties>
+					<Name>DialogCheckpointDiff</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog checkpoint diff</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/checkpoints/diff</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="e27cf813-bba9-4fab-98ff-c475557a0a3e">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogCheckpointDiffGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="42610c29-5dbf-4cbd-a0e2-6a3085e65308">
+				<Properties>
+					<Name>DialogResume</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog resume</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/resume</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="50669c71-e9aa-4a69-bfb9-cf63c2b242bd">
+						<Properties>
+							<Name>Post</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Post</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>POST</HTTPMethod>
+							<Handler>DialogResumePost</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="a5254f1e-0972-49c6-b074-aaa81791bedb">
+				<Properties>
+					<Name>DialogObjects</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog objects</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/objects</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="8d8e2b0b-da41-4600-9be0-f1b417d7c46b">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogObjectsGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="a8121bc9-2a82-444b-8927-2432918389f7">
+				<Properties>
+					<Name>DialogQueryResult</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>Dialog query result</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/dialogs/{id}/query-result</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="8552ddac-9c13-4510-a0b4-1726982e38d7">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>DialogQueryResultGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+			<URLTemplate uuid="e20e1fb6-8333-4dc8-86a9-69b9bba55615">
+				<Properties>
+					<Name>RagStatus</Name>
+					<Synonym>
+						<v8:item>
+							<v8:lang>ru</v8:lang>
+							<v8:content>RAG status</v8:content>
+						</v8:item>
+					</Synonym>
+					<Template>/v1/rag/status</Template>
+				</Properties>
+				<ChildObjects>
+					<Method uuid="4ffa13bf-f9e7-416b-92bb-c1d625033f0b">
+						<Properties>
+							<Name>Get</Name>
+							<Synonym>
+								<v8:item>
+									<v8:lang>ru</v8:lang>
+									<v8:content>Get</v8:content>
+								</v8:item>
+							</Synonym>
+							<HTTPMethod>GET</HTTPMethod>
+							<Handler>RagStatusGet</Handler>
+						</Properties>
+					</Method>
+				</ChildObjects>
+			</URLTemplate>
+		</ChildObjects>
+	</HTTPService>
+</MetaDataObject>

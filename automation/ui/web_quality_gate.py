@@ -26,7 +26,7 @@ for _path in (REPO_ROOT, AUTOMATION_ROOT, AUTOMATION_ROOT / "bridge"):
     if _path_str not in sys.path:
         sys.path.insert(0, _path_str)
 
-from automation.ui.web_agent_modes_e2e import send_prompt, switch_mode
+from automation.ui.web_agent_modes_e2e import ensure_agent_form, reset_chat, send_prompt, switch_mode
 from automation.ui.web_agent_skill_e2e import click_label, close_font_dialog
 from automation.ui.web_document_recognition_e2e import wait_for_agent_state
 from automation.ui.web_query1c_test import BrowserQuery1CTest, Logger, WebUiConfig, setup_console_encoding
@@ -121,6 +121,9 @@ def open_agent_form(test: BrowserQuery1CTest, web_url: str, timeout_sec: int) ->
     encoded_command = "CommonCommand.%D0%98%D0%98%D0%90_%D0%90%D0%B3%D0%B5%D0%BD%D1%82"
     target_url = web_url.rstrip("/") + f"/#e1cib/command/{encoded_command}"
     test._session_call("Page.navigate", {"url": target_url})
+    if test._wait_for_agent_form(min(timeout_sec, 30)):
+        return
+    test._open_agent_command()
     if not test._wait_for_agent_form(timeout_sec):
         raise RuntimeError("Форма ИИ Агент не открылась в облачном web-client.")
 
@@ -201,12 +204,30 @@ def run(args: argparse.Namespace) -> dict:
             auto_confirm = bool(args.auto_confirm or example.get("auto_confirm") or example.get("type") == "Запрос1С")
             mode = dialog_mode_name(example.get("type", "Запрос1С"))
             try:
-                switch_mode(test, mode)
-                send_prompt(test, example["text"])
-                state = wait_for_agent_state(test, args.agent_wait_sec, auto_confirm=auto_confirm)
+                reset = reset_chat(test)
+                print(f"  chat_reset dialog={reset.get('afterDialog')!r}")
+                mode_switch = switch_mode(test, mode)
+                send_result = send_prompt(test, example["text"], reset=False)
+                print(f"  mode={mode_switch.get('after')!r} send_started={send_result.get('started')} attempts={send_result.get('attempts')}")
+                if not send_result.get("started"):
+                    raise RuntimeError(
+                        "Промпт не отправился в форму ИИ Агент после 3 попыток: "
+                        + json.dumps(send_result, ensure_ascii=False)[:800]
+                    )
+                state = wait_for_agent_state(
+                    test,
+                    args.agent_wait_sec,
+                    auto_confirm=auto_confirm,
+                    expected_prompt=example["text"],
+                )
                 log_text = read_agent_log_text(test)
                 if state.get("bodyText") and state["bodyText"] not in log_text:
                     log_text = str(state["bodyText"]) + "\n" + log_text
+                needle = (example["text"] or "").strip()[:24]
+                if needle:
+                    idx = log_text.find(needle)
+                    if idx >= 0:
+                        log_text = log_text[idx:]
                 success = ui_success_from_state(state, analyze_log(log_text))
                 usage_tokens = extract_usage_tokens(log_text)
                 analysis = analyze_log(log_text)
@@ -270,6 +291,11 @@ def run(args: argparse.Namespace) -> dict:
                 }
                 print(f"  ОШИБКА: {exc}")
             results.append(item)
+            try:
+                recovered = ensure_agent_form(test)
+                print(f"  form={recovered}")
+            except Exception as recover_exc:
+                print(f"  form recover error: {recover_exc}")
     finally:
         test._close()
 

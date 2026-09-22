@@ -195,31 +195,62 @@ class FreshServiceManager:
     def visible_page_text(self) -> str:
         return (self.page.inner_text("body") or "").replace("\xa0", " ")
 
+    def visible_any(self, *labels: str, exact: bool = True) -> dict[str, Any] | None:
+        for label in labels:
+            box = self.visible_box(label, exact=exact) or self.visible_text_node(label, exact=exact)
+            if box is not None:
+                return box
+        return None
+
     def wizard_title(self) -> str:
-        if (
-            self.visible_box("Выполняется автоматическая проверка", exact=False)
-            or self.visible_text_node("Выполняется автоматическая проверка", exact=False)
-            or self.visible_box("Автоматическая проверка", exact=False)
-        ):
+        if self.visible_any("Выполняется автоматическая проверка", exact=False):
             return "автоматическая проверка"
-        if self.visible_box("Включить защиту исходного кода") or self.visible_text_node("Включить защиту исходного кода"):
+        if self.visible_any(
+            "Включить защиту исходного кода",
+            "Защита модулей не настроена. Настроить",
+            exact=True,
+        ) or self.visible_any("Защита модулей не настроена", exact=False):
             return "защита исходного кода"
-        if self.visible_box("Почта разработчика") or self.visible_text_node("Почта разработчика"):
+        if self.visible_any("Режим загрузки") or self.visible_any("Будет загружена новая версия", exact=False):
+            return "отличающихся полей"
+        if self.visible_any("Почта разработчика"):
             return "адреса"
-        if self.visible_box("Интернет-ресурсы") or self.visible_text_node("gitsell.ru"):
-            if self.visible_box("Привилегированный режим") or self.visible_text_node("Привилегированный режим"):
-                return "требуемые разрешения"
-        if self.visible_box("Заполните описание изменения") or self.visible_text_node("Заполните описание изменения"):
+        if self.visible_any("Привилегированный режим") or self.visible_any("Каталог временных файлов") or self.visible_any("Загрузить разрешения из файла"):
+            return "требуемые разрешения"
+        if self.visible_any("Привилегированный режим") and (
+            self.visible_any("Интернет-ресурсы") or self.visible_any("gitsell.ru")
+        ):
+            return "требуемые разрешения"
+        if self.visible_any("Заполните описание изменения"):
             return "описание изменения"
-        if self.visible_box("Краткая информация") or self.visible_text_node("Краткая информация"):
+        if self.visible_any(
+            "Краткая информация",
+            "Авторские права",
+            "Идентификатор во внешней системе",
+        ) or self.visible_any("Назначение: Адаптация", exact=False):
             return "сведения о расширении"
-        visible = self.visible_page_text().lower()
+        if self.visible_any("Совместимость") and self.visible_any("Назад"):
+            return "совместимость"
+        if self.visible_any("Все конфигурации") or self.visible_any("Только выбранные"):
+            return "совместимость"
         for title in WIZARD_TITLES:
-            if title in visible:
-                return title
-            if self.visible_text_node(title, exact=False):
+            if self.visible_text_node(title, exact=False) or self.visible_box(title, exact=False):
                 return title
         return ""
+
+    def click_wizard_next(self, current: str) -> None:
+        nxt = self.visible_text_node("Далее") or self.visible_box("Далее")
+        if nxt is None:
+            self.screenshot("no_wizard_next")
+            raise FreshUploadError("На шаге мастера нет кнопки «Далее».")
+        self._click_canvas(nxt["x"], nxt["y"])
+        deadline = time.time() + 15
+        while time.time() < deadline:
+            self.page.wait_for_timeout(500)
+            title = self.wizard_title()
+            if title and title != current:
+                return
+        self.note(f"После «Далее» шаг всё ещё «{self.wizard_title() or current}».")
 
     def login_openid(self, user: str, password: str) -> None:
         if not user or not password:
@@ -271,36 +302,133 @@ class FreshServiceManager:
             timeout_ms=max(self.timeout_ms, 120000),
         )
 
+    def wait_visible(self, *needles: str, timeout_ms: int | None = None, exact: bool = True) -> dict[str, Any]:
+        deadline = time.time() + ((timeout_ms or self.timeout_ms) / 1000)
+        while time.time() < deadline:
+            for needle in needles:
+                box = self.visible_box(needle, exact=exact) or self.visible_text_node(needle, exact=exact)
+                if box is not None:
+                    return box
+            self.page.wait_for_timeout(400)
+        self.screenshot("wait_visible_timeout")
+        raise FreshUploadError("Не появилось видимое: " + ", ".join(needles))
+
     def on_extensions_list(self) -> bool:
-        text = self.body_text()
-        return "Добавить из файла" in text and "Проверить расширение из файла" in text
+        return bool(
+            self.visible_box("Добавить из файла...")
+            or self.visible_box("Проверить расширение из файла...")
+        )
+
+    def adaptations_opened(self) -> bool:
+        return bool(
+            self.on_extensions_list()
+            or self.visible_box("Прервать аудит выбранных")
+            or self.visible_text_node("Прервать аудит выбранных")
+            or self.visible_box("Повторить аудит")
+            or self.visible_text_node("Повторить аудит")
+            or self.visible_box("Адаптация приложений")
+            or self.visible_text_node("Адаптация приложений")
+        )
+
+    def _click_canvas(self, x: float, y: float) -> None:
+        self.page.evaluate(
+            """
+            ([x, y]) => {
+              const top = document.elementFromPoint(x, y);
+              if (top && top.tagName !== "CANVAS") {
+                top.style.pointerEvents = "none";
+              }
+            }
+            """,
+            [x, y],
+        )
+        self.page.mouse.click(x, y)
 
     def open_adaptations(self) -> None:
-        if self.on_extensions_list():
-            self.note("Список расширений уже открыт.")
+        if self.adaptations_opened():
+            self.note("Адаптация уже открыта.")
             self.screenshot("extensions_list")
             return
-        if self.visible_box("Адаптация приложений"):
-            self.click_text("Адаптация приложений")
-        elif self.visible_box("Адаптация", exact=False):
-            self.click_text("Адаптация", exact=False)
-        else:
+        notify = (
+            self.visible_text_node("Задачи (Адаптация)")
+            or self.visible_box("Задачи (Адаптация)")
+            or self.visible_text_node("новая задача", exact=False)
+            or self.visible_box("1 новая задача", exact=False)
+        )
+        if notify is not None:
+            self.note(
+                f"Открываю уведомление адаптации: {notify.get('text')!r} "
+                f"@ {notify['x']:.0f},{notify['y']:.0f}"
+            )
+            self._click_canvas(notify["x"], notify["y"] - 8)
+            self.page.wait_for_timeout(2000)
+            if self.adaptations_opened():
+                self.screenshot("extensions_list")
+                return
+        target = (
+            self.visible_text_node("Адаптация (1)")
+            or self.visible_box("Адаптация (1)")
+            or self.visible_text_node("Адаптация приложений")
+            or self.visible_box("Адаптация приложений")
+            or self.visible_text_node("Адаптация")
+            or self.visible_box("Адаптация")
+        )
+        if target is None:
             self.screenshot("no_adaptations")
             raise FreshUploadError("Не найдена команда «Адаптация приложений».")
-        self.wait_text("Добавить из файла", "Проверить расширение из файла")
-        if not self.on_extensions_list():
-            if self.visible_box("Расширения"):
+        self.note(
+            f"Открываю адаптацию: {target.get('text')!r} "
+            f"{target['w']:.0f}x{target['h']:.0f} @ {target['x']:.0f},{target['y']:.0f}"
+        )
+        hit = self.page.evaluate(
+            """
+            ([x, y]) => {
+              const el = document.elementFromPoint(x, y);
+              if (!el) return {tag: null};
+              const r = el.getBoundingClientRect();
+              return {tag: el.tagName, id: el.id || "", cls: el.className || "", w: r.width, h: r.height};
+            }
+            """,
+            [target["x"], target["y"]],
+        )
+        self.note(f"elementFromPoint адаптации: {hit}")
+        self._click_canvas(target["x"], target["y"])
+        self.page.wait_for_timeout(1500)
+        if not self.adaptations_opened():
+            self.note("Командная панель не открыла адаптацию, ищу через Ctrl+Shift+F.")
+            self.page.keyboard.press("Control+Shift+F")
+            self.page.wait_for_timeout(800)
+            self.page.keyboard.type("Адаптация приложений", delay=30)
+            self.page.wait_for_timeout(600)
+            self.screenshot("adapt_search")
+            self.page.keyboard.press("Enter")
+            self.page.wait_for_timeout(1500)
+        try:
+            self.wait_visible(
+                "Добавить из файла...",
+                "Проверить расширение из файла...",
+                "Прервать аудит выбранных",
+                "Повторить аудит",
+                "Адаптация приложений",
+                timeout_ms=20000,
+            )
+        except FreshUploadError:
+            if self.visible_box("Расширения") or self.visible_text_node("Расширения"):
                 self.click_text("Расширения")
-            self.wait_text("Добавить из файла", "Проверить расширение из файла")
-        if not self.on_extensions_list():
+                self.wait_visible("Добавить из файла...", "Проверить расширение из файла...", timeout_ms=15000)
+            else:
+                raise
+        if not self.adaptations_opened():
             self.screenshot("extensions_list_missing")
             raise FreshUploadError("После открытия адаптации нет списка расширений.")
         self.screenshot("extensions_list")
 
     def card_opened(self) -> bool:
-        text = self.body_text()
-        return "Описания расширения" in text or "Расширение конфигурации" in text or (
-            "Опубликовано" in text and "ИИ_Агент" in text
+        return bool(
+            self.visible_box("Записать и закрыть")
+            or self.visible_text_node("Записать и закрыть")
+            or self.visible_box("Описания расширения")
+            or self.visible_text_node("Описания расширения")
         )
 
     def close_start_page(self) -> None:
@@ -390,6 +518,11 @@ class FreshServiceManager:
                 return
             text = self.body_text()
             locked = "уже заблокирован" in text or "Не удалось начать редактирование" in text
+            if locked and self.visible_box("Показать все", exact=False):
+                self.click_text("Показать все", exact=False)
+                self.page.wait_for_timeout(500)
+                deadline = max(deadline, time.time() + 6)
+                continue
             if time.time() >= deadline:
                 if locked and required:
                     raise FreshUploadError(
@@ -691,6 +824,7 @@ class FreshServiceManager:
     def walk_wizard(self, version: str, changelog: str, finish: bool) -> None:
         seen: list[str] = []
         for index in range(16):
+            self.page.wait_for_timeout(700)
             title = self.wizard_title()
             body = self.body_text()
             self.note(f"Шаг мастера {index + 1}: {title or 'не распознан'}")
@@ -704,36 +838,36 @@ class FreshServiceManager:
             if title == "загрузка файла":
                 raise FreshUploadError("Мастер снова на загрузке файла после выбора CFE.")
             if title == "отличающихся полей":
-                if self.visible_box("Новая"):
-                    self.click_text("Новая")
-                self.click_text("Далее")
+                radio = self.visible_text_node("Новая") or self.visible_box("Новая")
+                if radio is not None:
+                    self._click_canvas(radio["x"], radio["y"])
+                    self.page.wait_for_timeout(300)
+                self.click_wizard_next(title)
                 continue
             if title == "сведения о расширении":
                 if version not in body and version not in self.visible_page_text():
                     raise FreshUploadError(f"В сведениях нет версии {version}.")
-                self.click_text("Далее")
-                self.page.wait_for_timeout(1200)
+                self.click_wizard_next(title)
                 continue
             if title in {"защита исходного кода", "защита исходного"}:
-                if "невозмож" in self.visible_page_text():
+                if self.visible_any("Защита модулей не настроена", exact=False) or self.visible_any("невозмож", exact=False):
                     self.ensure_source_protection_ready()
-                self.click_text("Далее")
-                self.page.wait_for_timeout(1200)
+                self.click_wizard_next(title)
                 continue
             if title == "совместимость":
-                self.click_text("Далее")
+                self.click_wizard_next(title)
                 continue
             if title == "требуемые разрешения":
                 self.assert_required_hosts()
-                self.click_text("Далее")
+                self.click_wizard_next(title)
                 continue
             if title == "адреса":
                 self.fill_fresh_addresses()
-                if self.visible_box("Завершить"):
+                if self.visible_box("Завершить") or self.visible_text_node("Завершить"):
                     self.click_text("Завершить")
+                    self.page.wait_for_timeout(1500)
                 else:
-                    self.click_text("Далее")
-                self.page.wait_for_timeout(1500)
+                    self.click_wizard_next(title)
                 continue
             if title in {"заполните описание изменения", "описание изменения"}:
                 if "Заполните описание изменения" in body or "описание изменения" in body.lower():
@@ -743,10 +877,11 @@ class FreshServiceManager:
                 if not finish:
                     self.note("Черновик: останов перед завершением мастера.")
                     return
-                if self.visible_box("Завершить"):
+                if self.visible_box("Завершить") or self.visible_text_node("Завершить"):
                     self.click_text("Завершить")
+                    self.page.wait_for_timeout(1500)
                 else:
-                    self.click_text("Далее")
+                    self.click_wizard_next(title)
                 continue
             if title == "автоматическая проверка":
                 deadline = time.time() + 180
@@ -755,9 +890,21 @@ class FreshServiceManager:
                     if "Задача выполнена" in visible or "будет загружена новая версия" in visible:
                         self.screenshot("wizard_done")
                         return
+                    if self.visible_any("Завершить") and not self.visible_any("Выполняется автоматическая проверка", exact=False):
+                        self.click_text("Завершить")
+                        self.page.wait_for_timeout(1500)
+                        continue
                     self.page.wait_for_timeout(1000)
                 self.screenshot("autocheck_timeout")
                 raise FreshUploadError("Автоматическая проверка не завершилась за 180 сек.")
+            if self.visible_any("Назад") and (self.visible_any("Далее") or self.visible_any("Завершить")):
+                self.note(f"Неподписанный шаг мастера {index + 1}, жму далее.")
+                if self.visible_any("Завершить"):
+                    self.click_text("Завершить")
+                    self.page.wait_for_timeout(1500)
+                else:
+                    self.click_wizard_next(title or f"unknown-{index}")
+                continue
             if title in seen[-2:]:
                 raise FreshUploadError(f"Мастер зациклился на шаге «{title}».")
             seen.append(title)

@@ -62,7 +62,7 @@
 				<xr:Item xsi:type="xr:MDObjectRef">Role.ИИА_ОсновнаяРоль</xr:Item>
 			</DefaultRoles>
 			<Vendor />
-			<Version>0.9.9</Version>
+			<Version>0.9.11</Version>
 			<DefaultStyle />
 			<BriefInformation />
 			<DetailedInformation />
@@ -114,7 +114,9 @@
 			<CommonModule>ИИА_GitsellСервер</CommonModule>
 			<CommonModule>ИИА_ДиалогCOM</CommonModule>
 			<CommonModule>ИИА_Тесты</CommonModule>
+			<CommonModule>ИИА_АгентHTTP</CommonModule>
 			<ExchangePlan>МиграцияПриложений</ExchangePlan>
+			<HTTPService>ИИА_АгентAPI</HTTPService>
 			<CommonCommand>ИИА_Агент</CommonCommand>
 			<CommonCommand>ИИА_RAG</CommonCommand>
 			<CommonCommand>ИИА_Skills</CommonCommand>
@@ -142,4 +144,3 @@
 		</ChildObjects>
 	</Configuration>
 </MetaDataObject>
-

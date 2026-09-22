@@ -211,7 +211,19 @@ class BrowserQuery1CTest:
             r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
             r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
             r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+            "/usr/bin/google-chrome",
+            "/usr/bin/google-chrome-stable",
+            "/usr/bin/chromium-browser",
+            "/usr/bin/chromium",
+            "/snap/bin/chromium",
         ]
+        for name in ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser"):
+            found = shutil.which(name)
+            if found:
+                candidates.append(found)
+        playwright_root = Path.home() / ".cache" / "ms-playwright"
+        if playwright_root.is_dir():
+            candidates.extend(str(path) for path in sorted(playwright_root.glob("chromium-*/chrome-linux/chrome")))
         for candidate in candidates:
             if candidate and Path(candidate).exists():
                 return candidate
@@ -298,7 +310,17 @@ class BrowserQuery1CTest:
             initial_text = self._safe_body_text()
             user_visible = self.config.user and self.config.user in initial_text
             admin_alias_visible = self.config.user == "Администратор" and "admin" in initial_text
-            if user_visible or admin_alias_visible:
+            workspace_visible = any(
+                marker in initial_text
+                for marker in (
+                    "1С:Предприятие",
+                    "Управление нашей фирмой",
+                    "ИИ Агент",
+                    "Начальная страница",
+                    "Сервис и настройки",
+                )
+            )
+            if user_visible or admin_alias_visible or workspace_visible:
                 self.logger.info("web-client уже открыт под нужным пользователем.")
                 return
             fresh_openid = (

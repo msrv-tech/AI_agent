@@ -29,6 +29,7 @@
 				<xr:Item xsi:type="xr:MDObjectRef">CommonCommand.ИИА_RAG</xr:Item>
 				<xr:Item xsi:type="xr:MDObjectRef">CommonCommand.ИИА_Skills</xr:Item>
 				<xr:Item xsi:type="xr:MDObjectRef">CommonPicture.ИИА_ДлительнаяОперация</xr:Item>
+				<xr:Item xsi:type="xr:MDObjectRef">HTTPService.ИИА_АгентAPI</xr:Item>
 			</Content>
 		</Properties>
 		<ChildObjects/>

@@ -21,8 +21,15 @@ for _path in (REPO_ROOT, AUTOMATION_ROOT):
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
 
-from automation.ui.web_agent_modes_e2e import bridge_execute, press_enter
-from automation.ui.web_agent_skill_e2e import click_label, close_font_dialog, focus_prompt, replace_focused_text
+from automation.ui.web_agent_modes_e2e import (
+    agent_form_ready,
+    bridge_execute,
+    close_foreign_form,
+    confirm_pending_action,
+    confirmation_pending,
+    press_enter,
+)
+from automation.ui.web_agent_skill_e2e import click_label, close_font_dialog, focus_prompt, read_agent_surface_text, replace_focused_text
 from automation.ui.web_query1c_test import BrowserQuery1CTest, Logger, WebUiConfig, setup_console_encoding
 
 
@@ -275,37 +282,62 @@ def attach_image_to_latest_recognition_dialog(bridge_url: str, image_path: str) 
     return bridge_execute(bridge_url, code)
 
 
-def wait_for_agent_state(test: BrowserQuery1CTest, timeout_sec: int, auto_confirm: bool = False) -> dict:
+def wait_for_agent_state(
+    test: BrowserQuery1CTest,
+    timeout_sec: int,
+    auto_confirm: bool = False,
+    expected_prompt: str = "",
+) -> dict:
     deadline = time.time() + timeout_sec
     result: dict[str, object] = {"confirmed": False, "state": "timeout", "samples": []}
     last_sample = ""
+    needle = (expected_prompt or "").strip()[:24]
+    prompt_seen = not bool(needle)
     while time.time() < deadline:
-        if not test._agent_form_visible():
-            activate_agent_tab(test, 3)
-        body_text = test._safe_body_text()
+        if auto_confirm and confirmation_pending(test):
+            result["confirm"] = confirm_pending_action(test)
+            result["confirmed"] = True
+            time.sleep(1)
+            continue
+        if not agent_form_ready(test):
+            recovered = close_foreign_form(test)
+            result.setdefault("formRecover", []).append(recovered)
+            if not agent_form_ready(test):
+                activate_agent_tab(test, 3)
+        body_text = read_agent_surface_text(test)
         sample = body_text[:1200]
         if sample != last_sample:
             result["samples"].append(sample[:300])
             last_sample = sample
-        if auto_confirm and "Подтверд" in body_text:
-            result["confirmClick"] = click_label(test, "Подтвердить")
-            result["confirmed"] = True
-            time.sleep(1)
-            continue
-        summary_ready = "Выполненные шаги:" in body_text and "Проверка:" in body_text
-        if summary_ready:
+        if needle and needle in body_text:
+            prompt_seen = True
+        this_task = prompt_seen
+        task_text = body_text
+        if needle:
+            idx = body_text.find(needle)
+            if idx >= 0:
+                task_text = body_text[idx:]
+        summary_ready = "Выполненные шаги:" in task_text and "Проверка:" in task_text
+        success_text = "Задача выполнена успешно" in task_text or "Задача успешно обработана" in task_text
+        error_text = "Задача завершена с ошибкой" in task_text or "Не удалось надежно распознать" in task_text
+        if this_task and summary_ready:
             result["state"] = "success"
-            result["bodyText"] = body_text
+            result["bodyText"] = task_text
             return result
-        if "Задача выполнена успешно" in body_text or "Создан черновик документа" in body_text:
+        if this_task and success_text:
             time.sleep(2)
-            continue
-        if "Задача завершена с ошибкой" in body_text or "Не удалось надежно распознать" in body_text:
-            result["state"] = "error"
-            result["bodyText"] = body_text
+            body_text = read_agent_surface_text(test)
+            idx = body_text.find(needle) if needle else 0
+            result["state"] = "success"
+            result["bodyText"] = body_text[idx:] if idx >= 0 else body_text
             return result
-        time.sleep(2)
-    result["bodyText"] = test._safe_body_text()
+        if this_task and error_text:
+            result["state"] = "error"
+            result["bodyText"] = task_text
+            return result
+        time.sleep(1)
+    result["bodyText"] = read_agent_surface_text(test)
+    result["prompt_seen"] = prompt_seen
     return result
 
 
@@ -443,8 +475,11 @@ def wait_for_agent_state_with_diagnostics(
     last_hash = ""
     frame_index = 1
     while time.time() < deadline:
-        if not test._agent_form_visible():
-            activate_agent_tab(test, 3)
+        if not agent_form_ready(test):
+            recovered = close_foreign_form(test)
+            result.setdefault("formRecover", []).append(recovered)
+            if not agent_form_ready(test):
+                activate_agent_tab(test, 3)
         state = collect_ui_diagnostic_state(test)
         state_hash = str(state.get("bodyHash") or "")
         if state_hash != last_hash:
@@ -469,8 +504,8 @@ def wait_for_agent_state_with_diagnostics(
             frame_index += 1
             last_hash = state_hash
         body_text = str(state.get("bodyHead") or "") + str(state.get("bodyTail") or "")
-        if auto_confirm and state.get("hasApproval"):
-            result["confirmClick"] = click_label(test, "Подтвердить")
+        if auto_confirm and confirmation_pending(test):
+            result["confirm"] = confirm_pending_action(test)
             result["confirmed"] = True
             time.sleep(1)
             continue

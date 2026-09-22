@@ -153,6 +153,85 @@ def close_font_dialog() -> bool:
     return False
 
 
+def mouse_click(test: BrowserQuery1CTest, x: float, y: float) -> None:
+    x = float(x)
+    y = float(y)
+    test._session_call("Input.dispatchMouseEvent", {"type": "mouseMoved", "x": x, "y": y})
+    test._session_call(
+        "Input.dispatchMouseEvent",
+        {"type": "mousePressed", "x": x, "y": y, "button": "left", "buttons": 1, "clickCount": 1},
+    )
+    test._session_call(
+        "Input.dispatchMouseEvent",
+        {"type": "mouseReleased", "x": x, "y": y, "button": "left", "buttons": 0, "clickCount": 1},
+    )
+
+
+def find_text_boxes(test: BrowserQuery1CTest, text: str) -> list[dict]:
+    raw = test._evaluate(
+        """
+JSON.stringify((() => {
+  const needle = %s;
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const out = [];
+  let node;
+  while (node = walker.nextNode()) {
+    const t = (node.nodeValue || '').trim();
+    if (t !== needle) continue;
+    const el = node.parentElement;
+    if (!el) continue;
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    if (r.width < 4 || r.height < 4 || s.display === 'none' || s.visibility === 'hidden') continue;
+    out.push({t, x: r.x, y: r.y, w: r.width, h: r.height});
+  }
+  return out;
+})())
+"""
+        % json.dumps(text, ensure_ascii=False)
+    )
+    try:
+        parsed = json.loads(raw) if raw else []
+    except json.JSONDecodeError:
+        return []
+    return parsed if isinstance(parsed, list) else []
+
+
+def click_text_cdp(test: BrowserQuery1CTest, label: str) -> str:
+    boxes = find_text_boxes(test, label)
+    if not boxes:
+        return click_label(test, label)
+    visible = [item for item in boxes if item.get("y", 0) > 30] or boxes
+    visible.sort(key=lambda item: float(item.get("w", 0)) * float(item.get("h", 0)))
+    box = visible[0]
+    mouse_click(test, box["x"] + box["w"] / 2, box["y"] + box["h"] / 2)
+    return f"cdp:{round(box['x'])},{round(box['y'])}"
+
+
+def read_agent_surface_text(test: BrowserQuery1CTest) -> str:
+    return test._evaluate(
+        r"""
+(() => {
+  const prompt = document.querySelector('[id$="_ТекущийТекст_i0"]');
+  let root = prompt;
+  while (root && root.parentElement) {
+    root = root.parentElement;
+    if (/^form\\d+$/.test(root.id || '')) break;
+  }
+  const status = Array.from(document.querySelectorAll('[id*="СтрокаСтатуса"]'))
+    .map((el) => el.innerText || el.textContent || el.value || '')
+    .filter(Boolean);
+  const areas = Array.from(document.querySelectorAll('textarea'))
+    .filter((el) => !(el.id || '').includes('ТекущийТекст'))
+    .map((el) => el.value || '')
+    .filter(Boolean);
+  const formText = root && root !== document.body ? (root.innerText || '') : '';
+  return status.concat(areas, [formText]).join('\\n');
+})()
+"""
+    )
+
+
 def click_label(test: BrowserQuery1CTest, label: str) -> str:
     script = r"""
 ((label)=>{
@@ -183,32 +262,312 @@ def click_label(test: BrowserQuery1CTest, label: str) -> str:
     return test._evaluate(script)
 
 
+def press_key(test: BrowserQuery1CTest, key_code: int, key: str, code: str, modifiers: int = 0) -> None:
+    payload = {
+        "windowsVirtualKeyCode": key_code,
+        "nativeVirtualKeyCode": key_code,
+        "key": key,
+        "code": code,
+        "modifiers": modifiers,
+    }
+    test._session_call("Input.dispatchKeyEvent", {"type": "rawKeyDown", **payload})
+    test._session_call("Input.dispatchKeyEvent", {"type": "keyUp", **payload})
+
+
+def press_shift_tab(test: BrowserQuery1CTest) -> None:
+    test._session_call(
+        "Input.dispatchKeyEvent",
+        {
+            "type": "rawKeyDown",
+            "windowsVirtualKeyCode": 16,
+            "nativeVirtualKeyCode": 16,
+            "key": "Shift",
+            "code": "ShiftLeft",
+            "modifiers": 8,
+        },
+    )
+    press_key(test, 9, "Tab", "Tab", modifiers=8)
+    test._session_call(
+        "Input.dispatchKeyEvent",
+        {
+            "type": "keyUp",
+            "windowsVirtualKeyCode": 16,
+            "nativeVirtualKeyCode": 16,
+            "key": "Shift",
+            "code": "ShiftLeft",
+        },
+    )
+
+
+def describe_agent_inputs(test: BrowserQuery1CTest) -> str:
+    return test._evaluate(
+        r"""
+JSON.stringify((() => {
+  const vis = (e) => {
+    const r = e.getBoundingClientRect();
+    const s = getComputedStyle(e);
+    return r.width > 8 && r.height > 8 && s.display !== 'none' && s.visibility !== 'hidden';
+  };
+  const items = Array.from(document.querySelectorAll('textarea, input, [id$="_ТекущийТекст"], [id$="_ТекущийТекст_i0"]'))
+    .filter(vis)
+    .slice(0, 20)
+    .map((e) => {
+      const r = e.getBoundingClientRect();
+      const hx = r.x + Math.min(40, r.width / 2);
+      const hy = r.y + Math.min(16, r.height / 2);
+      const top = document.elementFromPoint(hx, hy);
+      return {
+        tag: e.tagName,
+        id: e.id,
+        x: Math.round(r.x),
+        y: Math.round(r.y),
+        w: Math.round(r.width),
+        h: Math.round(r.height),
+        hit: top ? (top.tagName + ':' + (top.id || '')) : 'none',
+        val: String(e.value || '').slice(0, 40)
+      };
+    });
+  const dd = document.getElementById('editDropDown');
+  const ae = document.activeElement;
+  return {
+    active: ae ? (ae.tagName + ':' + (ae.id || '')) : 'none',
+    dropdown: !!(dd && dd.offsetWidth),
+    items
+  };
+})())
+"""
+    )
+
+
+def press_ctrl_key(test: BrowserQuery1CTest, key_code: int, commands: list[str] | None = None) -> None:
+    key = "v" if key_code == 86 else "a"
+    code = "KeyV" if key_code == 86 else "KeyA"
+    test._session_call(
+        "Input.dispatchKeyEvent",
+        {
+            "type": "rawKeyDown",
+            "windowsVirtualKeyCode": 17,
+            "nativeVirtualKeyCode": 17,
+            "modifiers": 2,
+            "key": "Control",
+            "code": "ControlLeft",
+        },
+    )
+    payload = {
+        "type": "rawKeyDown",
+        "windowsVirtualKeyCode": key_code,
+        "nativeVirtualKeyCode": key_code,
+        "modifiers": 2,
+        "key": key,
+        "code": code,
+    }
+    if commands:
+        payload["commands"] = commands
+    test._session_call("Input.dispatchKeyEvent", payload)
+    test._session_call(
+        "Input.dispatchKeyEvent",
+        {
+            "type": "keyUp",
+            "windowsVirtualKeyCode": key_code,
+            "nativeVirtualKeyCode": key_code,
+            "modifiers": 2,
+            "key": key,
+            "code": code,
+        },
+    )
+    test._session_call(
+        "Input.dispatchKeyEvent",
+        {
+            "type": "keyUp",
+            "windowsVirtualKeyCode": 17,
+            "nativeVirtualKeyCode": 17,
+            "key": "Control",
+            "code": "ControlLeft",
+        },
+    )
+
+
+def write_clipboard(test: BrowserQuery1CTest, text: str) -> str:
+    href = test._current_url() or test.config.web_url
+    parsed = urllib.parse.urlparse(href)
+    origin = f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else href
+    grant = test._browser_call(
+        "Browser.grantPermissions",
+        {
+            "origin": origin,
+            "permissions": ["clipboardReadWrite", "clipboardSanitizedWrite"],
+        },
+    )
+    if grant.get("error"):
+        raise RuntimeError(f"Browser.grantPermissions: {grant['error']}")
+    expr = "navigator.clipboard.writeText(%s).then(() => 'ok')" % json.dumps(text, ensure_ascii=False)
+    result = test._session_call(
+        "Runtime.evaluate",
+        {"expression": expr, "awaitPromise": True, "returnByValue": True},
+    )
+    payload = result.get("result") or {}
+    if result.get("error"):
+        raise RuntimeError(f"clipboard.writeText CDP: {result['error']}")
+    if payload.get("exceptionDetails"):
+        raise RuntimeError(f"clipboard.writeText: {payload['exceptionDetails']}")
+    value = str((payload.get("result") or {}).get("value", ""))
+    if value != "ok":
+        raise RuntimeError(f"clipboard.writeText вернул {value!r}")
+    return origin
+
+
+def click_id_suffix(test: BrowserQuery1CTest, suffix: str) -> str:
+    raw = test._evaluate(
+        """
+(() => {
+  const items = Array.from(document.querySelectorAll(%s)).map((e) => {
+    e.scrollIntoView({block:'nearest'});
+    const r = e.getBoundingClientRect();
+    const s = getComputedStyle(e);
+    return {
+      id: e.id || '',
+      x: r.x, y: r.y, w: r.width, h: r.height,
+      visible: r.width > 4 && r.height > 4 && r.x > -1000 && r.y > -1000
+        && s.display !== 'none' && s.visibility !== 'hidden'
+    };
+  }).filter((item) => item.visible);
+  items.sort((a, b) => (b.w * b.h) - (a.w * a.h));
+  return items.length ? JSON.stringify(items[0]) : 'missing';
+})()
+"""
+        % json.dumps(f'[id$="{suffix}"]')
+    )
+    if not raw or raw == "missing":
+        return "missing"
+    try:
+        box = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(f"Не разобрать координаты {suffix}: {raw!r}") from exc
+    mouse_click(test, box["x"] + box["w"] / 2, box["y"] + box["h"] / 2)
+    return f"id:{box.get('id')}"
+
+
+def prompt_field_value(test: BrowserQuery1CTest) -> str:
+    return test._evaluate(
+        r"""
+(() => {
+  const e = document.querySelector('[id$="_ТекущийТекст_i0"]');
+  if (!e) return '__missing__';
+  return String(e.value || '');
+})()
+"""
+    )
+
+
+def focused_element_info(test: BrowserQuery1CTest) -> str:
+    return test._evaluate(
+        r"""
+(() => {
+  const e = document.activeElement;
+  if (!e) return 'none';
+  return [e.tagName, e.id || '', String(e.value || '').slice(0, 80)].join(':');
+})()
+"""
+    )
+
+
+def focus_by_id_suffix(test: BrowserQuery1CTest, suffix: str) -> str:
+    raw = test._evaluate(
+        """
+(() => {
+  const e = document.querySelector(%s);
+  if (!e) return 'missing';
+  e.scrollIntoView({block:'center'});
+  const r = e.getBoundingClientRect();
+  return JSON.stringify({id:e.id||'', x:r.x, y:r.y, w:r.width, h:r.height});
+})()
+"""
+        % json.dumps(f'[id$="{suffix}"]')
+    )
+    if not raw or raw == "missing":
+        return "missing"
+    try:
+        box = json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
+    if box.get("w", 0) > 4:
+        mouse_click(test, box["x"] + box["w"] / 2, box["y"] + min(box["h"] / 2, 20))
+        time.sleep(0.2)
+    return f"id:{box.get('id')}"
+
+
+def click_prompt_inset(test: BrowserQuery1CTest) -> str:
+    raw = test._evaluate(
+        r"""
+(() => {
+  const e = document.querySelector('[id$="_ТекущийТекст_i0"]');
+  if (!e) return 'missing';
+  e.scrollIntoView({block:'nearest'});
+  const r = e.getBoundingClientRect();
+  return JSON.stringify({id:e.id||'', x:r.x, y:r.y, w:r.width, h:r.height});
+})()
+"""
+    )
+    if not raw or raw == "missing":
+        return "missing"
+    box = json.loads(raw)
+    mouse_click(
+        test,
+        float(box["x"]) + min(64.0, float(box["w"]) * 0.15),
+        float(box["y"]) + min(28.0, float(box["h"]) * 0.3),
+    )
+    time.sleep(0.2)
+    return f"inset:{box.get('id')}"
+
+
 def focus_prompt(test: BrowserQuery1CTest) -> str:
+    inset = click_prompt_inset(test)
+    info = focused_element_info(test)
+    if "ТекущийТекст" in (info or "") and "TEXTAREA" in (info or ""):
+        return f"inset:{inset};active:{info}"
+    wrapper = click_id_suffix(test, "_ТекущийТекст")
+    time.sleep(0.25)
+    info = focused_element_info(test)
+    if "ТекущийТекст" in (info or "") and "TEXTAREA" in (info or ""):
+        return f"wrapper:{wrapper};active:{info}"
+    inner = focus_by_id_suffix(test, "_ТекущийТекст_i0")
+    time.sleep(0.2)
+    info = focused_element_info(test)
+    if "ТекущийТекст" in (info or ""):
+        return f"inner:{inner};active:{info}"
     script = r"""
 (()=>{
  const visible=e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return r.width>40&&r.height>15&&r.x>-1000&&r.y>-1000&&s.display!=='none'&&s.visibility!=='hidden'};
  let items=Array.from(document.querySelectorAll('textarea')).filter(visible)
-  .sort((a,b)=>a.getBoundingClientRect().y-b.getBoundingClientRect().y);
- if(!items.length) {
-  items=Array.from(document.querySelectorAll('input')).filter(visible)
-   .filter(e=>!(e.className||'').includes('captionbar'))
-   .sort((a,b)=>a.getBoundingClientRect().y-b.getBoundingClientRect().y);
- }
+  .sort((a,b)=>{
+    const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect();
+    return (rb.width*rb.height)-(ra.width*ra.height);
+  });
  if(!items.length) return 'missing';
- const e=items[0]; e.scrollIntoView({block:'center'}); e.focus(); e.click(); return e.tagName;
+ const e=items[0];
+ e.scrollIntoView({block:'center'});
+ const r=e.getBoundingClientRect();
+ return JSON.stringify({id:e.id||'', x:r.x, y:r.y, w:r.width, h:r.height});
 })()
 """
-    return test._evaluate(script)
+    raw = test._evaluate(script)
+    if raw and raw != "missing":
+        try:
+            box = json.loads(raw)
+            mouse_click(test, box["x"] + box["w"] / 2, box["y"] + box["h"] / 2)
+            time.sleep(0.2)
+            return f"largest:{box.get('id')};active:{focused_element_info(test)}"
+        except json.JSONDecodeError:
+            pass
+    return f"unfocused:{info};raw:{raw}"
 
 
 def replace_focused_text(test: BrowserQuery1CTest, text: str) -> None:
-    test._session_call("Input.dispatchKeyEvent", {"type": "keyDown", "windowsVirtualKeyCode": 17, "modifiers": 2})
-    test._session_call("Input.dispatchKeyEvent", {"type": "keyDown", "windowsVirtualKeyCode": 65, "modifiers": 2})
-    test._session_call("Input.dispatchKeyEvent", {"type": "keyUp", "windowsVirtualKeyCode": 65, "modifiers": 2})
-    test._session_call("Input.dispatchKeyEvent", {"type": "keyUp", "windowsVirtualKeyCode": 17})
-    test._session_call("Input.dispatchKeyEvent", {"type": "keyDown", "windowsVirtualKeyCode": 8})
-    test._session_call("Input.dispatchKeyEvent", {"type": "keyUp", "windowsVirtualKeyCode": 8})
-    test._session_call("Input.insertText", {"text": text})
+    write_clipboard(test, text)
+    press_ctrl_key(test, 65, ["selectAll"])
+    time.sleep(0.15)
+    press_ctrl_key(test, 86, ["paste"])
+    time.sleep(0.4)
 
 
 def inspect_dialog(bridge_url: str, marker: str, skill_name: str) -> dict:
