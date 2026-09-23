@@ -1160,6 +1160,22 @@ def main():
         action="store_true",
         help="Включить режим без подтверждения для всех сценариев. По умолчанию используется настройка конкретного сценария.",
     )
+    parser.add_argument(
+        "--agent-api-url",
+        default=os.environ.get("IIA_AGENT_API_URL", ""),
+        help="Прогон через /hs/iia-agent вместо Codex Test Bridge",
+    )
+    parser.add_argument(
+        "--password",
+        default=os.environ.get("IIA_AGENT_API_PASSWORD", os.environ.get("FRESH_CLOUD_PASSWORD", "")),
+        help="Пароль Basic-авторизации HTTP API. В лог не пишется.",
+    )
+    parser.add_argument(
+        "--wait-timeout-sec",
+        type=int,
+        default=900,
+        help="Сколько ждать остановку оркестратора в одном сценарии",
+    )
     args = parser.parse_args()
     score_llm_url = os.environ.get("SCORE_LLM_API_URL", "")
     score_llm_key = os.environ.get("SCORE_LLM_API_KEY", "")
@@ -1204,15 +1220,28 @@ def main():
             print(f"Ошибка: группа(ы) '{args.examples_group}' не содержит сценариев", file=sys.stderr)
             return 1
 
-    print("=" * 70)
-    print("Тестирование примеров (через HTTP-bridge)")
-    print(f"Bridge: {bridge_url}")
-    print("=" * 70)
+    agent_api = None
+    if args.agent_api_url:
+        from automation.ops.iia_agent_client import AgentApiClient
 
-    write_access = ensure_agent_write_access(bridge_url, args.user)
-    print(f"ДоступнаЗапись: {write_access}")
-    if not write_access or not write_access.get("newWriteAccess"):
-        raise RuntimeError(f"Не удалось включить ДоступнаЗапись для {args.user}: {write_access}")
+        agent_api = AgentApiClient(args.agent_api_url, args.user, args.password)
+        preflight = agent_api.preflight()
+        me = preflight["me"]
+        print("=" * 70)
+        print("Тестирование примеров (через HTTP API агента)")
+        print(f"API: {args.agent_api_url}")
+        print(f"Пользователь: {me.get('user')} | модель: {me.get('model')} | запись: {me.get('write_enabled')}")
+        print("=" * 70)
+    else:
+        print("=" * 70)
+        print("Тестирование примеров (через HTTP-bridge)")
+        print(f"Bridge: {bridge_url}")
+        print("=" * 70)
+
+        write_access = ensure_agent_write_access(bridge_url, args.user)
+        print(f"ДоступнаЗапись: {write_access}")
+        if not write_access or not write_access.get("newWriteAccess"):
+            raise RuntimeError(f"Не удалось включить ДоступнаЗапись для {args.user}: {write_access}")
 
     results = []
     fatal_score_error = ""
@@ -1224,7 +1253,15 @@ def main():
 
         try:
             auto_confirm = bool(args.auto_confirm or ex.get("auto_confirm", False) or ex.get("type") == "Запрос1С")
-            result = run_dialog(bridge_url, ex["text"], ex["type"], args.user, auto_confirm=auto_confirm)
+            if agent_api is not None:
+                result = agent_api.run_dialog(
+                    ex["text"],
+                    ex["type"],
+                    auto_confirm=auto_confirm,
+                    wait_timeout_sec=args.wait_timeout_sec,
+                )
+            else:
+                result = run_dialog(bridge_url, ex["text"], ex["type"], args.user, auto_confirm=auto_confirm)
         except Exception as e:
             print(f"  ОШИБКА: {e}")
             log_content = f"[{ex['id']}] ИСКЛЮЧЕНИЕ: {e}\n"
@@ -1254,6 +1291,13 @@ def main():
         messages = _get(result, "Сообщения") or []
 
         analysis = analyze_log(log_text)
+        if result.get("approval_pending"):
+            analysis["approval_pending"] = True
+        query_row_count = result.get("query_row_count")
+        if isinstance(query_row_count, int) and query_row_count > 0 and not analysis.get("runquery_row_counts"):
+            analysis["runquery_row_counts"] = [query_row_count]
+            analysis["runquery_nonempty"] = True
+            analysis["runquery_zero_rows"] = False
         scenario_eval = evaluate_scenario_rules(ex, success, analysis, usage_tokens)
         allow_pending_approval = bool(scenario_eval.get("rule", {}).get("allow_pending_approval"))
         approval_passed = bool(allow_pending_approval and analysis.get("approval_pending"))
@@ -1348,6 +1392,7 @@ def main():
             "text": ex["text"],
             "type": ex["type"],
             "success": success,
+            "task_success_source": str(result.get("task_success_source") or ""),
             "passed": passed,
             "base_passed": base_passed,
             "scenario_passed": bool(scenario_eval.get("passed")),

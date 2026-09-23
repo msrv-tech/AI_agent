@@ -2,16 +2,10 @@
 <Form xmlns="http://v8.1c.ru/8.3/xcf/logform" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:dcscor="http://v8.1c.ru/8.1/data-composition-system/core" xmlns:dcssch="http://v8.1c.ru/8.1/data-composition-system/schema" xmlns:dcsset="http://v8.1c.ru/8.1/data-composition-system/settings" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:pal="http://v8.1c.ru/8.1/data/ui/colors/palette" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.14">
 	<WindowOpeningMode>Независимый</WindowOpeningMode>
 	<Group>Vertical</Group>
-	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1"/>
+	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
+		<Autofill>false</Autofill>
+	</AutoCommandBar>
 	<ChildItems>
-		<Button name="ФормаРегистрация" id="1">
-			<Type>UsualButton</Type>
-			<DefaultButton>true</DefaultButton>
-			<HorizontalStretch>true</HorizontalStretch>
-			<CommandName>Form.Command.Регистрация</CommandName>
-			<ButtonImportance>Main</ButtonImportance>
-			<ExtendedTooltip name="ФормаРегистрацияРасширеннаяПодсказка" id="2"/>
-		</Button>
 		<UsualGroup name="ГруппаОсновная" id="10">
 			<Title>
 				<v8:item>
@@ -29,15 +23,15 @@
 					<Title formatted="false">
 						<v8:item>
 							<v8:lang>ru</v8:lang>
-							<v8:content>Мы используем ИИ прокси сервис Gitsell для доступа к нейросетям. Для работы необходимо авторизоваться.</v8:content>
+							<v8:content>Агенту нужен доступ к ИИ. GitSell — рекомендуемый прокси: войдите или зарегистрируйтесь, ключ подставится автоматически.</v8:content>
 						</v8:item>
 						<v8:item>
 							<v8:lang/>
 							<v8:content>Декорация описание</v8:content>
 						</v8:item>
 					</Title>
-					<TitleHeight>3</TitleHeight>
 					<HorizontalStretch>true</HorizontalStretch>
+					<VerticalStretch>false</VerticalStretch>
 					<ContextMenu name="ДекорацияОписаниеКонтекстноеМеню" id="32"/>
 					<ExtendedTooltip name="ДекорацияОписаниеРасширеннаяПодсказка" id="31"/>
 				</LabelDecoration>
@@ -56,14 +50,20 @@
 						<Event name="Click">ДекорацияСсылкаGitsellНажатие</Event>
 					</Events>
 				</LabelDecoration>
+				<Button name="ФормаРегистрация" id="1">
+					<Type>UsualButton</Type>
+					<DefaultButton>true</DefaultButton>
+					<CommandName>Form.Command.Регистрация</CommandName>
+					<ButtonImportance>Main</ButtonImportance>
+					<ExtendedTooltip name="ФормаРегистрацияРасширеннаяПодсказка" id="2"/>
+				</Button>
 				<LabelField name="СтрокаСтатуса" id="12">
 					<DataPath>СтрокаСтатуса</DataPath>
+					<Visible>false</Visible>
 					<TitleLocation>None</TitleLocation>
-					<Font ref="style:LargeTextFont" kind="StyleItem"/>
 					<AutoMaxWidth>false</AutoMaxWidth>
-					<Height>4</Height>
-					<AutoMaxHeight>false</AutoMaxHeight>
 					<HorizontalStretch>true</HorizontalStretch>
+					<VerticalStretch>false</VerticalStretch>
 					<ContextMenu name="СтрокаСтатусаКонтекстноеМеню" id="13"/>
 					<ExtendedTooltip name="СтрокаСтатусаРасширеннаяПодсказка" id="14"/>
 				</LabelField>
@@ -75,8 +75,10 @@
 							<v8:content>Код подтверждения</v8:content>
 						</v8:item>
 					</Title>
+					<Visible>false</Visible>
 					<Font ref="style:ExtraLargeTextFont" kind="StyleItem"/>
 					<HorizontalStretch>true</HorizontalStretch>
+					<VerticalStretch>false</VerticalStretch>
 					<ContextMenu name="UserCodeКонтекстноеМеню" id="16"/>
 					<ExtendedTooltip name="UserCodeРасширеннаяПодсказка" id="17"/>
 				</LabelField>
@@ -88,10 +90,10 @@
 							<v8:content>Ссылка</v8:content>
 						</v8:item>
 					</Title>
+					<Visible>false</Visible>
 					<Hiperlink>true</Hiperlink>
-					<Height>3</Height>
-					<AutoMaxHeight>false</AutoMaxHeight>
 					<HorizontalStretch>true</HorizontalStretch>
+					<VerticalStretch>false</VerticalStretch>
 					<ContextMenu name="VerificationUriКонтекстноеМеню" id="19"/>
 					<ExtendedTooltip name="VerificationUriРасширеннаяПодсказка" id="20"/>
 					<Events>
@@ -100,6 +102,7 @@
 				</LabelField>
 				<LabelField name="EmailПользователя" id="21">
 					<DataPath>EmailПользователя</DataPath>
+					<Visible>false</Visible>
 					<TitleLocation>None</TitleLocation>
 					<TextColor>style:SpecialTextColor</TextColor>
 					<Font ref="style:LargeTextFont" kind="StyleItem"/>

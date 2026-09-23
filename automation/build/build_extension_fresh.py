@@ -34,6 +34,8 @@ EXTENSION_NAME = "ИИ_Агент"
 GITHUB_MODULE = Path("CommonModules") / "ИИА_GitsellСервер" / "Ext" / "Module.bsl"
 SETTINGS_MODULE = Path("CommonForms") / "ИИА_Настройки" / "Ext" / "Form" / "Module.bsl"
 SETTINGS_FORM = Path("CommonForms") / "ИИА_Настройки" / "Ext" / "Form.xml"
+REGISTRATION_FORM = Path("CommonForms") / "ИИА_РегистрацияGitsell" / "Ext" / "Form.xml"
+REGISTRATION_MODULE = Path("CommonForms") / "ИИА_РегистрацияGitsell" / "Ext" / "Form" / "Module.bsl"
 DIALOG_LOG_MODULE = Path("CommonModules") / "ИИА_DialogLog" / "Ext" / "Module.bsl"
 PROVIDERS_MODULE = Path("CommonModules") / "ИИА_Провайдеры" / "Ext" / "Module.bsl"
 GITSELL_MODULE = Path("CommonModules") / "ИИА_GitsellСервер" / "Ext" / "Module.bsl"
@@ -227,7 +229,7 @@ def adapt_fresh_provider_form(xml_root: Path) -> None:
 \t\tProvider_BaseUrl = \"https://gitsell.ru/api/v1\";
 \tКонецЕсли;
 \tЕсли Provider_BaseUrl = \"https://gitsell.ru/api/v1\" Тогда
-\t\tМодель = \"gpt-5.4-nano\";
+\t\tМодель = \"gpt-5.6-luna\";
 \tИначеЕсли Provider_BaseUrl = \"https://api.giga.chat/v1\" Тогда
 \t\tМодель = \"GigaChat-2-Pro\";
 \tИначе
@@ -255,6 +257,299 @@ def adapt_fresh_provider_form(xml_root: Path) -> None:
         raise RuntimeError("Settings save block changed; Fresh provider guard needs update")
     content = content.replace(save_marker, save_guard)
     write_text(path, content)
+
+
+def adapt_fresh_registration_form(xml_root: Path) -> None:
+    """First-start registration offers the same three Fresh providers."""
+    path = xml_root / REGISTRATION_FORM
+    content = read_text(path)
+    old = """\t<AutoCommandBar name=\"ФормаКоманднаяПанель\" id=\"-1\">
+\t\t<Autofill>false</Autofill>
+\t</AutoCommandBar>
+\t<ChildItems>
+\t\t<UsualGroup name=\"ГруппаОсновная\" id=\"10\">"""
+    new = """\t<AutoCommandBar name=\"ФормаКоманднаяПанель\" id=\"-1\">
+\t\t<Autofill>false</Autofill>
+\t</AutoCommandBar>
+\t<Events>
+\t\t<Event name=\"OnOpen\">ПриОткрытии</Event>
+\t\t<Event name=\"OnCreateAtServer\">ПриСозданииНаСервере</Event>
+\t</Events>
+\t<ChildItems>
+\t\t<InputField name=\"Провайдер\" id=\"40\">
+\t\t\t<DataPath>Провайдер</DataPath>
+\t\t\t<Title>
+\t\t\t\t<v8:item>
+\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t<v8:content>ИИ-провайдер</v8:content>
+\t\t\t\t</v8:item>
+\t\t\t</Title>
+\t\t\t<Width>36</Width>
+\t\t\t<AutoMaxWidth>false</AutoMaxWidth>
+\t\t\t<HorizontalStretch>false</HorizontalStretch>
+\t\t\t<ListChoiceMode>true</ListChoiceMode>
+\t\t\t<ContextMenu name=\"ПровайдерКонтекстноеМеню\" id=\"41\"/>
+\t\t\t<ExtendedTooltip name=\"ПровайдерРасширеннаяПодсказка\" id=\"42\"/>
+\t\t\t<Events>
+\t\t\t\t<Event name=\"OnChange\">ПровайдерПриИзменении</Event>
+\t\t\t</Events>
+\t\t</InputField>
+\t\t<UsualGroup name=\"ГруппаОсновная\" id=\"10\">"""
+    if content.count(old) != 1:
+        raise RuntimeError("Registration form header changed; Fresh provider switch needs update")
+    content = content.replace(old, new)
+
+    old = """\t\t</UsualGroup>
+\t</ChildItems>
+\t<Attributes>"""
+    new = """\t\t</UsualGroup>
+\t\t<UsualGroup name=\"ГруппаКлючПровайдера\" id=\"43\">
+\t\t\t<Visible>false</Visible>
+\t\t\t<Title>
+\t\t\t\t<v8:item>
+\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t<v8:content>Ключ провайдера</v8:content>
+\t\t\t\t</v8:item>
+\t\t\t</Title>
+\t\t\t<Group>Vertical</Group>
+\t\t\t<Representation>None</Representation>
+\t\t\t<ShowTitle>false</ShowTitle>
+\t\t\t<ExtendedTooltip name=\"ГруппаКлючПровайдераРасширеннаяПодсказка\" id=\"44\"/>
+\t\t\t<ChildItems>
+\t\t\t\t<LabelDecoration name=\"ДекорацияКлючПровайдера\" id=\"56\">
+\t\t\t\t\t<Title formatted=\"false\">
+\t\t\t\t\t\t<v8:item>
+\t\t\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t\t\t<v8:content>Укажите ключ доступа. Модель уже подставлена, для Yandex замените идентификатор каталога.</v8:content>
+\t\t\t\t\t\t</v8:item>
+\t\t\t\t\t</Title>
+\t\t\t\t\t<ContextMenu name=\"ДекорацияКлючПровайдераКонтекстноеМеню\" id=\"57\"/>
+\t\t\t\t\t<ExtendedTooltip name=\"ДекорацияКлючПровайдераРасширеннаяПодсказка\" id=\"58\"/>
+\t\t\t\t</LabelDecoration>
+\t\t\t\t<InputField name=\"КлючПровайдера\" id=\"45\">
+\t\t\t\t\t<DataPath>КлючПровайдера</DataPath>
+\t\t\t\t\t<Title>
+\t\t\t\t\t\t<v8:item>
+\t\t\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t\t\t<v8:content>Ключ доступа</v8:content>
+\t\t\t\t\t\t</v8:item>
+\t\t\t\t\t</Title>
+\t\t\t\t\t<Width>36</Width>
+\t\t\t\t\t<AutoMaxWidth>false</AutoMaxWidth>
+\t\t\t\t\t<HorizontalStretch>false</HorizontalStretch>
+\t\t\t\t\t<PasswordMode>true</PasswordMode>
+\t\t\t\t\t<ContextMenu name=\"КлючПровайдераКонтекстноеМеню\" id=\"46\"/>
+\t\t\t\t\t<ExtendedTooltip name=\"КлючПровайдераРасширеннаяПодсказка\" id=\"47\"/>
+\t\t\t\t</InputField>
+\t\t\t\t<InputField name=\"МодельПровайдера\" id=\"48\">
+\t\t\t\t\t<DataPath>МодельПровайдера</DataPath>
+\t\t\t\t\t<Title>
+\t\t\t\t\t\t<v8:item>
+\t\t\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t\t\t<v8:content>Модель</v8:content>
+\t\t\t\t\t\t</v8:item>
+\t\t\t\t\t</Title>
+\t\t\t\t\t<Width>36</Width>
+\t\t\t\t\t<AutoMaxWidth>false</AutoMaxWidth>
+\t\t\t\t\t<HorizontalStretch>false</HorizontalStretch>
+\t\t\t\t\t<ContextMenu name=\"МодельПровайдераКонтекстноеМеню\" id=\"49\"/>
+\t\t\t\t\t<ExtendedTooltip name=\"МодельПровайдераРасширеннаяПодсказка\" id=\"50\"/>
+\t\t\t\t</InputField>
+\t\t\t\t<LabelField name=\"СтрокаСтатусаКлюча\" id=\"51\">
+\t\t\t\t\t<DataPath>СтрокаСтатуса</DataPath>
+\t\t\t\t\t<Visible>false</Visible>
+\t\t\t\t\t<TitleLocation>None</TitleLocation>
+\t\t\t\t\t<ContextMenu name=\"СтрокаСтатусаКлючаКонтекстноеМеню\" id=\"52\"/>
+\t\t\t\t\t<ExtendedTooltip name=\"СтрокаСтатусаКлючаРасширеннаяПодсказка\" id=\"53\"/>
+\t\t\t\t</LabelField>
+\t\t\t\t<Button name=\"СохранитьПровайдера\" id=\"54\">
+\t\t\t\t\t<Type>UsualButton</Type>
+\t\t\t\t\t<CommandName>Form.Command.СохранитьПровайдера</CommandName>
+\t\t\t\t\t<ButtonImportance>Main</ButtonImportance>
+\t\t\t\t\t<ExtendedTooltip name=\"СохранитьПровайдераРасширеннаяПодсказка\" id=\"55\"/>
+\t\t\t\t</Button>
+\t\t\t</ChildItems>
+\t\t</UsualGroup>
+\t</ChildItems>
+\t<Attributes>"""
+    if content.count(old) != 1:
+        raise RuntimeError("Registration form body changed; Fresh provider key group needs update")
+    content = content.replace(old, new)
+
+    old = """\t\t<Attribute name=\"EmailПользователя\" id=\"8\">"""
+    new = """\t\t<Attribute name=\"Провайдер\" id=\"9\">
+\t\t\t<Title>
+\t\t\t\t<v8:item>
+\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t<v8:content>ИИ-провайдер</v8:content>
+\t\t\t\t</v8:item>
+\t\t\t</Title>
+\t\t\t<Type>
+\t\t\t\t<v8:Type>xs:string</v8:Type>
+\t\t\t\t<v8:StringQualifiers>
+\t\t\t\t\t<v8:Length>0</v8:Length>
+\t\t\t\t\t<v8:AllowedLength>Variable</v8:AllowedLength>
+\t\t\t\t</v8:StringQualifiers>
+\t\t\t</Type>
+\t\t</Attribute>
+\t\t<Attribute name=\"КлючПровайдера\" id=\"10\">
+\t\t\t<Title>
+\t\t\t\t<v8:item>
+\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t<v8:content>Ключ доступа</v8:content>
+\t\t\t\t</v8:item>
+\t\t\t</Title>
+\t\t\t<Type>
+\t\t\t\t<v8:Type>xs:string</v8:Type>
+\t\t\t\t<v8:StringQualifiers>
+\t\t\t\t\t<v8:Length>0</v8:Length>
+\t\t\t\t\t<v8:AllowedLength>Variable</v8:AllowedLength>
+\t\t\t\t</v8:StringQualifiers>
+\t\t\t</Type>
+\t\t</Attribute>
+\t\t<Attribute name=\"МодельПровайдера\" id=\"11\">
+\t\t\t<Title>
+\t\t\t\t<v8:item>
+\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t<v8:content>Модель</v8:content>
+\t\t\t\t</v8:item>
+\t\t\t</Title>
+\t\t\t<Type>
+\t\t\t\t<v8:Type>xs:string</v8:Type>
+\t\t\t\t<v8:StringQualifiers>
+\t\t\t\t\t<v8:Length>0</v8:Length>
+\t\t\t\t\t<v8:AllowedLength>Variable</v8:AllowedLength>
+\t\t\t\t</v8:StringQualifiers>
+\t\t\t</Type>
+\t\t</Attribute>
+\t\t<Attribute name=\"EmailПользователя\" id=\"8\">"""
+    if content.count(old) != 1:
+        raise RuntimeError("Registration form attributes changed; Fresh provider fields need update")
+    content = content.replace(old, new)
+
+    old = """\t\t<Command name=\"Регистрация\" id=\"1\">"""
+    new = """\t\t<Command name=\"СохранитьПровайдера\" id=\"2\">
+\t\t\t<Title>
+\t\t\t\t<v8:item>
+\t\t\t\t\t<v8:lang>ru</v8:lang>
+\t\t\t\t\t<v8:content>Продолжить</v8:content>
+\t\t\t\t</v8:item>
+\t\t\t</Title>
+\t\t\t<Action>СохранитьПровайдера</Action>
+\t\t</Command>
+\t\t<Command name=\"Регистрация\" id=\"1\">"""
+    if content.count(old) != 1:
+        raise RuntimeError("Registration form commands changed; Fresh provider command needs update")
+    write_text(path, content.replace(old, new))
+
+    module_path = xml_root / REGISTRATION_MODULE
+    module = read_text(module_path)
+    old = """&НаКлиенте
+Процедура ПриОткрытии(Отказ)
+\t
+\tОбновитьВидимостьРезультатаАвторизации();
+\t
+\t// Проверяем, что расширение подключено без флага «Безопасный режим»"""
+    new = """&НаСервере
+Процедура ПриСозданииНаСервере(Отказ, СтандартнаяОбработка)
+\tЗаполнитьПровайдерыПервогоСтарта();
+КонецПроцедуры
+
+&НаКлиенте
+Процедура ПриОткрытии(Отказ)
+\tОбновитьВидимостьПровайдера();
+\tОбновитьВидимостьРезультатаАвторизации();
+\t
+\t// Проверяем, что расширение подключено без флага «Безопасный режим»"""
+    if module.count(old) != 1:
+        raise RuntimeError("Registration open handler changed; Fresh provider switch needs update")
+    module = module.replace(old, new)
+    module += """
+&НаКлиенте
+Процедура ПровайдерПриИзменении(Элемент)
+\tЕсли Провайдер = \"https://api.giga.chat/v1\" Тогда
+\t\tМодельПровайдера = \"GigaChat-2-Pro\";
+\t\tЭлементы.КлючПровайдера.Заголовок = \"Authorization Key\";
+\tИначеЕсли Провайдер = \"https://ai.api.cloud.yandex.net/v1\" Тогда
+\t\tМодельПровайдера = \"gpt://<идентификатор_каталога>/yandexgpt/latest\";
+\t\tЭлементы.КлючПровайдера.Заголовок = \"API-ключ\";
+\tИначе
+\t\tЭлементы.КлючПровайдера.Заголовок = \"Ключ доступа\";
+\tКонецЕсли;
+\tОбновитьВидимостьПровайдера();
+КонецПроцедуры
+
+&НаКлиенте
+Процедура ОбновитьВидимостьПровайдера()
+\tЭтоGitsell = Провайдер = \"https://gitsell.ru/api/v1\";
+\tЭлементы.ФормаРегистрация.Видимость = ЭтоGitsell;
+\tЭлементы.ГруппаОсновная.Видимость = ЭтоGitsell;
+\tЭлементы.ГруппаКлючПровайдера.Видимость = НЕ ЭтоGitsell;
+КонецПроцедуры
+
+&НаКлиенте
+Процедура СохранитьПровайдера(Команда)
+\tЕсли ПустаяСтрока(СокрЛП(КлючПровайдера)) Тогда
+\t\tСтрокаСтатуса = \"Укажите ключ доступа провайдера.\";
+\t\tЭлементы.СтрокаСтатусаКлюча.Видимость = Истина;
+\t\tВозврат;
+\tКонецЕсли;
+\tЕсли СтрНайти(МодельПровайдера, \"<идентификатор_каталога>\") > 0 Тогда
+\t\tСтрокаСтатуса = \"Замените <идентификатор_каталога> в модели YandexGPT на идентификатор каталога.\";
+\t\tЭлементы.СтрокаСтатусаКлюча.Видимость = Истина;
+\t\tВозврат;
+\tКонецЕсли;
+\tСохранитьПровайдераНаСервере();
+\tОткрытьФорму(\"ОбщаяФорма.ИИА_Агент\");
+\tЗакрыть();
+КонецПроцедуры
+
+&НаСервере
+Процедура ЗаполнитьПровайдерыПервогоСтарта()
+\tСписок = Элементы.Провайдер.СписокВыбора;
+\tСписок.Очистить();
+\tСписок.Добавить(\"https://gitsell.ru/api/v1\", \"GitSell (рекомендуется)\");
+\tСписок.Добавить(\"https://api.giga.chat/v1\", \"GigaChat\");
+\tСписок.Добавить(\"https://ai.api.cloud.yandex.net/v1\", \"Yandex AI Studio\");
+\tПровайдер = \"https://gitsell.ru/api/v1\";
+КонецПроцедуры
+
+&НаСервере
+Процедура СохранитьПровайдераНаСервере()
+\tЕсли Провайдер <> \"https://api.giga.chat/v1\"
+\t\tИ Провайдер <> \"https://ai.api.cloud.yandex.net/v1\" Тогда
+\t\tВызватьИсключение \"Для первого старта с ключом доступны только GigaChat и Yandex AI Studio.\";
+\tКонецЕсли;
+\tЕсли ПустаяСтрока(СокрЛП(КлючПровайдера)) Тогда
+\t\tВызватьИсключение \"Укажите ключ доступа провайдера.\";
+\tКонецЕсли;
+\tЕсли ПустаяСтрока(СокрЛП(МодельПровайдера))
+\t\tИЛИ СтрНайти(МодельПровайдера, \"<идентификатор_каталога>\") > 0 Тогда
+\t\tВызватьИсключение \"Укажите модель провайдера. Для YandexGPT замените идентификатор каталога.\";
+\tКонецЕсли;
+
+\tПользователь = ИИА_Сервер.ИмяТекущегоПользователя();
+\tНаборЗаписей = РегистрыСведений.ИИА_НастройкиПользователей.СоздатьНаборЗаписей();
+\tНаборЗаписей.Отбор.Пользователь.Установить(Пользователь);
+\tНаборЗаписей.Прочитать();
+\tЕсли НаборЗаписей.Количество() = 0 Тогда
+\t\tЗапись = НаборЗаписей.Добавить();
+\t\tЗапись.Пользователь = Пользователь;
+\t\tЗапись.ДоступнаЗапись = Истина;
+\t\tЗапись.ЛимитТокеновНаЗапуск = 50000;
+\tИначе
+\t\tЗапись = НаборЗаписей[0];
+\t\tЕсли Запись.ЛимитТокеновНаЗапуск = 0 Тогда
+\t\t\tЗапись.ЛимитТокеновНаЗапуск = 50000;
+\t\tКонецЕсли;
+\tКонецЕсли;
+\tЗапись.Provider_BaseUrl = Провайдер;
+\tЗапись.Provider_ApiKey = СокрЛП(КлючПровайдера);
+\tЗапись.Модель = СокрЛП(МодельПровайдера);
+\tНаборЗаписей.Записать();
+КонецПроцедуры
+"""
+    write_text(module_path, module)
 
 
 def adapt_fresh_provider_models(xml_root: Path) -> None:
@@ -533,6 +828,7 @@ def prepare_source(source: Path, destination: Path) -> None:
     remove_self_update(destination)
     remove_server_debug_file_log(destination)
     adapt_fresh_provider_form(destination)
+    adapt_fresh_registration_form(destination)
     adapt_fresh_provider_models(destination)
     adapt_fresh_provider_auth(destination)
     audit_preflight(destination)

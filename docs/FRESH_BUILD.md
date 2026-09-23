@@ -78,6 +78,9 @@ Playwright storage state в `FRESH_AUTH_STATE`.
 - `ai.api.cloud.yandex.net:443` — Yandex AI Studio.
 
 GitSell выбран по умолчанию и использует существующую device-авторизацию.
+Тот же список из трёх провайдеров есть на форме первого старта
+`ИИА_РегистрацияGitsell`: GitSell отмечен как рекомендуемый, для GigaChat
+и Yandex AI Studio форма просит ключ и модель вместо входа в GitSell.
 Для GigaChat пользователь вводит Authorization Key, для Yandex AI Studio —
 API-ключ и URI модели с идентификатором каталога. Произвольный
 OpenAI-совместимый URL остаётся доступен только в обычной desktop-редакции.

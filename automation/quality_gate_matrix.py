@@ -25,6 +25,7 @@ from automation.bridge.config import DEFAULT_BP_BRIDGE_URL, DEFAULT_UNF_BRIDGE_U
 DEFAULT_WEB_URL = "http://192.168.2.127/fresh-unf"
 DEFAULT_BRIDGE_URL = DEFAULT_UNF_BRIDGE_URL
 DEFAULT_CLOUD_WEB_URL = os.getenv("FRESH_CLOUD_WEB_URL", "https://1cfresh.com/a/sbm/2226502/ru_RU/")
+DEFAULT_SUPPLIER_INVOICE = REPO_ROOT / "temp" / "Счет на оплату № 6 от 26 августа 2025 г.pdf"
 
 
 DOC_RECOGNITION_CASES = {
@@ -148,6 +149,15 @@ def parse_doc_files(raw: str) -> dict[str, str]:
         key, value = item.split("=", 1)
         result[key.strip()] = value.strip()
     return result
+
+
+def recognition_files(raw: str) -> dict[str, str]:
+    parsed = parse_doc_files(raw)
+    if parsed:
+        return parsed
+    if DEFAULT_SUPPLIER_INVOICE.is_file():
+        return {"supplier_invoice": str(DEFAULT_SUPPLIER_INVOICE)}
+    return {}
 
 
 def build_ui_jobs(args: argparse.Namespace, artifact_dir: Path) -> list[tuple[str, list[str], Path, int]]:
@@ -276,7 +286,161 @@ def run_web_quality_gate(name: str, web_url: str, user: str, password: str, grou
     return result
 
 
+def agent_api_url_from_web(web_url: str) -> str:
+    base = (web_url or "").rstrip("/")
+    for suffix in ("/ru_RU", "/ru", "/en_US"):
+        if base.endswith(suffix):
+            base = base[: -len(suffix)]
+            break
+    return base + "/hs/iia-agent"
+
+
+def run_agent_api_gate(name: str, api_url: str, user: str, password: str, group: str, score_mode: str, artifact_dir: Path, timeout_sec: int, auto_confirm: bool, wait_timeout_sec: int) -> dict:
+    log_dir = artifact_dir / "agent_api" / name
+    log_dir.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        sys.executable,
+        "automation/bridge/test_examples.py",
+        "--agent-api-url",
+        api_url,
+        "--user",
+        user,
+        "--password",
+        password,
+        "--examples-group",
+        group,
+        "--score-mode",
+        score_mode,
+        "--log-dir",
+        str(log_dir),
+        "--wait-timeout-sec",
+        str(wait_timeout_sec),
+    ]
+    if auto_confirm:
+        cmd.append("--auto-confirm")
+    result = run_command(cmd, timeout_sec)
+    result["cmd"] = [part if part != password else "***" for part in cmd]
+    result["name"] = name
+    result["kind"] = "agent_api_examples"
+    result["report"] = latest_report(log_dir)
+    if result["success"] and result["report"]:
+        result["success"] = bool(result["report"].get("quality_gate_passed"))
+    return result
+
+
+def run_agent_api_recognition(
+    api_url: str,
+    user: str,
+    password: str,
+    document_files: str,
+    artifact_dir: Path,
+    wait_timeout_sec: int,
+    auto_confirm: bool,
+    require_created: bool,
+) -> list[dict]:
+    from automation.ops.iia_agent_client import UNF_RECOGNITION_CASES, AgentApiClient, AgentApiError
+
+    doc_files = recognition_files(document_files)
+    out_dir = artifact_dir / "agent_api" / "document_recognition"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if not doc_files:
+        return [{
+            "name": "cloud_api_document_recognition",
+            "kind": "agent_api_document_recognition",
+            "success": False,
+            "returncode": 2,
+            "error": "Файл счёта не найден: " + str(DEFAULT_SUPPLIER_INVOICE) + ". Передайте --document-files. Синтетический файл не создаётся.",
+        }]
+
+    selected: list[tuple[str, dict, str]] = []
+    shared = doc_files.get("all") or ""
+    if shared:
+        selected = [(case_id, case, shared) for case_id, case in UNF_RECOGNITION_CASES.items()]
+    else:
+        unknown = [key for key in doc_files if key not in UNF_RECOGNITION_CASES]
+        if unknown:
+            return [{
+                "name": "cloud_api_document_recognition",
+                "kind": "agent_api_document_recognition",
+                "success": False,
+                "returncode": 2,
+                "error": "Неизвестные ключи --document-files: " + ", ".join(unknown),
+            }]
+        selected = [(case_id, UNF_RECOGNITION_CASES[case_id], path) for case_id, path in doc_files.items()]
+
+    client = AgentApiClient(api_url, user, password)
+    results: list[dict] = []
+    for case_id, case, file_path in selected:
+        name = "cloud_api_recognition_" + case_id
+        if not Path(file_path).is_file():
+            results.append({
+                "name": name,
+                "kind": "agent_api_document_recognition",
+                "success": False,
+                "returncode": 2,
+                "error": f"Файл для распознавания не найден: {file_path}",
+            })
+            continue
+        try:
+            client.preflight()
+            payload = client.run_recognition_case(
+                case,
+                file_path,
+                auto_confirm=auto_confirm,
+                wait_timeout_sec=wait_timeout_sec,
+                require_created=require_created,
+            )
+        except AgentApiError as exc:
+            results.append({
+                "name": name,
+                "kind": "agent_api_document_recognition",
+                "success": False,
+                "returncode": 1,
+                "error": str(exc),
+            })
+            continue
+        if payload.get("timeout"):
+            payload["passed"] = False
+            payload.setdefault("checks", {})["timeout"] = False
+        log_file = out_dir / (case_id + "_log.txt")
+        log_file.write_text(str(payload.pop("log", "")), encoding="utf-8")
+        report = {
+            "name": name,
+            "kind": "agent_api_document_recognition",
+            "success": bool(payload.get("passed")),
+            "returncode": 0 if payload.get("passed") else 1,
+            "log_file": str(log_file),
+            "case": payload,
+        }
+        (out_dir / (case_id + "_report.json")).write_text(
+            json.dumps(report, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        results.append(report)
+    return results
+
+
 def apply_profile(args: argparse.Namespace) -> None:
+    if args.profile == "cloud-api":
+        args.skip_bp = True
+        args.skip_unf = True
+        args.include_ui = False
+        args.include_skill_write = False
+        args.include_skill_lifecycle = False
+        args.include_negative_ui = False
+        args.include_result_table_link = False
+        args.include_approval = False
+        args.include_document_recognition = False
+        if not args.agent_api_url:
+            web_url = args.cloud_web_url or os.getenv("FRESH_CLOUD_WEB_URL", DEFAULT_CLOUD_WEB_URL)
+            args.agent_api_url = agent_api_url_from_web(web_url)
+        env_user = os.getenv("FRESH_CLOUD_USER", "")
+        env_password = os.getenv("FRESH_CLOUD_PASSWORD", "")
+        if args.user == "Администратор" and env_user:
+            args.user = env_user
+        if not args.password and env_password:
+            args.password = env_password
+        return
     if args.profile != "cloud-fresh":
         return
     args.skip_bp = True
@@ -311,8 +475,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--profile",
         default="local",
-        choices=["local", "cloud-fresh"],
-        help="local: HTTP-bridge gate по BP/UNF; cloud-fresh: browser gate для опубликованного 1С:Фреш",
+        choices=["local", "cloud-fresh", "cloud-api"],
+        help="local: HTTP-bridge gate по BP/UNF; cloud-fresh: browser gate; cloud-api: сценарии через /hs/iia-agent",
+    )
+    parser.add_argument(
+        "--agent-api-url",
+        default=os.getenv("IIA_AGENT_API_URL", ""),
+        help="Базовый URL /hs/iia-agent. Для cloud-api по умолчанию строится из FRESH_CLOUD_WEB_URL",
     )
     parser.add_argument("--cloud-web-url", default="", help="URL облачного приложения 1С:Фреш")
     parser.add_argument("--group", default="extended", help="test_examples group: smoke|recovery|write|safety|metadata|extended")
@@ -384,6 +553,44 @@ def main() -> int:
     artifact_dir.mkdir(parents=True, exist_ok=True)
 
     results: list[dict] = []
+    if args.profile == "cloud-api":
+        if not args.user or not args.password:
+            print(json.dumps({
+                "passed": False,
+                "error": "Для profile=cloud-api задайте --user/--password или FRESH_CLOUD_USER/FRESH_CLOUD_PASSWORD.",
+            }, ensure_ascii=False, indent=2))
+            return 2
+        scenario_wait = args.web_agent_wait_sec if args.web_agent_wait_sec != 180 else 900
+        group_size = {
+            "smoke": 4,
+            "recovery": 2,
+            "write": 2,
+            "safety": 4,
+            "metadata": 2,
+            "extended": 13,
+        }.get(args.group, 13)
+        results.append(run_agent_api_gate(
+            "cloud_api",
+            args.agent_api_url,
+            args.user,
+            args.password,
+            args.group,
+            args.score_mode,
+            artifact_dir,
+            max(args.gate_timeout_sec, scenario_wait * group_size + 180),
+            args.auto_confirm,
+            scenario_wait,
+        ))
+        results.extend(run_agent_api_recognition(
+            args.agent_api_url,
+            args.user,
+            args.password,
+            args.document_files,
+            artifact_dir,
+            scenario_wait,
+            args.auto_confirm,
+            args.require_document_created,
+        ))
     if args.profile == "cloud-fresh":
         results.append(run_web_quality_gate(
             "cloud_fresh",
@@ -412,6 +619,7 @@ def main() -> int:
         "artifact_dir": str(artifact_dir),
         "profile": args.profile,
         "web_url": args.web_url if args.profile == "cloud-fresh" else "",
+        "agent_api_url": args.agent_api_url if args.profile == "cloud-api" else "",
         "passed": passed,
         "total": len(results),
         "passed_count": sum(1 for item in results if item.get("success")),

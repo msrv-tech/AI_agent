@@ -1,0 +1,101 @@
+{
+  "name": "Fresh first-start provider switch",
+  "steps": [
+    {
+      "name": "Connect",
+      "action": "assertConnected"
+    },
+    {
+      "name": "Open first-start registration",
+      "action": "openForm",
+      "metadataKind": "commonForm",
+      "metadataName": "ИИА_РегистрацияGitsell",
+      "targetForm": {
+        "title": "Регистрация в Gitsell",
+        "timeout": 60,
+        "saveAs": "registration"
+      }
+    },
+    {
+      "name": "GitSell is the recommended default",
+      "action": "assertField",
+      "field": {"title": "ИИ-провайдер"},
+      "expected": "GitSell (рекомендуется)"
+    },
+    {
+      "name": "GitSell login stays visible",
+      "action": "assertElement",
+      "element": {"title": "Войти / Зарегистрироваться"},
+      "elementType": "button",
+      "visible": true
+    },
+    {
+      "name": "Direct key entry stays hidden for GitSell",
+      "action": "assertElement",
+      "element": {"title": "Ключ доступа"},
+      "elementType": "field",
+      "visible": false
+    },
+    {
+      "name": "Select GigaChat",
+      "action": "selectFromDropdown",
+      "field": {"title": "ИИ-провайдер"},
+      "value": "GigaChat",
+      "strategy": "dropdownExact"
+    },
+    {
+      "name": "GigaChat hides GitSell login",
+      "action": "assertElement",
+      "element": {"title": "Войти / Зарегистрироваться"},
+      "elementType": "button",
+      "visible": false
+    },
+    {
+      "name": "GigaChat asks for Authorization Key",
+      "action": "assertElement",
+      "element": {"title": "Authorization Key"},
+      "elementType": "field",
+      "visible": true
+    },
+    {
+      "name": "GigaChat model is preset",
+      "action": "assertField",
+      "field": {"title": "Модель"},
+      "expected": "GigaChat-2-Pro"
+    },
+    {
+      "name": "Select Yandex AI Studio",
+      "action": "selectFromDropdown",
+      "field": {"title": "ИИ-провайдер"},
+      "value": "Yandex AI Studio",
+      "strategy": "dropdownExact"
+    },
+    {
+      "name": "Yandex asks for API key",
+      "action": "assertElement",
+      "element": {"title": "API-ключ"},
+      "elementType": "field",
+      "visible": true
+    },
+    {
+      "name": "Yandex model keeps the catalog placeholder",
+      "action": "assertField",
+      "field": {"title": "Модель"},
+      "expected": "gpt://<идентификатор_каталога>/yandexgpt/latest"
+    },
+    {
+      "name": "Return to recommended GitSell",
+      "action": "selectFromDropdown",
+      "field": {"title": "ИИ-провайдер"},
+      "value": "GitSell (рекомендуется)",
+      "strategy": "dropdownExact"
+    },
+    {
+      "name": "GitSell login is visible again",
+      "action": "assertElement",
+      "element": {"title": "Войти / Зарегистрироваться"},
+      "elementType": "button",
+      "visible": true
+    }
+  ]
+}
